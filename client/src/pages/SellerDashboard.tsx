@@ -62,9 +62,9 @@ function PriceSlider({ value, onChange }: { value: number; onChange: (val: numbe
         className="w-full h-2 bg-secondary-bg rounded-full appearance-none cursor-pointer accent-accent"
       />
       <div className="flex items-center justify-between text-xs">
-        <span className="text-secondary-text">$0.01 min</span>
-        <span className="text-secondary-text font-share-tech">Higher price = Higher perceived value</span>
-        <span className="text-secondary-text">$0.10 max</span>
+        <span className="text-text-secondary">$0.01 min</span>
+        <span className="text-text-secondary">Higher price = Higher perceived value</span>
+        <span className="text-text-secondary">$0.10 max</span>
       </div>
       <div className="h-1 bg-secondary-bg rounded-full overflow-hidden">
         <div
@@ -112,22 +112,22 @@ function LiveEarningsCard({
   return (
     <div className="card p-6 border-accent/30 space-y-4">
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center">
           <Zap className="w-6 h-6 text-accent" />
         </div>
         <div>
-          <p className="text-xs font-space-grotesk font-semibold text-secondary-text uppercase tracking-wider">
+          <p className="text-xs font-space-grotesk font-semibold text-text-secondary uppercase tracking-wider">
             Live Earnings
           </p>
-          <p className="text-xs text-secondary-text">Real-time USDC balance</p>
+          <p className="text-xs text-text-secondary">Real-time USDC balance</p>
         </div>
       </div>
 
-      <div className="space-y-1 bg-card-bg rounded-lg p-4 text-secondary-text">
+      <div className="space-y-1 bg-card-bg rounded-2xl p-4 text-text-secondary">
         <div className="text-4xl font-space-grotesk font-bold text-accent">
           ${displayEarnings.toFixed(4)}
         </div>
-        <p className="text-xs text-secondary-text font-share-tech">USDC on Base Sepolia</p>
+          <p className="text-xs text-text-secondary font-inter">USDC on Base Sepolia</p>
       </div>
 
       {/* Recent Sales Feed */}
@@ -142,7 +142,7 @@ function LiveEarningsCard({
               return (
                 <div
                   key={i}
-                  className="flex flex-col gap-1 text-sm bg-card-bg/50 rounded-lg px-3 py-2 border border-border/20 animate-fadeIn"
+                  className="flex flex-col gap-1 text-sm bg-card-bg/50 rounded-xl px-3 py-2 border border-border/20 animate-fadeIn"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 flex-1">
@@ -152,7 +152,7 @@ function LiveEarningsCard({
                       </span>
                       <span className="text-secondary-text truncate text-xs">{sale.productTitle}</span>
                     </div>
-                    <span className="text-xs text-muted-text font-share-tech flex-shrink-0">
+                    <span className="text-xs text-text-secondary font-inter flex-shrink-0">
                       {new Date(sale.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
@@ -161,13 +161,13 @@ function LiveEarningsCard({
                       href={`https://sepolia.basescan.org/tx/${sale.txHash}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-accent/80 hover:text-accent transition-colors font-share-tech group ml-5"
+                      className="inline-flex items-center gap-1 text-xs text-accent/80 hover:text-accent transition-colors font-inter group ml-5"
                     >
                       <span>Verify: {sale.txHash.slice(0, 10)}...{sale.txHash.slice(-6)}</span>
                       <ExternalLink className="w-3 h-3 opacity-70 group-hover:opacity-100" />
                     </a>
                   ) : (
-                    <span className="text-xs text-muted-text font-share-tech ml-5">Payment verified ✓</span>
+                    <span className="text-xs text-text-secondary ml-5">Payment verified ✓</span>
                   )}
                 </div>
               )
@@ -236,7 +236,7 @@ function MyProductsList({ products, walletFilter }: { products: ProductListing[]
               </div>
               <div className="text-right flex-shrink-0">
                 <div className="text-accent font-space-grotesk font-bold text-sm">${product.price.toFixed(2)}</div>
-                <div className="text-xs text-secondary-text font-share-tech">{product.salesCount} sales</div>
+                <div className="text-xs text-text-secondary">{product.salesCount} sales</div>
               </div>
             </div>
           </div>
@@ -388,21 +388,21 @@ export default function SellerDashboard() {
   return (
     <div className="min-h-screen bg-primary-bg pt-20 pb-8">
       {/* Navigation Bar - Reuse from App */}
-      <nav className="fixed top-0 left-0 right-0 z-40 bg-primary-bg/80 backdrop-blur-xl border-b border-secondary-bg">
+      <nav className="fixed top-0 left-0 right-0 z-40 bg-primary-bg/80 backdrop-blur-xl border-b border-border/30">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent flex items-center justify-center group-hover:shadow-lg group-hover:shadow-accent/30 transition-all duration-300">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-accent flex items-center justify-center group-hover:shadow-soft-accent transition-all duration-300">
                 <Zap className="w-5 h-5 text-primary-bg" />
               </div>
               <div>
                 <h1 className="text-lg font-space-grotesk font-bold text-accent">InfoMart</h1>
-                <p className="text-xs text-secondary-text">Seller Dashboard</p>
+                <p className="text-xs text-text-secondary">Seller Dashboard</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-secondary-text'}`} />
-              <span className="text-xs text-secondary-text font-share-tech">{connected ? 'Live' : 'Offline'}</span>
+              <span className="text-xs text-text-secondary">{connected ? 'Live' : 'Offline'}</span>
             </div>
           </div>
         </div>
@@ -432,10 +432,10 @@ export default function SellerDashboard() {
                   value={form.title}
                   onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
                   placeholder="e.g., Crypto Tax Loopholes India 2026"
-                  className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-secondary-text placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
+                  className="w-full bg-secondary-bg/60 border border-border/30 rounded-2xl px-4 py-3 text-text-secondary placeholder-text-secondary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/25 transition-all"
                   maxLength={100}
                 />
-                <p className="text-xs text-muted-text">{form.title.length}/100 characters</p>
+                <p className="text-xs text-text-secondary">{form.title.length}/100 characters</p>
               </div>
 
               {/* Description */}
@@ -447,11 +447,11 @@ export default function SellerDashboard() {
                   value={form.description}
                   onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                   placeholder="Describe what the buyer will learn. Be specific about the value you provide..."
-                  className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-secondary-text placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all resize-none"
+                  className="w-full bg-secondary-bg/60 border border-border/30 rounded-2xl px-4 py-3 text-text-secondary placeholder-text-secondary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/25 transition-all resize-none"
                   rows={3}
                   maxLength={500}
                 />
-                <p className="text-xs text-muted-text">{form.description.length}/500 characters</p>
+                <p className="text-xs text-text-secondary">{form.description.length}/500 characters</p>
               </div>
 
               {/* Content */}
@@ -467,11 +467,11 @@ export default function SellerDashboard() {
                   className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-secondary-text placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all resize-none font-share-tech text-sm"
                   rows={10}
                 />
-                <p className="text-xs text-muted-text">{form.content.length} characters • Markdown supported</p>
+                <p className="text-xs text-text-secondary">{form.content.length} characters • Markdown supported</p>
               </div>
 
               {/* Price Slider */}
-              <div className="bg-card-bg/50 rounded-lg p-4 text-secondary-text">
+              <div className="bg-card-bg/50 rounded-2xl p-4 text-text-secondary">
                 <PriceSlider
                   value={form.price}
                   onChange={(val) => setForm((prev) => ({ ...prev, price: val }))}
@@ -502,7 +502,7 @@ export default function SellerDashboard() {
                       key={type.key}
                       type="button"
                       onClick={() => setForm((prev) => ({ ...prev, type: type.key }))}
-                      className={`p-4 rounded-lg border-2 transition-all ${
+                      className={`p-4 rounded-2xl border-2 transition-all ${
                         form.type === type.key
                           ? 'border-accent bg-accent/10'
                           : 'border-border hover:border-border/70'
@@ -510,7 +510,7 @@ export default function SellerDashboard() {
                     >
                       <div className="mb-2">{type.icon}</div>
                       <div className="font-space-grotesk font-bold text-text-primary text-sm">{type.title}</div>
-                      <div className="text-xs text-secondary-text">{type.subtitle}</div>
+                        <div className="text-xs text-text-secondary">{type.subtitle}</div>
                     </button>
                   ))}
                 </div>
@@ -527,9 +527,9 @@ export default function SellerDashboard() {
                     value={form.wallet}
                     onChange={(e) => setForm((prev) => ({ ...prev, wallet: e.target.value }))}
                     placeholder="0x..."
-                    className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-secondary-text placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all font-share-tech text-sm"
+                    className="w-full bg-secondary-bg/60 border border-border/30 rounded-2xl px-4 py-3 text-text-secondary placeholder-text-secondary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/25 transition-all font-share-tech text-sm"
                   />
-                  <p className="text-xs text-muted-text">Receives USDC payments</p>
+                    <p className="text-xs text-text-secondary">Receives USDC payments</p>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-space-grotesk font-semibold text-secondary-text uppercase tracking-wider">
@@ -540,16 +540,16 @@ export default function SellerDashboard() {
                     value={form.sellerName}
                     onChange={(e) => setForm((prev) => ({ ...prev, sellerName: e.target.value }))}
                     placeholder="e.g., CryptoTaxPro"
-                    className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-secondary-text placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
+                    className="w-full bg-secondary-bg/60 border border-border/30 rounded-2xl px-4 py-3 text-text-secondary placeholder-text-secondary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/25 transition-all"
                   />
-                  <p className="text-xs text-muted-text">Visible to buyers</p>
+                  <p className="text-xs text-text-secondary">Visible to buyers</p>
                 </div>
               </div>
 
               {/* Publish Result */}
               {publishResult && (
                 <div
-                  className={`p-4 rounded-lg border ${
+                  className={`p-4 rounded-xl border ${
                     publishResult.success
                       ? 'bg-green-500/5 border-green-500/30 text-green-400'
                       : 'bg-red-500/5 border-red-500/30 text-red-400'
@@ -563,7 +563,7 @@ export default function SellerDashboard() {
               <button
                 type="submit"
                 disabled={!isFormValid || isPublishing}
-                className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-base rounded-2xl"
               >
                 {isPublishing ? (
                   <>
@@ -600,15 +600,15 @@ export default function SellerDashboard() {
                 Marketplace
               </h3>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-card-bg rounded-lg p-4 text-center text-secondary-text">
+                <div className="bg-card-bg rounded-2xl p-4 text-center text-text-secondary">
                   <div className="text-2xl font-space-grotesk font-bold text-accent">{products.length}</div>
-                  <div className="text-xs text-muted-text mt-1">Total Products</div>
+                  <div className="text-xs text-text-secondary mt-1">Total Products</div>
                 </div>
-                <div className="bg-secondary-bg rounded-lg p-4 text-center border border-border/20">
+                <div className="bg-secondary-bg rounded-2xl p-4 text-center border border-border/20">
                   <div className="text-2xl font-space-grotesk font-bold text-accent">
                     {products.filter((p) => p.type === 'human_alpha').length}
                   </div>
-                  <div className="text-xs text-muted-text mt-1">Human Alpha</div>
+                  <div className="text-xs text-text-secondary mt-1">Human Alpha</div>
                 </div>
               </div>
             </div>

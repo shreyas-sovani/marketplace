@@ -7,12 +7,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Simplified design system - 5 colors only
+        // Expanded dark palette
+        // Base blacks and deep blues
+        'background': '#020202',
+        'surface': '#081A28',
+        // Accents
+        'muted-slate': '#9DA2AB',
+        'soft-purple': '#7F5A83',
+        // Semantic aliases
         'primary-bg': '#020202',
-        'secondary-bg': '#29201D',
-        'card-bg': '#564138',
-        'accent': '#9E7A6B',
-        'secondary-text': '#F6F5AE',
+        'secondary-bg': '#081A28',
+        'card-bg': '#2A424F',
+        'accent': '#7F5A83',
+        'accent-weak': '#9DA2AB',
+        'muted': '#9DA2AB',
+        'text-primary': '#DDE3E8',
+        'text-secondary': '#9DA2AB',
+        'border': '#12232E',
       },
       fontFamily: {
         'space-grotesk': ['Space Grotesk', 'sans-serif'],
@@ -72,9 +83,14 @@ export default {
       borderRadius: {
         'sm': '0.375rem',
         'base': '0.5rem',
-        'md': '0.625rem',
-        'lg': '0.75rem',
-        'xl': '1rem',
+        'md': '0.75rem',
+        'lg': '1rem',
+        'xl': '1.25rem',
+        '2xl': '1.75rem',
+      },
+      boxShadow: {
+        soft: '0 6px 24px rgba(9,12,18,0.6)',
+        'soft-accent': '0 8px 30px rgba(127,90,131,0.12)',
       },
     },
   },

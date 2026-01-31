@@ -32,13 +32,13 @@ function TickerItem({ event }: { event: TickerEvent }) {
   if (event.type === 'listing') {
     return (
       <span className="inline-flex items-center gap-3 px-4 py-1 whitespace-nowrap">
-        <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1">
           <Package className="w-3 h-3 text-accent" />
-          <span className="text-accent font-share-tech font-semibold text-xs">[NEW]</span>
+          <span className="text-accent font-semibold text-xs">[NEW]</span>
         </span>
         <span className="text-text-primary font-inter text-sm">{event.data.productTitle}</span>
-        <span className="text-accent font-share-tech">${event.data.price.toFixed(2)}</span>
-        <span className="text-muted-text text-xs">by {event.data.sellerName || 'Anonymous'}</span>
+        <span className="text-accent text-sm">${event.data.price.toFixed(2)}</span>
+        <span className="text-text-secondary text-xs">by {event.data.sellerName || 'Anonymous'}</span>
       </span>
     )
   }
@@ -46,14 +46,14 @@ function TickerItem({ event }: { event: TickerEvent }) {
   if (event.type === 'sale') {
     return (
       <span className="inline-flex items-center gap-3 px-4 py-1 whitespace-nowrap">
-        <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1">
           <Zap className="w-3 h-3 text-accent" />
-          <span className="text-accent font-share-tech font-semibold text-xs">[SALE]</span>
+          <span className="text-accent font-semibold text-xs">[SALE]</span>
         </span>
         <span className="text-text-primary font-inter text-sm">
           {event.data.buyerName || 'Agent'} acquired from {event.data.sellerName || 'Human'}
         </span>
-        <span className="text-accent font-share-tech">${event.data.price.toFixed(2)}</span>
+        <span className="text-accent text-sm">${event.data.price.toFixed(2)}</span>
       </span>
     )
   }
@@ -198,13 +198,13 @@ export default function MarketTicker() {
   // If no events, show placeholder
   if (events.length === 0) {
     return (
-      <div className="bg-secondary-bg/95 backdrop-blur border-t border-border/30 py-3 px-6">
+      <div className="bg-secondary-bg/90 backdrop-blur border-t border-border/30 py-3 px-6">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
             <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`} />
-            <span className="text-muted-text text-sm font-inter">Waiting for market activity...</span>
+            <span className="text-text-secondary text-sm font-inter">Waiting for market activity...</span>
           </div>
-          <div className="flex items-center gap-6 text-xs text-muted-text font-share-tech">
+          <div className="flex items-center gap-6 text-xs text-text-secondary">
             <span className="flex items-center gap-1">
               <Package className="w-3 h-3 text-accent" />
               {stats.totalProducts} products
@@ -220,23 +220,23 @@ export default function MarketTicker() {
   }
 
   return (
-    <div className="bg-secondary-bg/95 backdrop-blur border-t border-border/30 overflow-hidden">
+    <div className="bg-secondary-bg/90 backdrop-blur border-t border-border/30 overflow-hidden">
       {/* Stats Bar */}
-      <div className="flex items-center justify-between px-6 py-2.5 border-b border-border/20 text-xs">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-border/20 text-xs">
         <div className="flex items-center gap-3">
           <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`} />
-          <span className="text-accent font-share-tech font-bold tracking-wide">INFOMART LIVE</span>
+          <span className="text-accent font-semibold tracking-wide">INFOMART LIVE</span>
         </div>
-        <div className="flex items-center gap-8 text-muted-text">
-          <span className="flex items-center gap-2 font-share-tech">
+        <div className="flex items-center gap-8 text-text-secondary">
+          <span className="flex items-center gap-2">
             <Package className="w-3 h-3 text-accent" />
             {stats.totalProducts} Listed
           </span>
-          <span className="flex items-center gap-2 font-share-tech">
+          <span className="flex items-center gap-2">
             <Zap className="w-3 h-3 text-accent" />
             {stats.totalSales} Sales
           </span>
-          <span className="flex items-center gap-2 font-share-tech">
+          <span className="flex items-center gap-2">
             <TrendingUp className="w-3 h-3 text-accent" />
             ${stats.totalVolume.toFixed(2)} Volume
           </span>
@@ -245,13 +245,13 @@ export default function MarketTicker() {
 
       {/* Scrolling Ticker */}
       <div className="relative overflow-hidden py-2">
-        <div className="animate-marquee flex whitespace-nowrap">
+        <div className="animate-marquee flex whitespace-nowrap items-center">
           {/* First copy */}
           {events.map((event) => (
             <TickerItem key={event.id} event={event} />
           ))}
           {/* Separator */}
-          <span className="inline-flex items-center px-6 text-border/50 font-share-tech">•</span>
+          <span className="inline-flex items-center px-6 text-border/50">•</span>
           {/* Second copy for seamless loop */}
           {events.map((event) => (
             <TickerItem key={`${event.id}-dup`} event={event} />
