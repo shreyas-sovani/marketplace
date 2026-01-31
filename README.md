@@ -1,80 +1,109 @@
-# DueDiligence — Just-in-Time Intelligence Platform
+# InfoMart — P2P Knowledge Marketplace for AI Agents
 
-**An AI agent with a Transparent Brain. It argues with itself about costs, rejects low-value queries, and pays for data — while you watch it think.**
+**Humans sell alpha. Agents hunt and buy it. Real USDC flows. You watch the whole economy live.**
 
 ---
 
 ## What is this?
 
-Imagine you're launching a crypto trading app in India. You need:
-- Regulatory requirements (VDA tax laws, FIU compliance)
-- Market sentiment (what's trending, bullish or bearish?)
-- Recent news (any breaking developments?)
+Forget APIs. Forget subscriptions. **InfoMart** is a peer-to-peer marketplace where:
 
-Free sources are garbage — outdated, unreliable, conflicting. Premium APIs have what you need, but they cost money.
+- 🧠 **Humans** publish their knowledge — insider tips, strategies, niche expertise
+- 🤖 **AI Agents** browse, evaluate, and purchase what they need
+- 💸 **Real money** (USDC) changes hands via x402 crypto payments
+- 📺 **You watch** every transaction scroll across a live market ticker
 
-**DueDiligence** is an AI agent that:
-1. **Argues with itself** about whether your query is worth paying for
-2. **Rejects low-value queries** (the "Taylor Swift Defense" — if it's on Wikipedia, you don't need us)
-3. **Discovers** available data vendors in a marketplace
-4. **Evaluates** ROI before spending a single cent
-5. **Pays** for exactly what it needs via x402 crypto payments
-6. **Streams its thinking** to your browser in real-time
+The agent doesn't ask permission. It has a wallet. It makes economic decisions. And it prefers **Human Alpha** — unique insights that APIs can't provide.
 
-No human approves the payments. The agent has a crypto wallet and makes its own economic decisions.
-
-**The twist?** You can watch its entire internal monologue. Every doubt, every calculation, every decision — streamed live to a "Neural Terminal" UI.
+**The twist?** A live scrolling ticker shows every listing and every sale in real-time. You're watching a closed-loop AI economy running on actual blockchain rails.
 
 ---
 
 ## The Demo
 
+### 🧠 Agent Terminal — Watch the Hunter Think
+
 ```
-📝 User Query: "What are the crypto tax regulations in India?"
+📝 User Query: "What strategies do Indian traders use to minimize crypto taxes?"
 
 🧠 NEURAL LOG (streamed in real-time):
 ┌──────────────────────────────────────────────────────────────────┐
 │ [ANALYSIS] Evaluating query value...                             │
-│ 💭 This asks about specific regulatory information that requires │
-│    jurisdiction-specific expertise. Not generic trivia.          │
+│ 💭 This requires jurisdiction-specific insider knowledge.        │
+│    Not generic facts — this is prime Human Alpha territory.      │
 │                                                                  │
-│ [BUDGET] Checking available funds...                             │
-│ 💭 Budget: $0.10 USDC. Legal data costs $0.02.                   │
-│    ROI Assessment: HIGH - regulatory info is time-sensitive      │
+│ [BROWSE] Checking InfoMart marketplace...                        │
+│ 💭 Found 3 products. "India Crypto Tax Loopholes 2026" matches.  │
+│    Type: human_alpha. Price: $0.03. Seller: Bob (Tax Expert)     │
 │                                                                  │
-│ [DECISION] Approved: Purchase from LegalEdge India               │
-│ ✅ Paying $0.02 for legal_in vendor data                         │
+│ [BUDGET] Calculating ROI...                                      │
+│ 💭 Budget: $0.10 USDC. Cost: $0.03. Remaining: $0.07             │
+│    Human Alpha ROI: HIGH — insider tax strategies are valuable   │
 │                                                                  │
-│ 💸 TX: 0x8174b34f... | -$0.02 | Balance: $0.08                   │
+│ [DECISION] Approved: Purchase from InfoMart Marketplace          │
+│ ✅ Buying "India Crypto Tax Loopholes 2026" ($0.03)              │
+│                                                                  │
+│ 💸 TX: 0x8174b34f... | -$0.03 | Balance: $0.07                   │
 └──────────────────────────────────────────────────────────────────┘
 
 📊 FINAL ANSWER:
-   📜 VDA Tax: 30% on all crypto transactions
-   📜 TDS: 1% on transfers above ₹10,000  
-   📜 FIU-IND registration mandatory for exchanges
-   📜 Recent: WazirX vs ED case setting precedents
+   � GIFT City exemption: Route through IFSC for 0% TDS
+   💡 NFT Gifting strategy: Transfer to relatives tax-free
+   � DeFi staking as "interest income" (slab rate, not 30%)
+   Source: Bob (Crypto Tax Expert) via InfoMart
 
-💰 Session cost: $0.02 USDC (1 vendor)
+💰 Session cost: $0.03 USDC — Human Alpha acquired
 ```
 
-But try asking "What is 2+2?" and watch:
+### 🚫 The Taylor Swift Defense — Reject Wasteful Queries
 
 ```
+📝 User Query: "Who is Taylor Swift?"
+
 🧠 NEURAL LOG:
 ┌──────────────────────────────────────────────────────────────────┐
 │ [ANALYSIS] Evaluating query value...                             │
-│ 💭 This is basic arithmetic. A calculator can answer this.       │
-│    No premium data source can add value here.                    │
+│ 💭 General knowledge. Wikipedia has this. Zero ROI.              │
 │                                                                  │
-│ [REJECTION] Query rejected under Taylor Swift Defense            │
-│ ❌ This query does not require paid intelligence sources.        │
-│    Answer: 2 + 2 = 4. Budget preserved.                          │
+│ [REJECTION] Query rejected — Taylor Swift Defense                │
+│ ❌ No data source adds value here. Answering from own knowledge. │
 └──────────────────────────────────────────────────────────────────┘
 
-💰 Session cost: $0.00 USDC (0 vendors) — STINGY MODE ACTIVATED
+💰 Session cost: $0.00 USDC — MISER MODE ACTIVATED
 ```
 
-Real USDC. Real blockchain transactions. Real accountability.
+### 💡 Seller Dashboard — Publish Your Knowledge
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  📦 PUBLISH YOUR KNOWLEDGE                                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Title: "AIBhoomi Winning Strategy 2026"                        │
+│  Description: Insider tips from a 3x hackathon winner...        │
+│  Price: [$0.05] ◀────────────●─────────────▶ ($0.01 - $0.10)    │
+│  Type: [🧠 Human Alpha ▼]                                       │
+│  Wallet: 0xYourWallet...                                        │
+│                                                                 │
+│  [🚀 PUBLISH TO INFOMART]                                       │
+│                                                                 │
+├─────────────────────────────────────────────────────────────────┤
+│  📈 YOUR EARNINGS                                               │
+│  Published: 1 product | Sales: 3 | Revenue: $0.15               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 📺 Market Ticker — The Closed Loop Economy
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 🟢 INFOMART LIVE | 📦 15 listed | 🛒 8 sales | 💰 $0.42 volume │
+├─────────────────────────────────────────────────────────────────┤
+│ [NEW] 'Crypto Tax 2026' ($0.03) by Bob ••• [SALE] Agent paid   │
+│ Alice ($0.05) ••• [NEW] 'BTC Sentiment' ($0.02) by Charlie ••• │
+└─────────────────────────────────────────────────────────────────┘
+                         ◀─── scrolling marquee ───▶
+```
 
 ---
 
@@ -83,67 +112,58 @@ Real USDC. Real blockchain transactions. Real accountability.
 ### The Architecture
 
 ```
-┌─────────────────┐     SSE Stream      ┌───────────────────┐
-│  React UI       │◄───────────────────│  Express Server   │
-│  (Neural        │     /api/stream     │                   │
-│   Terminal)     │                     │  x402 Paywall     │
-│                 │────────────────────►│                   │
-│  Port 5173      │    POST /api/chat   │  Port 4021        │
-└─────────────────┘                     └─────────┬─────────┘
-                                                  │
-                                                  ▼
-                                        ┌───────────────────┐
-                                        │  DueDiligence     │
-                                        │  Agent            │
-                                        │                   │
-                                        │  • log_reasoning  │
-                                        │  • purchase_data  │
-                                        │                   │
-                                        │  LangChain +      │
-                                        │  Gemini Flash     │
-                                        └─────────┬─────────┘
-                                                  │
-                                                  ▼
-                                        ┌───────────────────┐
-                                        │  Vendor           │
-                                        │  Marketplace      │
-                                        │                   │
-                                        │  5 vendors        │
-                                        │  x402 protected   │
-                                        └───────────────────┘
+┌─────────────────┐                      ┌───────────────────────────┐
+│  SELLER UI      │     POST /publish    │                           │
+│  (Dashboard)    │─────────────────────►│     EXPRESS SERVER        │
+│  Port 5173      │                      │     Port 4021             │
+└─────────────────┘                      │                           │
+                                         │  ┌─────────────────────┐  │
+┌─────────────────┐     SSE /stream      │  │  MARKETPLACE        │  │
+│  AGENT UI       │◄────────────────────│  │  SERVICE            │  │
+│  (Terminal)     │                      │  │                     │  │
+│  Port 5173      │     POST /chat       │  │  • Product Registry │  │
+│                 │─────────────────────►│  │  • SSE Events       │  │
+└─────────────────┘                      │  │  • x402 Paywall     │  │
+        │                                │  └─────────────────────┘  │
+        │                                └─────────────┬─────────────┘
+        │                                              │
+        ▼                                              ▼
+┌─────────────────┐                      ┌───────────────────────────┐
+│  MARKET TICKER  │◄─────SSE────────────│  INFOMART AGENT           │
+│  (Live Feed)    │   /market/stream     │                           │
+│                 │                      │  Tools:                   │
+│  [NEW] [SALE]   │                      │  • log_reasoning          │
+│  scrolling...   │                      │  • browse_marketplace     │
+└─────────────────┘                      │  • purchase_data          │
+                                         │                           │
+                                         │  "Hunter for Human Alpha" │
+                                         └───────────────────────────┘
 ```
 
-### The Transparent Brain (SSE Events)
+### The Agent's Tools
 
-Every thought is streamed as a Server-Sent Event:
+| Tool | Purpose |
+|------|---------|
+| `log_reasoning` | Stream internal monologue (ANALYSIS, BUDGET, DECISION, REJECTION) |
+| `browse_marketplace` | Fetch available products from `/api/market/products` |
+| `purchase_data` | Buy from marketplace OR legacy vendors via x402 payment |
 
-| Event | Purpose |
-|-------|---------|
-| `log` | Agent's internal reasoning (step, thought, status) |
-| `tx` | Payment transaction (vendor, amount, txHash) |
-| `budget` | Real-time budget update (spent, remaining) |
-| `answer` | Final synthesized response |
-| `error` | Something went wrong |
+### The Human Alpha Preference
 
-### The Taylor Swift Defense
+The agent is explicitly instructed:
 
-The agent has explicit instructions to reject queries that don't need premium data:
+> "You are a **Hunter for Human Alpha**. When queries involve subjective insights, niche expertise, 
+> or time-sensitive intelligence — PREFER marketplace products with type='human_alpha' over generic API data.
+> Human knowledge often has higher signal-to-noise ratio."
 
-> "If a query could be answered by a quick Google search, a calculator, or common knowledge, 
-> politely decline and explain that this is a premium intelligence service, not a general assistant.
-> Examples of REJECTIONS: 'What is 2+2?', 'Who is Taylor Swift?', 'What color is the sky?'"
+### The Marketplace
 
-### The Vendor Marketplace
+| Source | Type | What's Sold |
+|--------|------|-------------|
+| **InfoMart Marketplace** | human_alpha | Strategies, insider tips, niche expertise |
+| **Legacy Vendors** | api | Bloomberg news, weather, Wikipedia facts |
 
-| Vendor | Price | Value | Data |
-|--------|-------|-------|------|
-| LegalEdge India | $0.02 | HIGH | VDA tax (30%), TDS rules, FIU compliance |
-| Bloomberg Lite | $0.05 | HIGH | Breaking news, market moves, fear/greed index |
-| WikiFacts Basic | $0.01 | LOW | General facts, entity info |
-| WeatherNow Global | $0.01 | LOW | Weather data worldwide |
-| SentimentPulse X | $0.02 | MEDIUM | Twitter/X sentiment analysis |
-
-The agent uses the [x402 protocol](https://x402.org) — payments embedded directly in HTTP requests.
+All purchases protected by [x402 protocol](https://x402.org) — payments embedded in HTTP requests.
 
 ---
 
@@ -151,13 +171,14 @@ The agent uses the [x402 protocol](https://x402.org) — payments embedded direc
 
 ### Prerequisites
 - Node.js 18+
-- A wallet with testnet USDC on Base Sepolia
+- Wallet with testnet USDC on Base Sepolia
 - Google AI API key (free at [aistudio.google.com](https://aistudio.google.com/apikey))
 
 ### Setup
 
 ```bash
-cd agentpay-insights
+git clone https://github.com/shreyas-sovani/marketplace.git
+cd marketplace
 npm install
 cd client && npm install && cd ..
 cp .env.example .env
@@ -173,52 +194,76 @@ GOOGLE_API_KEY=...          # From Google AI Studio
 - ETH for gas: [Coinbase Faucet](https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet)  
 - USDC for payments: [Circle Faucet](https://faucet.circle.com/) (select Base Sepolia)
 
-### Run the platform
+### Run
 
-**Terminal 1** — Start the backend:
+**Terminal 1** — Backend:
 ```bash
 npm run start:server
 ```
 
-**Terminal 2** — Start the frontend:
+**Terminal 2** — Frontend:
 ```bash
 cd client && npm run dev
 ```
 
-Open `http://localhost:5173` and watch the agent think in real-time.
+Open `http://localhost:5173`:
+- **Agent Terminal** — Ask questions, watch the agent hunt for alpha
+- **Sell Knowledge** — Publish your own expertise to the marketplace
 
 ---
 
-## Project structure
+## Project Structure
 
 ```
 src/
-├── vendors.ts   # 5 vendor definitions with prices & data
-├── agent.ts     # DueDiligence agent with LangChain tools
-│                # - log_reasoning: Stream internal thoughts  
-│                # - purchase_data: Buy vendor data via x402
-└── server.ts    # Express server with SSE streaming
-                 # - /api/stream: Real-time event stream
-                 # - /api/chat: Trigger agent analysis
-                 # - /api/vendor/:id: x402 paywalled endpoints
+├── types/
+│   └── marketplace.ts    # Product, Event, Stats types
+├── services/
+│   └── marketplaceService.ts  # In-memory product registry, SSE events
+├── routes/
+│   └── market.ts         # /api/market/* endpoints + x402 paywall
+├── vendors.ts            # Legacy vendor definitions
+├── agent.ts              # InfoMart Agent — browse, evaluate, purchase
+└── server.ts             # Express server, SSE streaming, x402 config
 
-client/
-├── src/
-│   └── App.tsx  # Neural Terminal React UI
-│                # - Budget display with progress bar
-│                # - Real-time log viewer
-│                # - Transaction ledger
-│                # - Quick test buttons
-└── ...          # Vite + Tailwind config
+client/src/
+├── components/
+│   └── MarketTicker.tsx  # Live scrolling ticker (SSE-powered)
+├── pages/
+│   └── SellerDashboard.tsx  # Publish products, track earnings
+└── App.tsx               # Agent Terminal, routing, budget display
 ```
 
 ---
 
-## The tech stack
+## API Endpoints
+
+### Marketplace
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/market/publish` | POST | Publish a new product |
+| `/api/market/products` | GET | List all products (public) |
+| `/api/market/products/agent` | GET | Products formatted for LLM |
+| `/api/market/product/:id` | GET | Single product listing |
+| `/api/market/product/:id/buy` | GET | 🔒 Purchase (x402 paywall) |
+| `/api/market/stats` | GET | Marketplace statistics |
+| `/api/market/stream` | GET | SSE stream (listings, sales) |
+
+### Agent
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/chat` | POST | Trigger agent analysis |
+| `/api/stream` | GET | Agent reasoning SSE stream |
+
+---
+
+## The Tech Stack
 
 **AI Layer**
 - LangChain for tool orchestration
-- Google Gemini 2.5 Flash Lite for reasoning
+- Google Gemini 2.5 Flash for reasoning
 - Zod for schema validation
 
 **Payment Layer**
@@ -227,31 +272,42 @@ client/
 - USDC stablecoin
 
 **Real-time Layer**
-- Server-Sent Events (native HTTP, no Socket.io)
+- Server-Sent Events (native HTTP)
 - React 18 + Vite 5
-- Tailwind CSS (Neural Terminal theme)
+- Tailwind CSS (dark terminal theme)
 
 **Safeguards**
 - $0.10 budget cap per session
 - 8 iteration max (agent reasoning limit)
 - Taylor Swift Defense (reject trivial queries)
-- Transaction audit trail
+- Human Alpha preference for unique insights
+- Full transaction audit trail
 
 ---
 
-## Why this matters
+## Build Progress
 
-Today, AI agents are limited to free APIs or require human approval for payments. That doesn't scale.
+| Phase | Description | Status |
+|-------|-------------|--------|
+| 1 | Backend Marketplace — Dynamic product registry, x402 paywall | ✅ |
+| 2 | Seller Dashboard — Publish products, live earnings | ✅ |
+| 3 | Agent Brain Upgrade — browse_marketplace tool, Human Alpha persona | ✅ |
+| 4 | Market Ticker — Live scrolling feed of listings and sales | ✅ |
 
-With x402, any agent with a wallet can pay for any resource on the internet — instantly, programmatically, without subscriptions or API keys.
+---
 
-**But transparency matters too.** If an AI is spending money on your behalf, you should be able to see:
-- WHY it decided to spend
-- WHAT it considered before spending  
-- HOW MUCH it spent and on what
-- WHEN it chose NOT to spend
+## Why This Matters
 
-DueDiligence gives you that visibility. The Neural Terminal isn't just a UI — it's an audit log for autonomous AI decisions.
+**The Old World**: AI agents use free APIs or need human approval to pay for anything.
+
+**The New World**: Any agent with a wallet can pay any human for any knowledge — instantly, programmatically, without intermediaries.
+
+InfoMart is proof that:
+1. **Humans can monetize expertise** directly to AI (no platform cut)
+2. **Agents can make economic decisions** autonomously
+3. **The economy can be transparent** — every transaction visible
+
+The ticker isn't just eye candy. It's a window into an AI-powered economy where humans provide alpha and machines pay for it.
 
 ---
 
@@ -259,10 +315,9 @@ DueDiligence gives you that visibility. The Neural Terminal isn't just a UI — 
 
 - [x402 Documentation](https://x402.org)
 - [x402 GitHub](https://github.com/coinbase/x402)
-- [Base Sepolia Explorer](https://sepolia.basescan.org) (verify your transactions)
-- [Detailed Report](./report.md) (technical deep-dive)
+- [Base Sepolia Explorer](https://sepolia.basescan.org)
+- [Detailed Report](./report.md)
 
 ---
 
-Built for a hackathon. Built for the future of accountable AI.
-# marketplace
+**Built for AIBhoomi 2026. Built for the future of Human-AI commerce.**
