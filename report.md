@@ -1,7 +1,7 @@
 # 🧠 InfoMart - Complete Technical Report
 
 > **Project**: P2P Knowledge Marketplace for AI Agents  
-> **Date**: January 31, 2026  
+> **Date**: February 1, 2026  
 > **Protocol**: x402 v2 (Coinbase Open Payment Protocol)  
 > **Network**: Base Sepolia Testnet (`eip155:84532`)  
 > **Status**: ✅ **FULLY OPERATIONAL**  
@@ -404,7 +404,7 @@ module.exports = {
 │    Type: human_alpha. Price: $0.03. Seller: Bob (Tax Expert)    │
 │                                                                 │
 │ [BUDGET] Calculating ROI...                            Thinking │
-│ 💭 Budget: $0.10. Cost: $0.03. Remaining: $0.07                 │
+│ 💭 Budget: $0.50. Cost: $0.03. Remaining: $0.47                 │
 │    Human Alpha ROI: HIGH — insider strategies are valuable      │
 │                                                                 │
 │ [DECISION] Approved: Purchase from InfoMart            Approved │
@@ -417,12 +417,13 @@ module.exports = {
 │ Source: marketplace (human_alpha)                               │
 │ Seller: Bob (Tax Expert)                                        │
 │ -$0.03    TX: 0xa1b2c3d4...    ✅ Success                       │
+│ 🔗 Verify: https://sepolia.basescan.org/tx/0xa1b2c3d4...        │
 └─────────────────────────────────────────────────────────────────┘
 
 📺 Market Ticker:
 [SALE] Agent paid Bob ($0.03) ••• scrolling •••
 
-💰 Final Budget: $0.07 remaining — Human Alpha acquired!
+💰 Final Budget: $0.47 remaining — Human Alpha acquired!
 ```
 
 ### Scenario 2: Taylor Swift Defense (Rejected)
@@ -443,7 +444,7 @@ module.exports = {
 
 💸 Transactions: (none)
 
-💰 Final Budget: $0.10 remaining — MISER MODE ACTIVATED
+💰 Final Budget: $0.50 remaining — MISER MODE ACTIVATED
 ```
 
 ### Scenario 3: New Listing + Sale Flow
@@ -482,7 +483,7 @@ module.exports = {
 │                                                                 │
 │ [BUDGET] Calculating multi-source cost...              Thinking │
 │ 💭 marketplace: $0.03 + bloomberg_lite: $0.05 + x_sentiment: $0.02 │
-│    Total: $0.10. Budget: $0.10. Tight but affordable ✅         │
+│    Total: $0.10. Budget: $0.50. Well within budget ✅           │
 │                                                                 │
 │ [DECISION] Multi-source purchase approved              Approved │
 │ 💭 Buying from marketplace (human_alpha) + 2 legacy vendors     │
@@ -495,10 +496,7 @@ module.exports = {
 │ SentimentPulse X (legacy_vendor)               -$0.02  ✅       │
 └─────────────────────────────────────────────────────────────────┘
 
-💰 Final Budget: $0.00 remaining — ALL IN ON ALPHA
-```
-
-💰 Final Budget: $0.00 remaining — ALL IN ON ALPHA
+💰 Final Budget: $0.40 remaining — Multiple sources acquired!
 ```
 
 ---
@@ -509,7 +507,7 @@ module.exports = {
 
 | Safeguard | Value | Purpose |
 |-----------|-------|---------|
-| Session Budget | $0.10 USDC | Hard spending cap per session |
+| Session Budget | $0.50 USDC | Hard spending cap per session |
 | Per-purchase check | Real-time | Reject if would exceed budget |
 | Taylor Swift Defense | Query filter | Reject trivial queries |
 | Human Alpha Preference | Priority logic | Marketplace products checked first |
@@ -518,8 +516,8 @@ module.exports = {
 
 | Safeguard | Value | Purpose |
 |-----------|-------|---------|
-| Max Iterations | 8 | Prevent infinite agent loops |
-| Min Delay | 1000ms | Respect API rate limits |
+| Max Iterations | 30 | Prevent infinite agent loops |
+| Min Delay | 800ms | Respect API rate limits |
 | SSE Reconnect | 5000ms | Prevent connection flood |
 
 ### Error Handling
@@ -711,7 +709,8 @@ cd client && npm run dev
 | ✅ Taylor Swift Defense | Trivial queries rejected, budget preserved |
 | ✅ Dual-Source Architecture | Marketplace + Legacy vendors coexist |
 | ✅ x402 Protocol | Dynamic product registration with paywall |
-| ✅ Production Ready | Budget caps, error handling, audit trails |
+| ✅ Production Ready | Budget caps ($0.50), 30 iterations max, error handling |
+| ✅ Verifiable Transactions | BaseScan links for all purchases |
 
 ### The Vision
 
@@ -764,9 +763,17 @@ All transactions can be verified on Base Sepolia Explorer:
 https://sepolia.basescan.org/tx/[TX_HASH]
 ```
 
-### PayTo Address
+**Example verified transactions:**
+- [0xce9b5336ea2e04bae40c54b4581ebca5ebd4e7f4a37c7088855dcd75e3233b39](https://sepolia.basescan.org/tx/0xce9b5336ea2e04bae40c54b4581ebca5ebd4e7f4a37c7088855dcd75e3233b39)
 
-All vendor payments go to:
+### Wallet Addresses
+
+**Agent Wallet** (purchases from):
+```
+0xa2A7358dDFcf7B1738C08E4E2A910B2D9F018E39
+```
+
+**Seller Wallet** (payments go to):
 ```
 0xB9b4aEcFd092514fDAC6339edba6705287464409
 ```
