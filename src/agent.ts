@@ -8,7 +8,10 @@ import { HumanMessage, SystemMessage, ToolMessage, AIMessage, type BaseMessage }
 import { z } from 'zod';
 import { getVendorById, getVendorSummary } from './vendors.js';
 
-// Types
+// =============================================================================
+// TYPES
+// =============================================================================
+
 export interface SessionState {
   sessionId: string;
   budget: number;
@@ -16,6 +19,8 @@ export interface SessionState {
   transactions: TransactionRecord[];
   logs: LogEntry[];
   status: 'idle' | 'thinking' | 'purchasing' | 'complete' | 'error';
+  /** Cached marketplace products for this session */
+  marketplaceCache: MarketplaceProduct[] | null;
 }
 
 export interface TransactionRecord {
@@ -25,24 +30,40 @@ export interface TransactionRecord {
   txHash: string;
   timestamp: string;
   justification: string;
+  source: 'legacy_vendor' | 'marketplace';
 }
 
 export interface LogEntry {
-  step: 'ANALYSIS' | 'BUDGET' | 'DECISION' | 'REJECTION' | 'PURCHASE' | 'FINAL';
+  step: 'ANALYSIS' | 'BUDGET' | 'DECISION' | 'REJECTION' | 'PURCHASE' | 'FINAL' | 'BROWSE';
   thought: string;
   status: 'Thinking' | 'Approved' | 'Rejected' | 'Complete';
   timestamp: string;
   metadata?: Record<string, unknown>;
 }
 
+/** Marketplace product from /api/market/products */
+export interface MarketplaceProduct {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  type: 'human_alpha' | 'api';
+  sellerName?: string;
+  sellerWallet: string;
+  salesCount: number;
+}
+
 export interface SSELogEvent { type: 'log'; data: LogEntry; }
-export interface SSETransactionEvent { type: 'tx'; data: { amount: number; vendor: string; vendorId: string; txHash: string; budgetRemaining: number; }; }
+export interface SSETransactionEvent { type: 'tx'; data: { amount: number; vendor: string; vendorId: string; txHash: string; budgetRemaining: number; source: string; }; }
 export interface SSEAnswerEvent { type: 'answer'; data: { content: string; complete: boolean; }; }
 export interface SSEErrorEvent { type: 'error'; data: { message: string; code: string; }; }
 export interface SSEBudgetEvent { type: 'budget'; data: { total: number; spent: number; remaining: number; }; }
 export type SSEEvent = SSELogEvent | SSETransactionEvent | SSEAnswerEvent | SSEErrorEvent | SSEBudgetEvent;
 
-// Config
+// =============================================================================
+// CONFIG
+// =============================================================================
+
 export const CONFIG = {
   SERVER_URL: 'http://localhost:4021',
   MODEL: 'gemini-2.5-flash',
@@ -53,67 +74,129 @@ export const CONFIG = {
   NETWORK: 'eip155:84532' as const,
 } as const;
 
-// System Prompt
-export function getDueDiligenceSystemPrompt(): string {
-  return `You are **DueDiligence**, a ruthless financial controller AI. Your job is to maximize ROI on every data purchase.
+// =============================================================================
+// SYSTEM PROMPT - INFOMART HUNTER PERSONA
+// =============================================================================
+
+export function getInfoMartSystemPrompt(marketplaceProducts: MarketplaceProduct[]): string {
+  // Format marketplace products for the prompt
+  const marketplaceSection = marketplaceProducts.length > 0
+    ? marketplaceProducts.map(p => ({
+        id: p.id,
+        title: p.title,
+        description: p.description,
+        price: `$${p.price.toFixed(2)}`,
+        type: p.type,
+        seller: p.sellerName || 'Anonymous',
+        sales: p.salesCount,
+      }))
+    : [];
+
+  return `You are **InfoMart Agent**, an elite intelligence hunter with a ruthless financial discipline. You operate the InfoMart P2P Knowledge Marketplace where humans sell insights and you buy them with real USDC.
+
+## YOUR IDENTITY
+- You are a **Hunter for Human Alpha** — unique insights from real humans
+- You have a **Miser's discipline** — every cent must deliver ROI
+- You prefer **human_alpha** products over generic API data
+- You stream your reasoning transparently to build trust
 
 ## YOUR BUDGET
-You have exactly $0.10 USDC. Every cent counts. You MUST justify every purchase.
+You have exactly **$0.10 USDC**. This is REAL cryptocurrency. Every purchase is recorded on-chain.
 
-## AVAILABLE VENDORS
+## AVAILABLE DATA SOURCES
+
+### 🧠 INFOMART MARKETPLACE (Human Alpha - PREFERRED)
+${JSON.stringify(marketplaceSection, null, 2)}
+
+### 🤖 LEGACY VENDORS (API Data)
 ${JSON.stringify(getVendorSummary(), null, 2)}
 
 ## YOUR TOOLS
 
 ### 1. log_reasoning
-Call this BEFORE any decision. Stream your internal monologue to the user.
-- step: "ANALYSIS" | "BUDGET" | "DECISION" | "REJECTION"
-- thought: Your reasoning (be specific about costs and value)
+Stream your internal monologue. MUST call before any decision.
+- step: "ANALYSIS" | "BUDGET" | "DECISION" | "REJECTION" | "BROWSE"
+- thought: Your reasoning (be specific about costs, value, and source preference)
 - status: "Thinking" | "Approved" | "Rejected"
 
-### 2. purchase_data
-Buy data from a vendor. ONLY call this after log_reasoning with status="Approved".
-- vendor_id: The vendor to purchase from
+### 2. browse_marketplace
+Refresh the list of available marketplace products. Use if you need updated listings.
+Returns: Array of products with id, title, description, price, type, seller
+
+### 3. purchase_data
+Buy data from marketplace OR legacy vendor. ONLY after log_reasoning with status="Approved".
+- product_id: The product/vendor ID to purchase
+- source: "marketplace" or "legacy_vendor"
 - justification: Why this data is worth the cost
 
-## CRITICAL CONSTRAINTS
+## CRITICAL RULES
 
-### THE TAYLOR SWIFT DEFENSE
-If the user asks a generic question that could be answered by:
-- Basic arithmetic (e.g., "What is 2+2?")
-- Common knowledge (e.g., "Who is Taylor Swift?", "What is the capital of France?")
-- Simple facts available in any search engine
+### 🎯 THE HUMAN ALPHA PREFERENCE
+When the query involves:
+- Subjective insights (strategies, opinions, predictions)
+- Niche expertise (tax loopholes, winning formulas, insider tips)
+- Time-sensitive intelligence (sentiment, breaking analysis)
+
+**PREFER products with type="human_alpha"** over legacy API vendors.
+Human knowledge often has higher signal-to-noise ratio.
+
+### 🚫 THE TAYLOR SWIFT DEFENSE
+If the query could be answered by:
+- Basic arithmetic ("What is 2+2?")
+- Common knowledge ("Who is Taylor Swift?")
+- Simple facts ("Capital of France?")
 
 You MUST:
-1. Call log_reasoning with step="REJECTION", status="Rejected"
-2. thought="General knowledge query. Zero ROI. No vendor provides unique value for this."
-3. DO NOT purchase ANY data
-4. Provide the answer from your own knowledge
+1. log_reasoning with step="REJECTION", status="Rejected"
+2. thought="General knowledge. Zero ROI. No data source adds value."
+3. DO NOT purchase anything
+4. Answer from your own knowledge
 
-### THE AUDIT RULE
-You MUST call log_reasoning with step="ANALYSIS" BEFORE considering any purchase.
-You MUST call log_reasoning with step="BUDGET" to show cost calculation.
-You MUST call log_reasoning with step="DECISION" with your final buy/no-buy choice.
+### 💰 THE MISER'S AUDIT
+Before EVERY purchase:
+1. log_reasoning(ANALYSIS): "What unique value does the user need?"
+2. log_reasoning(BUDGET): "Cost: $X. Budget remaining: $Y. ROI assessment..."
+3. log_reasoning(DECISION): "Approved/Rejected because..."
 
-### THE BUDGET RULE
-- Never exceed $0.10 total spending
-- Always check remaining budget before purchasing
-- Prefer cheaper vendors if they provide equivalent value
-- wiki_basic and weather_global are usually LOW VALUE traps - avoid unless specifically needed
+### 📊 SOURCE SELECTION LOGIC
+| Query Type | Preferred Source | Reason |
+|------------|------------------|--------|
+| Strategies, tips, insider knowledge | marketplace (human_alpha) | Unique human insights |
+| Breaking news, market data | legacy_vendor (bloomberg) | Real-time API feeds |
+| Regulatory/legal questions | BOTH | Cross-reference human + official |
+| Generic facts | NONE | Use own knowledge |
 
 ## WORKFLOW
-1. Receive user query
-2. log_reasoning(ANALYSIS): "What unique intelligence does the user need?"
-3. If generic query -> log_reasoning(REJECTION) -> Answer from own knowledge -> STOP
-4. log_reasoning(BUDGET): "Calculating cost vs. value for relevant vendors..."
-5. log_reasoning(DECISION): "Approving/Rejecting vendor X because..."
-6. If approved -> purchase_data for each approved vendor
-7. Synthesize all purchased data into comprehensive answer
+1. Receive query
+2. log_reasoning(ANALYSIS): Classify query type and identify data needs
+3. If generic → log_reasoning(REJECTION) → Answer directly → STOP
+4. If specialized:
+   a. Check marketplace for human_alpha products matching the topic
+   b. Check legacy vendors if API data is also useful
+   c. log_reasoning(BUDGET): Calculate total cost vs. value
+   d. log_reasoning(DECISION): Approve/reject each source
+5. purchase_data for each approved source
+6. Synthesize ALL purchased data into comprehensive answer
+7. Cite your sources (marketplace seller names, vendor names)
 
-BE RUTHLESS. EVERY CENT COUNTS. REJECT WASTEFUL QUERIES.`;
+## REMEMBER
+- You are spending REAL money on behalf of the user
+- Human Alpha is often worth more than its price suggests
+- Always justify purchases with specific reasoning
+- Stream your thoughts — transparency builds trust
+
+BE A RUTHLESS HUNTER. FIND THE ALPHA. GUARD THE BUDGET.`;
 }
 
-// Wallet Setup
+// Legacy prompt for backwards compatibility
+export function getDueDiligenceSystemPrompt(): string {
+  return getInfoMartSystemPrompt([]);
+}
+
+// =============================================================================
+// WALLET SETUP
+// =============================================================================
+
 export function setupWallet() {
   const privateKey = process.env.AGENT_PRIVATE_KEY;
   if (!privateKey) throw new Error('AGENT_PRIVATE_KEY not found in .env file');
@@ -124,10 +207,13 @@ export function setupWallet() {
   return { account, fetchWithPayment, address: account.address };
 }
 
-// Tool: Log Reasoning
+// =============================================================================
+// TOOL: LOG REASONING
+// =============================================================================
+
 export function createLogReasoningTool(emitSSE: (event: SSEEvent) => void) {
   return tool(
-    async ({ step, thought, status }: { step: 'ANALYSIS' | 'BUDGET' | 'DECISION' | 'REJECTION'; thought: string; status: 'Thinking' | 'Approved' | 'Rejected'; }) => {
+    async ({ step, thought, status }: { step: 'ANALYSIS' | 'BUDGET' | 'DECISION' | 'REJECTION' | 'BROWSE'; thought: string; status: 'Thinking' | 'Approved' | 'Rejected'; }) => {
       const logEntry: LogEntry = { step, thought, status, timestamp: new Date().toISOString() };
       emitSSE({ type: 'log', data: logEntry });
       console.log(`   [${step}] ${status}: ${thought.slice(0, 80)}...`);
@@ -137,7 +223,7 @@ export function createLogReasoningTool(emitSSE: (event: SSEEvent) => void) {
       name: 'log_reasoning',
       description: 'Log your reasoning process. MUST be called before any purchase decision.',
       schema: z.object({
-        step: z.enum(['ANALYSIS', 'BUDGET', 'DECISION', 'REJECTION']).describe('The reasoning phase'),
+        step: z.enum(['ANALYSIS', 'BUDGET', 'DECISION', 'REJECTION', 'BROWSE']).describe('The reasoning phase'),
         thought: z.string().describe('Your detailed reasoning about costs, value, and ROI'),
         status: z.enum(['Thinking', 'Approved', 'Rejected']).describe('Current status'),
       }),
@@ -145,14 +231,175 @@ export function createLogReasoningTool(emitSSE: (event: SSEEvent) => void) {
   );
 }
 
-// Tool: Purchase Data
+// =============================================================================
+// TOOL: BROWSE MARKETPLACE (NEW)
+// =============================================================================
+
+export function createBrowseMarketplaceTool(session: SessionState, emitSSE: (event: SSEEvent) => void) {
+  return tool(
+    async () => {
+      console.log(`   Browsing InfoMart marketplace...`);
+      
+      try {
+        const response = await fetch(`${CONFIG.SERVER_URL}/api/market/products`);
+        if (!response.ok) {
+          throw new Error(`Marketplace request failed: ${response.status}`);
+        }
+        
+        const data = await response.json() as { products?: MarketplaceProduct[] };
+        const products: MarketplaceProduct[] = data.products || [];
+        
+        // Cache products in session for agent's future reference
+        session.marketplaceCache = products;
+        
+        const logEntry: LogEntry = {
+          step: 'BROWSE',
+          thought: `Found ${products.length} products in marketplace`,
+          status: 'Thinking',
+          timestamp: new Date().toISOString(),
+          metadata: { productCount: products.length },
+        };
+        emitSSE({ type: 'log', data: logEntry });
+        
+        console.log(`   Found ${products.length} marketplace products`);
+        
+        return JSON.stringify({
+          success: true,
+          count: products.length,
+          products: products.map(p => ({
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            price: `$${p.price.toFixed(2)}`,
+            type: p.type,
+            seller: p.sellerName || 'Anonymous',
+            sales: p.salesCount,
+          })),
+        });
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.log(`   Marketplace browse failed: ${errorMsg}`);
+        emitSSE({ type: 'error', data: { message: `Marketplace unavailable: ${errorMsg}`, code: 'MARKETPLACE_ERROR' } });
+        return JSON.stringify({ success: false, error: errorMsg, products: [] });
+      }
+    },
+    {
+      name: 'browse_marketplace',
+      description: 'Browse the InfoMart marketplace to see available human alpha products. Returns list of products with IDs, titles, prices, and types.',
+      schema: z.object({}),
+    }
+  );
+}
+
+// =============================================================================
+// TOOL: PURCHASE DATA (UPGRADED)
+// =============================================================================
+
 export function createPurchaseDataTool(fetchWithPayment: typeof fetch, session: SessionState, emitSSE: (event: SSEEvent) => void) {
   return tool(
-    async ({ vendor_id, justification }: { vendor_id: string; justification: string }) => {
-      const vendor = getVendorById(vendor_id);
+    async ({ product_id, source, justification }: { product_id: string; source: 'marketplace' | 'legacy_vendor'; justification: string }) => {
+      
+      // =====================================================================
+      // ROUTE 1: MARKETPLACE PURCHASE (Human Alpha)
+      // =====================================================================
+      if (source === 'marketplace') {
+        // Find product in cache or fetch fresh
+        let product: MarketplaceProduct | undefined;
+        
+        if (session.marketplaceCache) {
+          product = session.marketplaceCache.find(p => p.id === product_id);
+        }
+        
+        if (!product) {
+          // Try to fetch the product directly
+          try {
+            const listResp = await fetch(`${CONFIG.SERVER_URL}/api/market/products`);
+            const listData = await listResp.json() as { products?: MarketplaceProduct[] };
+            session.marketplaceCache = listData.products || [];
+            product = session.marketplaceCache?.find(p => p.id === product_id);
+          } catch {
+            // Ignore fetch errors
+          }
+        }
+        
+        if (!product) {
+          emitSSE({ type: 'error', data: { message: `Unknown marketplace product: ${product_id}`, code: 'PRODUCT_NOT_FOUND' } });
+          return JSON.stringify({ success: false, error: `Unknown marketplace product: ${product_id}` });
+        }
+        
+        const remaining = session.budget - session.spent;
+        if (product.price > remaining) {
+          emitSSE({ type: 'error', data: { message: `Insufficient budget. Need $${product.price.toFixed(2)}, have $${remaining.toFixed(2)}`, code: 'INSUFFICIENT_BUDGET' } });
+          return JSON.stringify({ success: false, error: `Insufficient budget for ${product.title}` });
+        }
+        
+        console.log(`   Purchasing from marketplace: "${product.title}" ($${product.price.toFixed(2)})...`);
+        session.status = 'purchasing';
+        
+        try {
+          // x402 paywall endpoint
+          const fullUrl = `${CONFIG.SERVER_URL}/api/market/product/${product_id}/buy`;
+          const response = await fetchWithPayment(fullUrl);
+          
+          if (!response.ok) {
+            throw new Error(`Marketplace purchase failed: ${response.status}`);
+          }
+          
+          const purchasedData = await response.json();
+          
+          // Extract transaction hash from x402 payment response
+          let txHash = 'sim-' + Math.random().toString(36).slice(2, 10);
+          const paymentResponse = response.headers.get('PAYMENT-RESPONSE');
+          if (paymentResponse) {
+            try {
+              const decoded = JSON.parse(Buffer.from(paymentResponse, 'base64').toString('utf-8'));
+              txHash = decoded.transaction || txHash;
+            } catch { /* use sim hash */ }
+          }
+          
+          session.spent += product.price;
+          session.transactions.push({
+            vendorId: product_id,
+            vendorName: product.title,
+            amount: product.price,
+            txHash,
+            timestamp: new Date().toISOString(),
+            justification,
+            source: 'marketplace',
+          });
+          
+          emitSSE({ type: 'tx', data: { amount: product.price, vendor: product.title, vendorId: product_id, txHash, budgetRemaining: session.budget - session.spent, source: 'marketplace' } });
+          emitSSE({ type: 'budget', data: { total: session.budget, spent: session.spent, remaining: session.budget - session.spent } });
+          
+          console.log(`   Purchased from marketplace! TX: ${txHash.slice(0, 16)}...`);
+          
+          return JSON.stringify({
+            success: true,
+            source: 'marketplace',
+            product: product.title,
+            seller: product.sellerName || 'Anonymous',
+            type: product.type,
+            cost: product.price,
+            txHash,
+            budgetRemaining: session.budget - session.spent,
+            data: purchasedData,
+          });
+          
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : String(error);
+          console.log(`   Marketplace purchase failed: ${errorMsg}`);
+          emitSSE({ type: 'error', data: { message: `Purchase failed: ${errorMsg}`, code: 'PURCHASE_FAILED' } });
+          return JSON.stringify({ success: false, error: errorMsg });
+        }
+      }
+      
+      // =====================================================================
+      // ROUTE 2: LEGACY VENDOR PURCHASE (API Data)
+      // =====================================================================
+      const vendor = getVendorById(product_id);
       if (!vendor) {
-        emitSSE({ type: 'error', data: { message: `Unknown vendor: ${vendor_id}`, code: 'VENDOR_NOT_FOUND' } });
-        return JSON.stringify({ success: false, error: `Unknown vendor: ${vendor_id}` });
+        emitSSE({ type: 'error', data: { message: `Unknown vendor: ${product_id}`, code: 'VENDOR_NOT_FOUND' } });
+        return JSON.stringify({ success: false, error: `Unknown vendor: ${product_id}` });
       }
       
       const remaining = session.budget - session.spent;
@@ -161,11 +408,11 @@ export function createPurchaseDataTool(fetchWithPayment: typeof fetch, session: 
         return JSON.stringify({ success: false, error: `Insufficient budget` });
       }
       
-      console.log(`   Purchasing from ${vendor.name} ($${vendor.cost.toFixed(2)})...`);
+      console.log(`   Purchasing from legacy vendor: ${vendor.name} ($${vendor.cost.toFixed(2)})...`);
       session.status = 'purchasing';
       
       try {
-        const fullUrl = `${CONFIG.SERVER_URL}/api/vendor/${vendor_id}`;
+        const fullUrl = `${CONFIG.SERVER_URL}/api/vendor/${product_id}`;
         const response = await fetchWithPayment(fullUrl);
         if (!response.ok) throw new Error(`Vendor request failed: ${response.status}`);
         const vendorData = await response.json();
@@ -180,45 +427,52 @@ export function createPurchaseDataTool(fetchWithPayment: typeof fetch, session: 
         }
         
         session.spent += vendor.cost;
-        session.transactions.push({ vendorId: vendor_id, vendorName: vendor.name, amount: vendor.cost, txHash, timestamp: new Date().toISOString(), justification });
-        emitSSE({ type: 'tx', data: { amount: vendor.cost, vendor: vendor.name, vendorId: vendor_id, txHash, budgetRemaining: session.budget - session.spent } });
+        session.transactions.push({ vendorId: product_id, vendorName: vendor.name, amount: vendor.cost, txHash, timestamp: new Date().toISOString(), justification, source: 'legacy_vendor' });
+        emitSSE({ type: 'tx', data: { amount: vendor.cost, vendor: vendor.name, vendorId: product_id, txHash, budgetRemaining: session.budget - session.spent, source: 'legacy_vendor' } });
         emitSSE({ type: 'budget', data: { total: session.budget, spent: session.spent, remaining: session.budget - session.spent } });
         
-        console.log(`   Purchased! TX: ${txHash.slice(0, 16)}...`);
-        return JSON.stringify({ success: true, vendor: vendor.name, cost: vendor.cost, txHash, budgetRemaining: session.budget - session.spent, data: vendorData });
+        console.log(`   Purchased from legacy vendor! TX: ${txHash.slice(0, 16)}...`);
+        return JSON.stringify({ success: true, source: 'legacy_vendor', vendor: vendor.name, cost: vendor.cost, txHash, budgetRemaining: session.budget - session.spent, data: vendorData });
       } catch (error) {
-        console.log(`   Purchase failed, using simulated data...`);
+        console.log(`   Legacy purchase failed, using simulated data...`);
         session.spent += vendor.cost;
         const txHash = 'sim-' + Math.random().toString(36).slice(2, 10);
-        session.transactions.push({ vendorId: vendor_id, vendorName: vendor.name, amount: vendor.cost, txHash, timestamp: new Date().toISOString(), justification });
-        emitSSE({ type: 'tx', data: { amount: vendor.cost, vendor: vendor.name, vendorId: vendor_id, txHash, budgetRemaining: session.budget - session.spent } });
+        session.transactions.push({ vendorId: product_id, vendorName: vendor.name, amount: vendor.cost, txHash, timestamp: new Date().toISOString(), justification, source: 'legacy_vendor' });
+        emitSSE({ type: 'tx', data: { amount: vendor.cost, vendor: vendor.name, vendorId: product_id, txHash, budgetRemaining: session.budget - session.spent, source: 'legacy_vendor' } });
         emitSSE({ type: 'budget', data: { total: session.budget, spent: session.spent, remaining: session.budget - session.spent } });
-        return JSON.stringify({ success: true, vendor: vendor.name, cost: vendor.cost, txHash, budgetRemaining: session.budget - session.spent, data: vendor.data, note: 'Used simulated data' });
+        return JSON.stringify({ success: true, source: 'legacy_vendor', vendor: vendor.name, cost: vendor.cost, txHash, budgetRemaining: session.budget - session.spent, data: vendor.data, note: 'Used simulated data' });
       }
     },
     {
       name: 'purchase_data',
-      description: 'Purchase data from a vendor using x402 payment. ONLY call after log_reasoning with status="Approved".',
+      description: 'Purchase data from InfoMart marketplace OR legacy vendor using x402 payment. ONLY call after log_reasoning with status="Approved".',
       schema: z.object({
-        vendor_id: z.string().describe('The vendor ID (e.g., "legal_in", "bloomberg_lite")'),
+        product_id: z.string().describe('The product/vendor ID to purchase from'),
+        source: z.enum(['marketplace', 'legacy_vendor']).describe('Source: "marketplace" for human alpha products, "legacy_vendor" for API data'),
         justification: z.string().describe('Why this data is worth the cost'),
       }),
     }
   );
 }
 
-// Session Factory
+// =============================================================================
+// SESSION FACTORY
+// =============================================================================
+
 export function createSession(sessionId: string): SessionState {
-  return { sessionId, budget: CONFIG.INITIAL_BUDGET_USD, spent: 0, transactions: [], logs: [], status: 'idle' };
+  return { sessionId, budget: CONFIG.INITIAL_BUDGET_USD, spent: 0, transactions: [], logs: [], status: 'idle', marketplaceCache: null };
 }
 
 // Agent Result
 export interface AgentResult { answer: string; session: SessionState; }
 
-// Main Agent Function
+// =============================================================================
+// MAIN AGENT FUNCTION - INFOMART HUNTER
+// =============================================================================
+
 export async function runDueDiligenceAgent(query: string, sessionId: string, emitSSE: (event: SSEEvent) => void): Promise<AgentResult> {
   console.log(`\n${'='.repeat(60)}`);
-  console.log(`DUEDILIGENCE AGENT - Session: ${sessionId}`);
+  console.log(`INFOMART AGENT - Session: ${sessionId}`);
   console.log(`Query: "${query}"`);
   console.log(`Budget: $${CONFIG.INITIAL_BUDGET_USD.toFixed(2)}`);
   console.log(`${'='.repeat(60)}\n`);
@@ -243,13 +497,32 @@ export async function runDueDiligenceAgent(query: string, sessionId: string, emi
     throw new Error('GOOGLE_API_KEY not found in .env file');
   }
   
+  // Fetch initial marketplace products for system prompt
+  let initialProducts: MarketplaceProduct[] = [];
+  try {
+    console.log(`   Fetching marketplace products...`);
+    const marketResp = await fetch(`${CONFIG.SERVER_URL}/api/market/products`);
+    if (marketResp.ok) {
+      const marketData = await marketResp.json() as { products?: MarketplaceProduct[] };
+      initialProducts = marketData.products || [];
+      session.marketplaceCache = initialProducts;
+      console.log(`   Found ${initialProducts.length} marketplace products`);
+    }
+  } catch (e) {
+    console.log(`   Marketplace unavailable, continuing with legacy vendors only`);
+  }
+  
   const llm = new ChatGoogleGenerativeAI({ model: CONFIG.MODEL, temperature: CONFIG.TEMPERATURE, maxRetries: 2 });
   const tools = [
     createLogReasoningTool((event) => { emitSSE(event); if (event.type === 'log') session.logs.push(event.data); }),
+    createBrowseMarketplaceTool(session, emitSSE),
     createPurchaseDataTool(fetchWithPayment, session, emitSSE),
   ];
   const llmWithTools = llm.bindTools(tools);
-  const messages: BaseMessage[] = [new SystemMessage(getDueDiligenceSystemPrompt()), new HumanMessage(query)];
+  
+  // Use InfoMart prompt with marketplace products
+  const systemPrompt = getInfoMartSystemPrompt(initialProducts);
+  const messages: BaseMessage[] = [new SystemMessage(systemPrompt), new HumanMessage(query)];
   
   let iterations = 0;
   const MAX_ITERATIONS = 8;
@@ -292,19 +565,22 @@ export async function runDueDiligenceAgent(query: string, sessionId: string, emi
   emitSSE({ type: 'log', data: { step: 'FINAL', thought: `Session complete. Spent $${session.spent.toFixed(2)} of $${session.budget.toFixed(2)} budget. ${session.transactions.length} purchases made.`, status: 'Complete', timestamp: new Date().toISOString() } });
   
   console.log(`\n${'='.repeat(60)}`);
-  console.log(`Session Complete - Spent: $${session.spent.toFixed(2)} / $${session.budget.toFixed(2)}`);
+  console.log(`InfoMart Session Complete - Spent: $${session.spent.toFixed(2)} / $${session.budget.toFixed(2)}`);
   console.log(`${'='.repeat(60)}\n`);
   
   return { answer: finalAnswer, session };
 }
 
-// CLI Entry Point
+// =============================================================================
+// CLI ENTRY POINT
+// =============================================================================
+
 async function main() {
-  const query = process.argv[2] || "What are the crypto tax regulations in India?";
-  console.log('\nRunning DueDiligence Agent in CLI mode...\n');
+  const query = process.argv[2] || "What strategies do Indian traders use to minimize crypto taxes?";
+  console.log('\nRunning InfoMart Agent in CLI mode...\n');
   const result = await runDueDiligenceAgent(query, 'cli-' + Date.now(), (event) => {
     if (event.type === 'log') console.log(`[LOG] ${event.data.step}: ${event.data.thought}`);
-    else if (event.type === 'tx') console.log(`[TX] ${event.data.vendor}: -$${event.data.amount.toFixed(2)}`);
+    else if (event.type === 'tx') console.log(`[TX] ${event.data.vendor}: -$${event.data.amount.toFixed(2)} (${event.data.source})`);
   });
   console.log('\nFINAL ANSWER:\n' + '-'.repeat(60) + '\n' + result.answer + '\n' + '-'.repeat(60));
 }
