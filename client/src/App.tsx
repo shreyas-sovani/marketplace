@@ -1,8 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
-import { Menu, X, ArrowRight, Zap, Brain, TrendingUp, Check, Lock } from 'lucide-react'
+import { Menu, X, ArrowRight, Zap, Brain, TrendingUp, Check, Lock, LogOut } from 'lucide-react'
 import SellerDashboard from './pages/SellerDashboard'
+import LoginPage from './pages/LoginPage'
+import LoginModal from './components/LoginModal'
 import MarketTicker from './components/MarketTicker'
+import { AuthProvider, useAuth } from './context/AuthContext'
+import { ProtectedRoute } from './components/ProtectedRoute'
 
 // Types
 interface LogEntry {
@@ -32,8 +36,10 @@ interface Budget {
 function Navigation() {
   const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { isLoggedIn, user, logout } = useAuth()
   const isTerminal = location.pathname === '/' || location.pathname === '/terminal'
   const isSell = location.pathname === '/sell'
+  const isLogin = location.pathname === '/login'
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 bg-primary-bg/80 backdrop-blur-xl border-b border-secondary-bg">
@@ -52,26 +58,49 @@ function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            <Link
-              to="/"
-              className={`px-4 py-2 rounded-lg font-space-grotesk text-sm font-semibold transition-all duration-300 ${
-                isTerminal
-                  ? 'bg-accent/20 text-accent'
-                    : 'text-secondary-text hover:text-accent'
-              }`}
-            >
+            {!isLogin && (
+              <>
+                <Link
+                  to="/"
+                  className={`px-4 py-2 rounded-lg font-space-grotesk text-sm font-semibold transition-all duration-300 ${
+                    isTerminal && isLoggedIn
+                      ? 'bg-accent/20 text-accent'
+                      : 'text-secondary-text hover:text-accent'
+                  }`}
+                >
                   Agent Terminal
-            </Link>
-            <Link
-              to="/sell"
-              className={`px-4 py-2 rounded-lg font-space-grotesk text-sm font-semibold transition-all duration-300 ${
-                isSell
-                  ? 'bg-accent/20 text-accent'
-                    : 'text-secondary-text hover:text-accent'
-              }`}
-            >
+                </Link>
+                <Link
+                  to="/sell"
+                  className={`px-4 py-2 rounded-lg font-space-grotesk text-sm font-semibold transition-all duration-300 ${
+                    isSell && isLoggedIn
+                      ? 'bg-accent/20 text-accent'
+                      : 'text-secondary-text hover:text-accent'
+                  }`}
+                >
                   Publish Knowledge
-            </Link>
+                </Link>
+              </>
+            )}
+            
+            {isLoggedIn && user && (
+              <div className="flex items-center gap-4 pl-4 border-l border-secondary-bg">
+                <div className="text-right">
+                  <p className="text-sm font-space-grotesk font-semibold text-text-primary">{user.username}</p>
+                  <p className="text-xs text-muted-text capitalize">{user.role}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    logout()
+                    setMobileMenuOpen(false)
+                  }}
+                  className="px-4 py-2 rounded-lg bg-red-900/20 text-red-400 hover:bg-red-900/30 font-space-grotesk text-sm font-semibold transition-all duration-300 flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -86,20 +115,43 @@ function Navigation() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden mt-4 pt-4 border-t border-secondary-bg space-y-2">
-            <Link
-              to="/"
-              onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-2 rounded-lg text-secondary-text hover:text-accent transition-colors"
-            >
-              Agent Terminal
-            </Link>
-            <Link
-              to="/sell"
-              onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-2 rounded-lg text-secondary-text hover:text-accent transition-colors"
-            >
-              Publish Knowledge
-            </Link>
+            {!isLogin && (
+              <>
+                <Link
+                  to="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-4 py-2 rounded-lg text-secondary-text hover:text-accent transition-colors"
+                >
+                  Agent Terminal
+                </Link>
+                <Link
+                  to="/sell"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-4 py-2 rounded-lg text-secondary-text hover:text-accent transition-colors"
+                >
+                  Publish Knowledge
+                </Link>
+              </>
+            )}
+            
+            {isLoggedIn && user && (
+              <>
+                <div className="px-4 py-2 border-t border-secondary-bg">
+                  <p className="text-sm font-space-grotesk font-semibold text-text-primary">{user.username}</p>
+                  <p className="text-xs text-muted-text capitalize">{user.role}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    logout()
+                    setMobileMenuOpen(false)
+                  }}
+                  className="w-full text-left px-4 py-2 rounded-lg bg-red-900/20 text-red-400 hover:bg-red-900/30 font-space-grotesk text-sm font-semibold transition-all duration-300 flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -239,6 +291,21 @@ function FeatureCard({ icon: Icon, title, description }: { icon: React.Component
 // HERO SECTION
 // ============================================================================
 function HeroSection() {
+  const [showLogin, setShowLogin] = useState<null | 'buyer' | 'seller'>(null)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      try {
+        // @ts-ignore - custom event
+        const role = (e as CustomEvent)?.detail?.role
+        if (role === 'buyer' || role === 'seller') setShowLogin(role)
+      } catch (err) {
+        // noop
+      }
+    }
+
+    window.addEventListener('open-inline-login', handler)
+    return () => window.removeEventListener('open-inline-login', handler)
+  }, [])
   return (
     <div className="min-h-screen bg-primary-bg pt-24 pb-16 relative overflow-hidden">
       {/* Gradient accent */}
@@ -264,21 +331,21 @@ function HeroSection() {
               </p>
             </div>
 
-            {/* CTA Buttons */}
+            {/* CTA Buttons (open inline login modal) */}
             <div className="flex flex-wrap gap-4">
-              <Link
-                to="/terminal"
+              <button
+                onClick={() => setShowLogin('buyer')}
                 className="btn-primary flex items-center gap-2 group"
               >
                 Launch Terminal
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link
-                to="/sell"
+              </button>
+              <button
+                onClick={() => setShowLogin('seller')}
                 className="btn-secondary flex items-center gap-2"
               >
                 Publish Knowledge
-              </Link>
+              </button>
             </div>
 
             {/* Stats */}
@@ -337,6 +404,16 @@ function HeroSection() {
           </div>
         </div>
       </div>
+
+      {showLogin && (
+        <LoginModal
+          initialRole={showLogin}
+          onClose={() => setShowLogin(null)}
+        />
+      )}
+
+      {/* listen for global CTASection events to open the inline modal */}
+      {/* Use a React event listener so we don't inject scripts into the DOM */}
     </div>
   )
 }
@@ -444,12 +521,12 @@ function CTASection() {
             Join the next generation of knowledge commerce. Launch the agent terminal or publish your expertise today.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/terminal" className="btn-primary">
+            <button onClick={() => window.dispatchEvent(new CustomEvent('open-inline-login', { detail: { role: 'buyer' } }))} className="btn-primary">
               Launch Terminal
-            </Link>
-            <Link to="/sell" className="btn-secondary">
+            </button>
+            <button onClick={() => window.dispatchEvent(new CustomEvent('open-inline-login', { detail: { role: 'seller' } }))} className="btn-secondary">
               Publish Knowledge
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -808,16 +885,34 @@ function AgentTerminal() {
 }
 
 // ============================================================================
+// APP ROUTES WRAPPER
+// ============================================================================
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route 
+        path="/terminal" 
+        element={<ProtectedRoute element={<AgentTerminal />} requiredRole="buyer" />} 
+      />
+      <Route 
+        path="/sell" 
+        element={<ProtectedRoute element={<SellerDashboard />} requiredRole="seller" />} 
+      />
+    </Routes>
+  )
+}
+
+// ============================================================================
 // MAIN APP
 // ============================================================================
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/terminal" element={<AgentTerminal />} />
-        <Route path="/sell" element={<SellerDashboard />} />
-      </Routes>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   )
 }
