@@ -37,13 +37,14 @@ The agent doesn't ask permission. It has a wallet. It makes economic decisions. 
 │    Type: human_alpha. Price: $0.03. Seller: Bob (Tax Expert)     │
 │                                                                  │
 │ [BUDGET] Calculating ROI...                                      │
-│ 💭 Budget: $0.10 USDC. Cost: $0.03. Remaining: $0.07             │
+│ 💭 Budget: $0.50 USDC. Cost: $0.03. Remaining: $0.47             │
 │    Human Alpha ROI: HIGH — insider tax strategies are valuable   │
 │                                                                  │
 │ [DECISION] Approved: Purchase from InfoMart Marketplace          │
 │ ✅ Buying "India Crypto Tax Loopholes 2026" ($0.03)              │
 │                                                                  │
-│ 💸 TX: 0x8174b34f... | -$0.03 | Balance: $0.07                   │
+│ 💸 TX: 0x8174b34f... | -$0.03 | Balance: $0.47                   │
+│    🔗 Verify: https://sepolia.basescan.org/tx/0x8174b34f...      │
 └──────────────────────────────────────────────────────────────────┘
 
 📊 FINAL ANSWER:
@@ -247,6 +248,7 @@ client/src/
 | `/api/market/products/agent` | GET | Products formatted for LLM |
 | `/api/market/product/:id` | GET | Single product listing |
 | `/api/market/product/:id/buy` | GET | 🔒 Purchase (x402 paywall) |
+| `/api/market/product/:id/record-sale` | POST | Record sale with txHash |
 | `/api/market/stats` | GET | Marketplace statistics |
 | `/api/market/stream` | GET | SSE stream (listings, sales) |
 
@@ -277,11 +279,11 @@ client/src/
 - Tailwind CSS (dark terminal theme)
 
 **Safeguards**
-- $0.10 budget cap per session
-- 8 iteration max (agent reasoning limit)
+- $0.50 budget cap per session
+- 30 iteration max (agent reasoning limit)
 - Taylor Swift Defense (reject trivial queries)
 - Human Alpha preference for unique insights
-- Full transaction audit trail
+- Full transaction audit trail with verifiable BaseScan links
 
 ---
 
