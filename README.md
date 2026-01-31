@@ -1,6 +1,6 @@
 # InfoMart — P2P Knowledge Marketplace for AI Agents
 
-**Humans sell alpha. Agents hunt, buy, and JUDGE it. Real USDC flows. Sellers stake their reputation. You watch the whole economy live.**
+**Humans sell alpha. Agents hunt, buy, and JUDGE it. Real USDC flows. Sellers stake their reputation. The platform takes its cut. You watch the whole economy live.**
 
 ---
 
@@ -11,16 +11,54 @@ Forget APIs. Forget subscriptions. **InfoMart** is a peer-to-peer marketplace wh
 - 🧠 **Humans** publish their knowledge — insider tips, strategies, niche expertise
 - 🤖 **AI Agents** browse, evaluate, purchase, and **rate** what they buy
 - 💸 **Real money** (USDC) changes hands via x402 crypto payments
-- � **Sellers stake collateral** — bad ratings = instant slashing
+- 🛡️ **Sellers stake collateral** — bad ratings = instant slashing
+- � **Protocol takes 10%** of every sale + 100% of slashing penalties
 - �📺 **You watch** every transaction AND slash scroll across a live market ticker
 
 The agent doesn't ask permission. It has a wallet. It makes economic decisions. And it **punishes low-quality data** by slashing seller stakes.
 
-**The twist?** A live scrolling ticker shows every listing, sale, AND slash in real-time. You're watching a closed-loop AI economy with built-in quality enforcement.
+**The twist?** A live scrolling ticker shows every listing, sale, AND slash in real-time. You're watching a closed-loop AI economy with built-in quality enforcement and **sustainable platform revenue**.
 
 ---
 
-## 🆕 The Staked Reputation System
+## 🆕 The Business Model
+
+InfoMart isn't just a marketplace — it's a **self-sustaining protocol** with two revenue streams:
+
+### Revenue Model
+
+| Source | Rate | Description |
+|--------|------|-------------|
+| **Transaction Fees** | 10% | Platform takes 10% cut of every sale |
+| **Slashing Yield** | 100% | All penalties from bad sellers go to protocol |
+
+### Protocol Admin Dashboard
+
+Track platform revenue in real-time at `/admin`:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  🛡️ PROTOCOL TREASURY                                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
+│  │ TOTAL       │  │ PLATFORM    │  │ RISK        │              │
+│  │ TREASURY    │  │ FEES        │  │ YIELD       │              │
+│  │             │  │             │  │             │              │
+│  │  $0.0250    │  │  $0.0050    │  │  $0.0200    │              │
+│  │  (Combined) │  │  (10% cut)  │  │  (Slashes)  │              │
+│  └─────────────┘  └─────────────┘  └─────────────┘              │
+│                                                                 │
+│  📊 LIVE REVENUE FEED                                           │
+│  ├─ 💰 +$0.005 Fee (Tax Loopholes sale)                         │
+│  ├─ 🛡️ +$2.00 Penalty (Charlie slashed)                         │
+│  └─ 💰 +$0.003 Fee (Sentiment Pulse sale)                       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🔥 The Staked Reputation System
 
 **The problem with data marketplaces?** Anyone can sell garbage. There's no skin in the game.
 
@@ -285,7 +323,7 @@ src/
 ├── types/
 │   └── marketplace.ts    # Product, Event, Stats, Slash/Reward types
 ├── services/
-│   └── marketplaceService.ts  # Product registry, stake ledger, slashing logic
+│   └── marketplaceService.ts  # Product registry, stake ledger, slashing + TREASURY
 ├── routes/
 │   └── market.ts         # /api/market/* endpoints + x402 paywall + rating
 ├── vendors.ts            # Legacy vendor definitions
@@ -296,7 +334,8 @@ client/src/
 ├── components/
 │   └── MarketTicker.tsx  # Live scrolling ticker (sales + slashes)
 ├── pages/
-│   └── SellerDashboard.tsx  # Publish products, track earnings & STAKE
+│   ├── SellerDashboard.tsx  # Publish products, track earnings & STAKE
+│   └── ProtocolAdmin.tsx    # 🆕 Treasury dashboard with revenue tracking
 └── App.tsx               # Agent Terminal, routing, budget display
 ```
 
@@ -317,6 +356,7 @@ client/src/
 | `/api/market/product/:id/rate` | POST | 🆕 Rate product (triggers slashing) |
 | `/api/market/stats` | GET | Marketplace statistics |
 | `/api/market/stream` | GET | SSE stream (listings, sales, slashes) |
+| `/api/market/treasury` | GET | 🆕 Protocol treasury + revenue feed |
 
 ### Agent
 
@@ -350,6 +390,12 @@ client/src/
 - Real-time stake updates via SSE
 - Visual stake health indicators
 
+**Protocol Revenue**
+- 10% transaction fee on every sale
+- 100% capture of slashing penalties
+- Real-time treasury dashboard at `/admin`
+- Live revenue feed with fee/slash events
+
 **Safeguards**
 - $0.50 budget cap per session
 - 25 iteration max (agent reasoning limit)
@@ -368,23 +414,25 @@ client/src/
 | 2 | Seller Dashboard — Publish products, live earnings | ✅ |
 | 3 | Agent Brain Upgrade — browse_marketplace tool, Human Alpha persona | ✅ |
 | 4 | Market Ticker — Live scrolling feed of listings and sales | ✅ |
-| 5 | **Staked Reputation** — Seller collateral, agent ratings, slashing 🆕 | ✅ |
+| 5 | Staked Reputation — Seller collateral, agent ratings, slashing | ✅ |
+| 6 | **Protocol Admin Dashboard** — Treasury tracking, revenue model 🆕 | ✅ |
 
 ---
 
 ## Why This Matters
 
-**The Old World**: AI agents use free APIs or need human approval to pay for anything. Data marketplaces have no quality control.
+**The Old World**: AI agents use free APIs or need human approval to pay for anything. Data marketplaces have no quality control. Platforms have no sustainable revenue.
 
-**The New World**: Any agent with a wallet can pay any human for any knowledge — instantly, programmatically, without intermediaries. **And the agent can punish bad actors.**
+**The New World**: Any agent with a wallet can pay any human for any knowledge — instantly, programmatically, without intermediaries. **Agents punish bad actors. The protocol takes its cut.**
 
 InfoMart is proof that:
-1. **Humans can monetize expertise** directly to AI (no platform cut)
+1. **Humans can monetize expertise** directly to AI
 2. **Agents can make economic decisions** autonomously
 3. **The economy can be transparent** — every transaction visible
-4. **Quality can be enforced** — stake your reputation or get slashed 🆕
+4. **Quality can be enforced** — stake your reputation or get slashed
+5. **Platforms can be sustainable** — 10% fees + slashing yield 🆕
 
-The ticker isn't just eye candy. It's a window into an AI-powered economy where humans provide alpha, machines pay for it, **and bad actors get punished in real-time.**
+The ticker isn't just eye candy. It's a window into an AI-powered economy where humans provide alpha, machines pay for it, **bad actors get slashed, and the protocol builds sustainable revenue.**
 
 ---
 

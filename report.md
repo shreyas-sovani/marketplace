@@ -5,7 +5,7 @@
 > **Protocol**: x402 v2 (Coinbase Open Payment Protocol)  
 > **Network**: Base Sepolia Testnet (`eip155:84532`)  
 > **Status**: ✅ **FULLY OPERATIONAL**  
-> **Architecture**: SSE Streaming + React Marketplace UI + Dynamic Product Registry + **Staked Reputation System**
+> **Architecture**: SSE Streaming + React Marketplace UI + Dynamic Product Registry + **Staked Reputation System** + **Protocol Treasury**
 
 ---
 
@@ -17,10 +17,11 @@ This report documents **InfoMart** — a peer-to-peer knowledge marketplace wher
 2. **AI agents browse, evaluate, and purchase** available products in real-time
 3. **Agents rate every purchase** and penalize low-quality sellers via staking/slashing
 4. **Sellers stake collateral** ($5.00) — bad ratings = instant slashing
-5. **Real USDC flows** via x402 protocol with full transaction transparency
-6. **A live ticker** shows every listing, sale, AND slash in the closed-loop economy
+5. **Protocol takes its cut** — 10% of every sale + 100% of slashing penalties
+6. **Real USDC flows** via x402 protocol with full transaction transparency
+7. **A live ticker** shows every listing, sale, AND slash in the closed-loop economy
 
-**Key Innovation**: The "Staked Reputation System" — sellers put skin in the game. AI agents don't just buy, they **judge**. Bad data gets punished with real economic penalties. This isn't just a marketplace; it's a **self-correcting economy with built-in quality enforcement**.
+**Key Innovation**: The "Staked Reputation System" paired with "Protocol Treasury" — sellers put skin in the game, AI agents **judge**, and the platform generates sustainable revenue from both transaction fees and quality enforcement. This isn't just a marketplace; it's a **self-correcting economy with built-in revenue generation**.
 
 ---
 
@@ -243,8 +244,100 @@ InfoMart solves this with **Staked Reputation**: every seller stakes $5.00 colla
 │  6. STAKE UPDATED                                                               │
 │     └─► Seller sees new stake balance in real-time                              │
 │                                                                                 │
+│  7. TREASURY CREDITED (if slashed)                                              │
+│     └─► Protocol treasury receives 100% of slashing penalty                     │
+│                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 💰 The Protocol Treasury
+
+### Revenue Model
+
+InfoMart isn't just a marketplace — it's a **self-sustaining protocol** with two revenue streams:
+
+| Revenue Source | Rate | Description |
+|----------------|------|-------------|
+| **Transaction Fees** | 10% | Platform takes 10% cut of every sale |
+| **Slashing Yield** | 100% | All penalties from bad sellers go to protocol |
+
+### How Fees Work
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         PROTOCOL REVENUE FLOW                                   │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  SCENARIO A: SALE                                                               │
+│  ─────────────────                                                              │
+│     Agent pays $0.05 for "Tax Loopholes" product                                │
+│     └─► Seller receives: $0.045 (90%)                                           │
+│     └─► Protocol treasury: +$0.005 (10% fee)                                    │
+│                                                                                 │
+│  SCENARIO B: SLASHING                                                           │
+│  ────────────────────                                                           │
+│     Agent rates "Bad Data" product 1 star                                       │
+│     └─► Seller loses: $2.00 from stake                                          │
+│     └─► Protocol treasury: +$2.00 (100% of penalty)                             │
+│                                                                                 │
+│  TREASURY GROWS FROM:                                                           │
+│     ├─► Every successful sale (10% fee)                                         │
+│     └─► Every quality enforcement action (100% slash)                           │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Admin Dashboard
+
+The Protocol Admin Dashboard (`/admin`) provides CEO-level visibility:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  🛡️ PROTOCOL TREASURY                                                          │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐                  │
+│  │ 💎 TOTAL        │  │ 💰 PLATFORM     │  │ 🛡️ RISK         │                  │
+│  │ TREASURY        │  │ FEES            │  │ YIELD           │                  │
+│  │                 │  │                 │  │                 │                  │
+│  │   $2.0250      │  │   $0.0250      │  │   $2.0000      │                  │
+│  │   (Combined)    │  │   (10% cuts)    │  │   (Slashes)     │                  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘                  │
+│                                                                                 │
+│  📊 LIVE REVENUE FEED                                                           │
+│  ├─ 🛡️ +$2.00 Penalty — Charlie slashed for "Fake Alpha"                       │
+│  ├─ 💰 +$0.005 Fee — "Tax Loopholes" sale                                       │
+│  └─ 💰 +$0.003 Fee — "Sentiment Pulse" sale                                     │
+│                                                                                 │
+│  📈 REVENUE SPLIT                                                               │
+│  └─ [████████████████████░░░] 99% from slashing                                 │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Treasury API
+
+```typescript
+// GET /api/market/treasury
+interface TreasuryResponse {
+  feeCollected: number;    // Total from 10% transaction fees
+  slashCollected: number;  // Total from slashing penalties
+  totalRevenue: number;    // Combined treasury value
+  recentEvents: TreasuryEvent[];  // Last 50 fee/slash events
+}
+
+interface TreasuryEvent {
+  type: 'fee' | 'slash';
+  amount: number;
+  productTitle: string;
+  sellerName?: string;      // Only for slash events
+  timestamp: string;
+}
+```
+
+---
 
 ### Agent Rating Instructions
 
@@ -787,15 +880,17 @@ infomart/
 │   │   └── market.ts      # 📦 Marketplace REST API
 │   │                       #   - POST /products (publish)
 │   │                       #   - GET /products (browse)
-│   │                       #   - POST /product/:id/rate 🆕 (rating endpoint)
+│   │                       #   - POST /product/:id/rate (rating endpoint)
+│   │                       #   - GET /treasury (protocol revenue) 🆕
 │   │                       #   - GET /stream (SSE events incl. slash)
 │   │
 │   ├── services/
 │   │   └── marketplaceService.ts  # 🗄️ In-Memory Product Store
 │   │                               #   - Dynamic product registry
 │   │                               #   - Event emitter for SSE
-│   │                               #   - Sale tracking
-│   │                               #   - rateProduct() + slashing algorithm 🆕
+│   │                               #   - Sale tracking + fee collection 🆕
+│   │                               #   - rateProduct() + slashing algorithm
+│   │                               #   - Protocol treasury tracking 🆕
 │   │                               #   - DEFAULT_STAKE_AMOUNT = $5.00
 │   │
 │   └── types/
@@ -808,22 +903,29 @@ infomart/
 │   │   ├── App.tsx        # 🖥️ Main App with Routing
 │   │   │                   #   - / (AgentTerminal)
 │   │   │                   #   - /sell (SellerDashboard)
+│   │   │                   #   - /admin (ProtocolAdmin) 🆕
 │   │   │                   #   - MarketTicker (bottom, shows slashes)
 │   │   │
 │   │   ├── pages/
-│   │   │   └── SellerDashboard.tsx  # 💰 Seller UI
-│   │   │                             #   - Publish form
-│   │   │                             #   - Live earnings
-│   │   │                             #   - StakedCollateralCard 🆕
-│   │   │                             #   - Recent stake events 🆕
-│   │   │                             #   - Product list
+│   │   │   ├── SellerDashboard.tsx  # 💰 Seller UI
+│   │   │   │                         #   - Publish form
+│   │   │   │                         #   - Live earnings
+│   │   │   │                         #   - StakedCollateralCard
+│   │   │   │                         #   - Recent stake events
+│   │   │   │                         #   - Product list
+│   │   │   │
+│   │   │   └── ProtocolAdmin.tsx    # 🛡️ Treasury Dashboard 🆕
+│   │   │                             #   - Total treasury display
+│   │   │                             #   - Fee vs slash breakdown
+│   │   │                             #   - Live revenue feed
+│   │   │                             #   - Revenue split visualization
 │   │   │
 │   │   ├── components/
 │   │   │   └── MarketTicker.tsx     # 📺 Economy Visualizer
 │   │   │                             #   - SSE connection
 │   │   │                             #   - Marquee animation
 │   │   │                             #   - Live stats
-│   │   │                             #   - Slash events in red 🆕
+│   │   │                             #   - Slash events in red
 │   │   │
 │   │   ├── main.tsx       # React + Router entry
 │   │   └── index.css      # Tailwind + animations
@@ -901,6 +1003,7 @@ cd client && npm run dev
 7. **Dual-Source Architecture** — Marketplace (human_alpha) + Legacy Vendors (institutional)
 8. **Transparent Brain** — See WHY the agent buys AND how it rates
 9. **Taylor Swift Defense** — Still refuses to waste money on trivial queries
+10. **Protocol Treasury** — 10% fee on sales + 100% slashing yield = sustainable revenue
 
 ---
 
@@ -913,27 +1016,34 @@ cd client && npm run dev
 - ✅ Real-time stake updates via SSE
 - ✅ Seller dashboard shows stake health
 
-### Phase 6: Product Categories
+### ✅ Phase 6: Protocol Admin Dashboard (COMPLETE)
+- ✅ 10% transaction fee on every sale
+- ✅ 100% capture of slashing penalties
+- ✅ Real-time treasury dashboard at `/admin`
+- ✅ Live revenue feed showing fee/slash events
+- ✅ CEO-level metrics display
+
+### Phase 7: Product Categories
 - Tags and categories for products
 - Agent query → category matching
 - Improved product discovery
 
-### Phase 7: Agent Memory
+### Phase 8: Agent Memory
 - Remember past purchases
 - Avoid re-buying redundant data
 - Track which sellers deliver quality (historical ratings)
 
-### Phase 8: Multi-Agent Commerce
+### Phase 9: Multi-Agent Commerce
 - Agents selling data to other agents
 - Agent-to-agent negotiation
 - Cross-marketplace federation
 
-### Phase 9: Real Payment Rails
+### Phase 10: Real Payment Rails
 - Mainnet USDC integration
 - Escrow for disputed sales
 - Revenue sharing with facilitators
 
-### Phase 10: Advanced Reputation
+### Phase 11: Advanced Reputation
 - Cumulative seller scores across all products
 - "Top Seller" badges based on average ratings
 - Automatic delisting for depleted stakes
@@ -942,7 +1052,7 @@ cd client && npm run dev
 
 ## ✅ Conclusion
 
-**InfoMart** proves that **Humans sell alpha. Agents hunt, buy, and JUDGE it.**
+**InfoMart** proves that **Humans sell alpha. Agents hunt, buy, and JUDGE it. The protocol takes its cut.**
 
 | Achievement | Details |
 |-------------|---------|
@@ -952,6 +1062,7 @@ cd client && npm run dev
 | ✅ Market Ticker | Real-time SSE visualization of sales AND slashes |
 | ✅ **Staked Reputation** | Sellers stake $5.00 collateral, bad data gets slashed |
 | ✅ **Agent as Judge** | AI rates every purchase, enforces quality standards |
+| ✅ **Protocol Treasury** | 10% fees + slashing yield = sustainable revenue |
 | ✅ Taylor Swift Defense | Trivial queries rejected, budget preserved |
 | ✅ Dual-Source Architecture | Marketplace + Legacy vendors coexist |
 | ✅ x402 Protocol | Dynamic product registration with paywall |
@@ -964,6 +1075,7 @@ A world where:
 - **Humans monetize** their specialized knowledge directly
 - **AI agents hunt** for the best human alpha
 - **Bad actors get slashed** — quality is enforced economically
+- **The protocol profits** — 10% fees + slashing yield
 - **Payments flow automatically** via x402 protocol
 - **Everyone can watch** the economy scroll by in real-time
 
@@ -971,15 +1083,15 @@ A world where:
 
 Not humans building AI. Not AI replacing humans.
 
-**Humans selling to AI. AI buying from humans. AI judging humans.**
+**Humans selling to AI. AI buying from humans. AI judging humans. The protocol taking its cut.**
 
-The closed loop economy. The P2P future. **Now with teeth.** 🦷
+The closed loop economy. The P2P future. **Now with teeth and a treasury.** 🦷💰
 
 ---
 
 *Built with 🧠 using x402, LangChain, Google Gemini, React, and Base*
 
-**Humans sell alpha. Agents hunt, buy, and JUDGE it.**
+**Humans sell alpha. Agents hunt, buy, and JUDGE it. The protocol takes its cut.**
 
 ---
 
