@@ -8,6 +8,8 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { runDueDiligenceAgent, type SSEEvent, type SessionState, createSession, CONFIG as AGENT_CONFIG } from './agent.js';
 import { VENDOR_REGISTRY, getVendorById, getVendorSummary } from './vendors.js';
+import marketRoutes, { generateMarketplaceRouteConfig, initializeRouteConfig } from './routes/market.js';
+import { getAllProductListings } from './services/marketplaceService.js';
 
 dotenv.config();
 
@@ -39,7 +41,8 @@ const state: ServerState = {
 const facilitatorClient = new HTTPFacilitatorClient({ url: FACILITATOR_URL });
 const x402Server = new x402ResourceServer(facilitatorClient).register(NETWORK, new ExactEvmScheme());
 
-// Route Config for x402
+// Route Config for x402 - Legacy Vendors (static)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const routeConfig: any = {};
 for (const vendor of VENDOR_REGISTRY) {
   routeConfig[`GET /api/vendor/${vendor.id}`] = {
@@ -47,6 +50,13 @@ for (const vendor of VENDOR_REGISTRY) {
     description: vendor.description,
   };
 }
+
+// Route Config for x402 - InfoMart Marketplace Products (initial seed)
+const marketplaceRouteConfig = generateMarketplaceRouteConfig(PAYTO_ADDRESS, NETWORK);
+Object.assign(routeConfig, marketplaceRouteConfig);
+
+// Export for dynamic route registration
+export { routeConfig, PAYTO_ADDRESS, NETWORK };
 
 
 // Express Setup
@@ -64,6 +74,12 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client/dist')));
 app.use(paymentMiddleware(routeConfig, x402Server));
+
+// Initialize dynamic x402 registration for marketplace
+initializeRouteConfig(routeConfig, PAYTO_ADDRESS, NETWORK);
+
+// Mount InfoMart Marketplace Routes
+app.use('/api/market', marketRoutes);
 
 // SSE Endpoint
 app.get('/api/stream', (req: Request, res: Response) => {
@@ -154,14 +170,25 @@ app.get('/api/health', (_req: Request, res: Response) => {
 // API Info
 app.get('/api', (_req: Request, res: Response) => {
   res.json({
-    service: 'DueDiligence - Just-in-Time Intelligence Platform',
+    service: 'InfoMart - P2P Knowledge Marketplace + DueDiligence Agent',
     status: 'online',
-    version: '2.0.0',
+    version: '3.0.0',
     endpoints: {
+      // Agent endpoints
       'GET /api/stream': 'SSE endpoint for real-time agent events',
       'POST /api/chat': 'Trigger agent analysis { query, session_id }',
+      // Legacy vendor endpoints
       'GET /api/vendors': 'List available data vendors (free)',
       'GET /api/vendor/:id': 'Purchase vendor data (x402 protected)',
+      // InfoMart Marketplace endpoints
+      'POST /api/market/publish': 'Publish a new product { title, description, price, content, wallet }',
+      'GET /api/market/products': 'List all marketplace products (free)',
+      'GET /api/market/products/agent': 'Products formatted for agent consumption',
+      'GET /api/market/product/:id': 'Get single product details (free)',
+      'GET /api/market/product/:id/buy': 'Purchase product content (x402 protected)',
+      'GET /api/market/stats': 'Marketplace statistics',
+      'GET /api/market/stream': 'SSE endpoint for marketplace events (listings, sales)',
+      // Stats
       'GET /api/stats': 'Server statistics',
       'GET /api/health': 'Health check',
     },
@@ -185,16 +212,24 @@ app.get('/{*path}', (req: Request, res: Response) => {
 // Start Server
 httpServer.listen(PORT, () => {
   console.log('\n' + '='.repeat(70));
-  console.log('DUEDILIGENCE - JUST-IN-TIME INTELLIGENCE PLATFORM');
+  console.log('INFOMART - P2P KNOWLEDGE MARKETPLACE + DUEDILIGENCE AGENT');
   console.log('='.repeat(70));
   console.log(`Server:     http://localhost:${PORT}`);
   console.log(`API:        http://localhost:${PORT}/api`);
   console.log(`SSE:        http://localhost:${PORT}/api/stream`);
   console.log(`Vendors:    http://localhost:${PORT}/api/vendors`);
+  console.log(`Market:     http://localhost:${PORT}/api/market/products`);
   console.log('='.repeat(70));
-  console.log('VENDOR MARKETPLACE:');
+  console.log('LEGACY VENDOR MARKETPLACE:');
   for (const vendor of VENDOR_REGISTRY) {
     console.log(`   ${vendor.name.padEnd(20)} $${vendor.cost.toFixed(2)} [${vendor.valueRating}]`);
+  }
+  console.log('='.repeat(70));
+  console.log('INFOMART P2P PRODUCTS:');
+  const products = getAllProductListings();
+  for (const product of products) {
+    const typeLabel = product.type === 'human_alpha' ? '🧠 HUMAN' : '🤖 API';
+    console.log(`   ${product.title.slice(0, 30).padEnd(32)} $${product.price.toFixed(2)} [${typeLabel}]`);
   }
   console.log('='.repeat(70));
   console.log(`Network:    ${NETWORK} (Base Sepolia Testnet)`);
