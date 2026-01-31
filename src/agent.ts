@@ -134,6 +134,17 @@ Buy data from marketplace OR legacy vendor. ONLY after log_reasoning with status
 - source: "marketplace" or "legacy_vendor"
 - justification: Why this data is worth the cost
 
+### 4. rate_product (MANDATORY AFTER PURCHASE)
+IMMEDIATELY after purchase_data, you MUST evaluate the quality of the purchased data.
+- productId: The product ID you just purchased
+- rating: 1-5 integer score
+- reason: Why you gave this rating
+
+**RATING SCALE (affects seller's staked collateral):**
+- Rating 1-2: SLASH $2.00 from seller stake (data is vague, generic, or unhelpful)
+- Rating 3: SLASH $0.50 from seller stake (mediocre quality)
+- Rating 4-5: REWARD +$0.05 to seller stake (high-value Human Alpha)
+
 ## CRITICAL RULES
 
 ### 🎯 BE GENEROUS WITH RELEVANT PURCHASES
@@ -183,9 +194,18 @@ For specialized queries:
       - log_reasoning(BUDGET): Evaluate this specific product
       - log_reasoning(DECISION): "Approved" if relevant
       - purchase_data for this product
+      - **IMMEDIATELY call rate_product** to evaluate the content quality
    c. Continue until all relevant products are purchased OR budget exhausted
 5. Synthesize ALL purchased content into comprehensive answer
 6. Cite your sources (marketplace seller names, vendor names)
+
+## CRITICAL: ALWAYS RATE AFTER PURCHASE
+After EVERY purchase_data call, you MUST call rate_product:
+- If data is vague, generic, copy-paste, or unhelpful → rate 1-2 (SLASH)
+- If data is mediocre, incomplete, or only partially useful → rate 3 (SLASH)
+- If data is high-value, unique insights, actionable Human Alpha → rate 4-5 (REWARD)
+
+This protects the marketplace from low-quality sellers!
 
 ## CRITICAL: BUY COMPREHENSIVELY
 - If 2+ products are relevant, BUY ALL OF THEM
@@ -389,26 +409,25 @@ export function createPurchaseDataTool(fetchWithPayment: typeof fetch, session: 
             txHash = decoded.transaction || decoded.txHash || 'decoded-but-no-hash';
             console.log(`   [x402] ✅ REAL TX HASH: ${txHash}`);
             console.log(`   [x402] 🔗 Verify: https://sepolia.basescan.org/tx/${txHash}`);
-            
-            // Notify the marketplace about the real txHash for the seller dashboard
-            // This broadcasts the sale event with the verified txHash
-            try {
-              const recordResponse = await fetch(`${CONFIG.SERVER_URL}/api/market/product/${product_id}/record-sale`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  buyerWallet: session.sessionId,
-                  txHash: txHash,
-                }),
-              });
-              const recordResult = await recordResponse.json() as { success?: boolean };
-              console.log(`   [x402] 📡 Sale recorded: ${recordResponse.status} - ${recordResult.success ? 'SUCCESS' : 'FAILED'}`);
-            } catch (recordError) {
-              console.log(`   [x402] ⚠️ Failed to record sale: ${recordError}`);
-            }
           } catch (e) {
             console.log(`   [x402] ⚠️ Failed to decode PAYMENT-RESPONSE: ${e}`);
           }
+        }
+        
+        // ALWAYS record the sale (broadcast SSE event) even if txHash extraction failed
+        try {
+          const recordResponse = await fetch(`${CONFIG.SERVER_URL}/api/market/product/${product_id}/record-sale`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              buyerWallet: session.sessionId,
+              txHash: txHash,
+            }),
+          });
+          const recordResult = await recordResponse.json() as { success?: boolean };
+          console.log(`   [x402] 📡 Sale recorded: ${recordResponse.status} - ${recordResult.success ? 'SUCCESS' : 'FAILED'}`);
+        } catch (recordError) {
+          console.log(`   [x402] ⚠️ Failed to record sale: ${recordError}`);
         }
         
         session.spent += product.price;
@@ -535,6 +554,86 @@ export function createPurchaseDataTool(fetchWithPayment: typeof fetch, session: 
 }
 
 // =============================================================================
+// TOOL: RATE PRODUCT (SLASHING MECHANISM)
+// =============================================================================
+
+export function createRateProductTool(emitSSE: (event: SSEEvent) => void) {
+  return tool(
+    async ({ productId, rating, reason }: { productId: string; rating: number; reason: string }) => {
+      console.log(`   📝 Rating product ${productId}: ${rating}/5 - "${reason}"`);
+      
+      try {
+        const response = await fetch(`${CONFIG.SERVER_URL}/api/market/product/${productId}/rate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rating, reason }),
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Unknown error');
+          console.log(`   ⚠️ Rating failed: ${response.status} - ${errorText}`);
+          return JSON.stringify({ success: false, error: `Rating failed: ${response.status}` });
+        }
+        
+        const result = await response.json() as {
+          success: boolean;
+          productId: string;
+          rating: number;
+          eventType: 'slash' | 'reward';
+          stakeChange: number;
+          newStake: number;
+          reason: string;
+          message: string;
+        };
+        
+        // Log the rating result
+        const logEntry: LogEntry = {
+          step: 'DECISION',
+          thought: result.eventType === 'slash' 
+            ? `⚠️ SLASHED: Product rated ${rating}/5. Seller penalized $${Math.abs(result.stakeChange).toFixed(2)}. Reason: ${reason}`
+            : `✅ REWARDED: Product rated ${rating}/5. Seller rewarded $${result.stakeChange.toFixed(2)}. Reason: ${reason}`,
+          status: result.eventType === 'slash' ? 'Rejected' : 'Approved',
+          timestamp: new Date().toISOString(),
+          metadata: { 
+            productId, 
+            rating, 
+            eventType: result.eventType, 
+            stakeChange: result.stakeChange,
+            newStake: result.newStake,
+          },
+        };
+        emitSSE({ type: 'log', data: logEntry });
+        
+        console.log(`   ${result.eventType === 'slash' ? '🔴' : '🟢'} ${result.message}`);
+        
+        return JSON.stringify({
+          success: true,
+          productId: result.productId,
+          rating: result.rating,
+          eventType: result.eventType,
+          stakeChange: result.stakeChange,
+          newStake: result.newStake,
+          message: result.message,
+        });
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.log(`   ⚠️ Rating error: ${errorMsg}`);
+        return JSON.stringify({ success: false, error: errorMsg });
+      }
+    },
+    {
+      name: 'rate_product',
+      description: 'Rate a purchased product to reward or penalize the seller. MUST be called IMMEDIATELY after purchase_data to evaluate quality. Low ratings (1-2) slash $2.00 from stake, medium (3) slashes $0.50, high ratings (4-5) reward $0.05.',
+      schema: z.object({
+        productId: z.string().describe('The product ID that was just purchased'),
+        rating: z.number().min(1).max(5).describe('Quality rating 1-5. 1-2=poor (slash $2), 3=mediocre (slash $0.50), 4-5=excellent (reward $0.05)'),
+        reason: z.string().describe('Detailed explanation of why this rating was given based on content quality'),
+      }),
+    }
+  );
+}
+
+// =============================================================================
 // SESSION FACTORY
 // =============================================================================
 
@@ -596,6 +695,7 @@ export async function runDueDiligenceAgent(query: string, sessionId: string, emi
     createLogReasoningTool((event) => { emitSSE(event); if (event.type === 'log') session.logs.push(event.data); }),
     createBrowseMarketplaceTool(session, emitSSE),
     createPurchaseDataTool(fetchWithPayment, session, emitSSE),
+    createRateProductTool(emitSSE),
   ];
   const llmWithTools = llm.bindTools(tools);
   
@@ -604,7 +704,7 @@ export async function runDueDiligenceAgent(query: string, sessionId: string, emi
   const messages: BaseMessage[] = [new SystemMessage(systemPrompt), new HumanMessage(query)];
   
   let iterations = 0;
-  const MAX_ITERATIONS = 8;
+  const MAX_ITERATIONS = 25; // Increased to handle multiple purchases + ratings
   let finalAnswer = '';
   
   try {
@@ -631,7 +731,15 @@ export async function runDueDiligenceAgent(query: string, sessionId: string, emi
         break;
       }
     }
-    if (iterations >= MAX_ITERATIONS) finalAnswer = 'Maximum iterations reached.';
+    if (iterations >= MAX_ITERATIONS) {
+      console.log(`\n⚠️ Max iterations (${MAX_ITERATIONS}) reached. Generating final answer from collected data...`);
+      // Generate a final answer from what we have
+      finalAnswer = session.transactions.length > 0 
+        ? `Based on ${session.transactions.length} purchased sources, here's what I found:\n\n` +
+          session.transactions.map(t => `- ${t.vendorName} (${t.source})`).join('\n') +
+          `\n\nTotal spent: $${session.spent.toFixed(2)}. Please ask a follow-up question for synthesis.`
+        : 'I was unable to complete the analysis within the iteration limit. Please try a more specific query.';
+    }
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     console.error(`Agent error: ${errorMsg}`);

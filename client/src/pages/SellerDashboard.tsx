@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Zap, Package, TrendingUp, Lock, AlertCircle, ExternalLink, Brain } from 'lucide-react'
+import { Zap, Package, TrendingUp, Lock, AlertCircle, ExternalLink, Brain, Shield } from 'lucide-react'
 
 // Types
 interface ProductListing {
@@ -12,18 +12,26 @@ interface ProductListing {
   type: 'human_alpha' | 'api'
   createdAt: string
   salesCount: number
+  currentStake: number
 }
 
 interface MarketplaceEvent {
-  type: 'sale' | 'listing'
+  type: 'sale' | 'listing' | 'slash' | 'reward'
   productId: string
   productTitle: string
   sellerWallet: string
+  sellerName?: string
   amount?: number
   price?: number
   buyerWallet?: string
   txHash?: string
   timestamp: string
+  // Slash/Reward specific
+  rating?: number
+  slashAmount?: number
+  rewardAmount?: number
+  newStake?: number
+  reason?: string
 }
 
 interface PublishForm {
@@ -134,14 +142,14 @@ function LiveEarningsCard({
       {recentSales.length > 0 && (
         <div className="border-t border-secondary-bg pt-4 space-y-2">
           <p className="text-xs font-space-grotesk font-semibold text-secondary-text uppercase tracking-wider">
-            Recent Sales
+            Recent Sales ({recentSales.length})
           </p>
           <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-thin">
             {recentSales.slice(0, 5).map((sale, i) => {
               const isValidTxHash = sale.txHash && sale.txHash.startsWith('0x') && sale.txHash.length === 66
               return (
                 <div
-                  key={i}
+                  key={`${sale.productId}-${sale.timestamp}-${i}`}
                   className="flex flex-col gap-1 text-sm bg-card-bg/50 rounded-lg px-3 py-2 border border-border/20 animate-fadeIn"
                 >
                   <div className="flex items-center justify-between">
@@ -180,6 +188,97 @@ function LiveEarningsCard({
         <div className="border-t border-secondary-bg pt-4 text-center text-secondary-text text-sm">
           <Package className="w-6 h-6 mx-auto mb-2 opacity-50" />
           <p>Waiting for sales...</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================================
+// STAKED COLLATERAL CARD COMPONENT
+// ============================================================================
+function StakedCollateralCard({
+  totalStake,
+  recentSlashEvents,
+}: {
+  totalStake: number
+  recentSlashEvents: MarketplaceEvent[]
+}) {
+  const DEFAULT_STAKE = 5.00
+  const isSlashed = totalStake < DEFAULT_STAKE
+  const stakeColor = isSlashed ? 'text-red-500' : 'text-blue-400'
+
+  return (
+    <div className={`card p-6 space-y-4 ${isSlashed ? 'border-red-500/30' : 'border-blue-500/30'}`}>
+      <div className="flex items-center gap-4">
+        <div className={`w-12 h-12 rounded-lg ${isSlashed ? 'bg-red-500/10' : 'bg-blue-500/10'} flex items-center justify-center`}>
+          <Shield className={`w-6 h-6 ${stakeColor}`} />
+        </div>
+        <div>
+          <p className="text-xs font-space-grotesk font-semibold text-secondary-text uppercase tracking-wider">
+            Staked Collateral
+          </p>
+          <p className="text-xs text-secondary-text">Platform Credit</p>
+        </div>
+      </div>
+
+      <div className={`space-y-1 rounded-lg p-4 ${isSlashed ? 'bg-red-500/5' : 'bg-blue-500/5'}`}>
+        <div className={`text-4xl font-space-grotesk font-bold ${stakeColor}`}>
+          ${totalStake.toFixed(2)}
+        </div>
+        <p className="text-xs text-secondary-text font-share-tech">
+          {isSlashed ? '⚠️ Below default ($5.00)' : '✓ Healthy stake'}
+        </p>
+      </div>
+
+      {/* Recent Slash/Reward Events */}
+      {recentSlashEvents.length > 0 && (
+        <div className="border-t border-secondary-bg pt-4 space-y-2">
+          <p className="text-xs font-space-grotesk font-semibold text-secondary-text uppercase tracking-wider">
+            Recent Stake Events
+          </p>
+          <div className="space-y-2 max-h-32 overflow-y-auto scrollbar-thin">
+            {recentSlashEvents.slice(0, 5).map((event, i) => (
+              <div
+                key={i}
+                className={`flex flex-col gap-1 text-sm rounded-lg px-3 py-2 border animate-fadeIn ${
+                  event.type === 'slash' 
+                    ? 'bg-red-500/5 border-red-500/20' 
+                    : 'bg-green-500/5 border-green-500/20'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 flex-1">
+                    <span className={`font-space-grotesk font-semibold ${
+                      event.type === 'slash' ? 'text-red-500' : 'text-green-500'
+                    }`}>
+                      {event.type === 'slash' 
+                        ? `-$${event.slashAmount?.toFixed(2) || '0.00'}` 
+                        : `+$${event.rewardAmount?.toFixed(2) || '0.00'}`}
+                    </span>
+                    <span className="text-secondary-text truncate text-xs">
+                      {event.productTitle}
+                    </span>
+                  </div>
+                  <span className="text-xs text-muted-text font-share-tech flex-shrink-0">
+                    {event.rating}★
+                  </span>
+                </div>
+                {event.reason && (
+                  <span className="text-xs text-muted-text font-share-tech ml-5 line-clamp-1">
+                    {event.reason}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {recentSlashEvents.length === 0 && (
+        <div className="border-t border-secondary-bg pt-4 text-center text-secondary-text text-sm">
+          <Shield className="w-6 h-6 mx-auto mb-2 opacity-50" />
+          <p>No stake events yet</p>
         </div>
       )}
     </div>
@@ -264,18 +363,24 @@ export default function SellerDashboard() {
   const [publishResult, setPublishResult] = useState<{ success: boolean; message: string } | null>(null)
   const [products, setProducts] = useState<ProductListing[]>([])
   const [recentSales, setRecentSales] = useState<MarketplaceEvent[]>([])
+  const [recentStakeEvents, setRecentStakeEvents] = useState<MarketplaceEvent[]>([])
   const [totalEarnings, setTotalEarnings] = useState(0)
+  const [totalStake, setTotalStake] = useState(5.00) // Default stake
   const [connected, setConnected] = useState(false)
 
   const eventSourceRef = useRef<EventSource | null>(null)
 
-  // Load initial products
+  // Load initial products and calculate total stake
   useEffect(() => {
     fetch('/api/market/products')
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
           setProducts(data.products)
+          // Calculate total stake from all products (for this wallet)
+          // In MVP, all products go to same wallet so we sum all stakes
+          const total = data.products.reduce((sum: number, p: ProductListing) => sum + (p.currentStake || 5.00), 0)
+          setTotalStake(total / (data.products.length || 1)) // Average stake per product
         }
       })
       .catch(console.error)
@@ -305,10 +410,47 @@ export default function SellerDashboard() {
       const data = JSON.parse(e.data) as MarketplaceEvent
       setRecentSales((prev) => [data, ...prev].slice(0, 10))
 
-      // Update earnings if it's for our wallet
-      if (form.wallet && data.sellerWallet.toLowerCase() === form.wallet.toLowerCase()) {
-        setTotalEarnings((prev) => prev + (data.amount || 0))
-      }
+      // Update earnings - In MVP, all products go to SELLER_WALLET so we track all sales
+      // The wallet filter is for display only, actual earnings track everything
+      setTotalEarnings((prev) => prev + (data.amount || 0))
+    })
+
+    // Handle slash events (low ratings penalize seller stake)
+    es.addEventListener('slash', (e: MessageEvent) => {
+      const data = JSON.parse(e.data) as MarketplaceEvent
+      const slashEvent: MarketplaceEvent = { ...data, type: 'slash' as const }
+      setRecentStakeEvents((prev) => [slashEvent, ...prev].slice(0, 10))
+      
+      // Refresh products to get updated stake values and recalculate total
+      fetch('/api/market/products')
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.success && result.products.length > 0) {
+            setProducts(result.products)
+            // Calculate average stake across all products
+            const totalStakeSum = result.products.reduce((sum: number, p: ProductListing) => sum + (p.currentStake || 5.00), 0)
+            setTotalStake(totalStakeSum / result.products.length)
+          }
+        })
+    })
+
+    // Handle reward events (high ratings - $0 change in new algorithm)
+    es.addEventListener('reward', (e: MessageEvent) => {
+      const data = JSON.parse(e.data) as MarketplaceEvent
+      const rewardEvent: MarketplaceEvent = { ...data, type: 'reward' as const }
+      setRecentStakeEvents((prev) => [rewardEvent, ...prev].slice(0, 10))
+      
+      // Refresh products to get updated stake values and recalculate total
+      fetch('/api/market/products')
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.success && result.products.length > 0) {
+            setProducts(result.products)
+            // Calculate average stake across all products
+            const totalStakeSum = result.products.reduce((sum: number, p: ProductListing) => sum + (p.currentStake || 5.00), 0)
+            setTotalStake(totalStakeSum / result.products.length)
+          }
+        })
     })
 
     es.onerror = () => {
@@ -318,7 +460,7 @@ export default function SellerDashboard() {
     return () => {
       es.close()
     }
-  }, [form.wallet])
+  }, []) // Remove form.wallet dependency since we track all events in MVP
 
   // Handle form submission
   const handlePublish = async (e: React.FormEvent) => {
@@ -586,6 +728,14 @@ export default function SellerDashboard() {
             <LiveEarningsCard
               totalEarnings={totalEarnings}
               recentSales={recentSales.filter(
+                (s) => !form.wallet || s.sellerWallet.toLowerCase() === form.wallet.toLowerCase()
+              )}
+            />
+
+            {/* Staked Collateral */}
+            <StakedCollateralCard
+              totalStake={totalStake}
+              recentSlashEvents={recentStakeEvents.filter(
                 (s) => !form.wallet || s.sellerWallet.toLowerCase() === form.wallet.toLowerCase()
               )}
             />

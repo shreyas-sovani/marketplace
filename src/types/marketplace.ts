@@ -45,6 +45,9 @@ export interface Product {
   
   /** Number of times this product has been purchased */
   salesCount: number;
+  
+  /** Current staked collateral in USD (Simulated "Platform Credit"). Default: $5.00 */
+  currentStake: number;
 }
 
 /**
@@ -61,6 +64,8 @@ export interface ProductListing {
   createdAt: string;
   sellerName?: string;
   salesCount: number;
+  /** Current staked collateral in USD (Simulated "Platform Credit"). Default: $5.00 */
+  currentStake: number;
 }
 
 /**
@@ -140,7 +145,38 @@ export interface MarketplaceListingEvent {
 /**
  * Union type for all marketplace events.
  */
-export type MarketplaceEvent = MarketplaceSaleEvent | MarketplaceListingEvent;
+export type MarketplaceEvent = MarketplaceSaleEvent | MarketplaceListingEvent | MarketplaceSlashEvent | MarketplaceRewardEvent;
+
+/**
+ * Slash event when a product receives a low rating.
+ */
+export interface MarketplaceSlashEvent {
+  type: 'slash';
+  productId: string;
+  productTitle: string;
+  sellerWallet: string;
+  sellerName?: string;
+  rating: number;
+  slashAmount: number;
+  newStake: number;
+  reason: string;
+  timestamp: string;
+}
+
+/**
+ * Reward event when a product receives a high rating.
+ */
+export interface MarketplaceRewardEvent {
+  type: 'reward';
+  productId: string;
+  productTitle: string;
+  sellerWallet: string;
+  sellerName?: string;
+  rating: number;
+  rewardAmount: number;
+  newStake: number;
+  timestamp: string;
+}
 
 /**
  * Error response structure for API consistency.

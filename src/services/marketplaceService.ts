@@ -14,6 +14,8 @@ import type {
   PublishProductRequest,
   MarketplaceStats,
   MarketplaceEvent,
+  MarketplaceSlashEvent,
+  MarketplaceRewardEvent,
 } from '../types/marketplace.js';
 
 /**
@@ -51,6 +53,11 @@ const stats: MarketplaceStats = {
 export const SELLER_WALLET = '0xB9b4aEcFd092514fDAC6339edba6705287464409';
 
 /**
+ * Default stake amount for all new products (Simulated "Platform Credit")
+ */
+export const DEFAULT_STAKE_AMOUNT = 5.00;
+
+/**
  * Seeds the marketplace with initial products for demo purposes.
  * All payments go to SELLER_WALLET (hardcoded for MVP).
  */
@@ -63,6 +70,7 @@ function seedMarketplace(): void {
       title: 'AIBhoomi Winning Strategy 2026',
       description: 'Insider tips from a 3x hackathon winner. Learn the exact pitch structure, demo flow, and judge psychology that wins at AIBhoomi. Includes specific talking points for crypto/AI tracks.',
       price: 0.05,
+      currentStake: DEFAULT_STAKE_AMOUNT,
       content: `
 ## 🏆 AIBhoomi 2026 Winning Strategy
 
@@ -95,6 +103,7 @@ Good luck! 🚀
       title: 'India Crypto Tax Loopholes 2026',
       description: 'Legal tax optimization strategies for Indian crypto traders. Covers NFT gifting, DeFi staking, and the new GIFT city exemptions. NOT financial advice.',
       price: 0.03,
+      currentStake: DEFAULT_STAKE_AMOUNT,
       content: `
 ## 💰 India Crypto Tax Optimization (2026 Edition)
 
@@ -138,6 +147,7 @@ Disclaimer: Consult a CA before acting on this.
       title: 'Bitcoin Sentiment Pulse - Jan 2026',
       description: 'Aggregated sentiment from CT (Crypto Twitter), Reddit, and Discord whales. Includes fear/greed breakdown and whale wallet movements.',
       price: 0.02,
+      currentStake: DEFAULT_STAKE_AMOUNT,
       content: `
 ## 📊 Bitcoin Sentiment Pulse - January 31, 2026
 
@@ -229,6 +239,7 @@ export function publishProduct(request: PublishProductRequest): Product {
     type: request.type || 'human_alpha',
     createdAt: new Date().toISOString(),
     salesCount: 0,
+    currentStake: DEFAULT_STAKE_AMOUNT, // Initialize with default stake
   };
 
   productRegistry.set(id, product);
@@ -273,6 +284,7 @@ export function getAllProductListings(): ProductListing[] {
       type: product.type,
       createdAt: product.createdAt,
       salesCount: product.salesCount,
+      currentStake: product.currentStake,
     });
   }
 
@@ -299,6 +311,7 @@ export function getProductListing(id: string): ProductListing | undefined {
     type: product.type,
     createdAt: product.createdAt,
     salesCount: product.salesCount,
+    currentStake: product.currentStake,
   };
 }
 
@@ -406,6 +419,141 @@ export function getProductSummaryForAgent(): Array<{
     type: p.type,
     sellerName: p.sellerName || 'Anonymous',
   }));
+}
+
+// =============================================================================
+// RATING & SLASHING SYSTEM
+// =============================================================================
+
+/**
+ * Rating/Slashing result interface.
+ */
+export interface RatingResult {
+  success: boolean;
+  productId: string;
+  rating: number;
+  eventType: 'slash' | 'reward';
+  stakeChange: number;
+  newStake: number;
+  reason: string;
+}
+
+/**
+ * Rate a product and apply slashing logic.
+ * 
+ * The "Ruthless" Slashing Algorithm (No Rewards - Only Penalties):
+ * - Rating 1: SLASH -$3.00 (Completely useless/misleading content)
+ * - Rating 2: SLASH -$2.00 (Very poor quality, vague or generic)
+ * - Rating 3: SLASH -$1.00 (Below expectations, mediocre)
+ * - Rating 4: SLASH -$0.25 (Acceptable but not exceptional)
+ * - Rating 5: NO CHANGE $0.00 (Meets expectations - baseline, no reward)
+ * 
+ * Philosophy: High-quality content is the BASELINE expectation.
+ * Sellers don't get rewarded for doing their job - they only get penalized for failing.
+ * 
+ * @param productId - The product to rate
+ * @param rating - Integer 1-5
+ * @param reason - Agent's reason for the rating
+ */
+export function rateProduct(
+  productId: string,
+  rating: number,
+  reason: string
+): RatingResult | undefined {
+  const product = productRegistry.get(productId);
+  if (!product) return undefined;
+
+  // Validate rating
+  const normalizedRating = Math.round(Math.max(1, Math.min(5, rating)));
+  
+  let stakeChange: number;
+  let eventType: 'slash' | 'reward';
+  
+  // The "Ruthless" Slashing Algorithm - NO REWARDS
+  switch (normalizedRating) {
+    case 1:
+      // Catastrophic: Completely useless, misleading, or harmful content
+      stakeChange = -3.00;
+      eventType = 'slash';
+      break;
+    case 2:
+      // Poor: Very generic, vague, or low-effort content
+      stakeChange = -2.00;
+      eventType = 'slash';
+      break;
+    case 3:
+      // Below Average: Mediocre, incomplete, or only partially useful
+      stakeChange = -1.00;
+      eventType = 'slash';
+      break;
+    case 4:
+      // Acceptable: Decent but not exceptional - minor penalty
+      stakeChange = -0.25;
+      eventType = 'slash';
+      break;
+    case 5:
+      // Excellent: Meets high standards - NO CHANGE (baseline expectation)
+      stakeChange = 0.00;
+      eventType = 'reward'; // Still emit as reward for UI purposes, but $0
+      break;
+    default:
+      stakeChange = -1.00;
+      eventType = 'slash';
+  }
+  
+  // Apply stake change (ensure stake doesn't go below 0)
+  const previousStake = product.currentStake;
+  const newStake = Math.max(0, product.currentStake + stakeChange);
+  product.currentStake = newStake;
+  
+  // Log the rating event
+  console.log(`\n${'='.repeat(70)}`);
+  if (stakeChange < 0) {
+    console.log(`🔴 STAKE SLASHED!`);
+  } else {
+    console.log(`⚪ STAKE UNCHANGED (Meets expectations)`);
+  }
+  console.log(`   Product: "${product.title}"`);
+  console.log(`   Seller: ${product.sellerName || 'Anonymous'}`);
+  console.log(`   Rating: ${normalizedRating}/5`);
+  console.log(`   Previous Stake: $${previousStake.toFixed(2)}`);
+  console.log(`   Stake Change: ${stakeChange >= 0 ? '' : ''}$${stakeChange.toFixed(2)}`);
+  console.log(`   New Stake: $${newStake.toFixed(2)}`);
+  console.log(`   Reason: ${reason}`);
+  console.log(`${'='.repeat(70)}\n`);
+  
+  // Always emit slash event (even for $0 change) so UI can track
+  const slashEvent: MarketplaceSlashEvent = {
+    type: 'slash',
+    productId: product.id,
+    productTitle: product.title,
+    sellerWallet: product.sellerWallet,
+    sellerName: product.sellerName,
+    rating: normalizedRating,
+    slashAmount: Math.abs(stakeChange),
+    newStake,
+    reason,
+    timestamp: new Date().toISOString(),
+  };
+  emitEvent(slashEvent);
+  
+  return {
+    success: true,
+    productId: product.id,
+    rating: normalizedRating,
+    eventType,
+    stakeChange,
+    newStake,
+    reason,
+  };
+}
+
+/**
+ * Get the current stake for a product.
+ */
+export function getProductStake(productId: string): number | undefined {
+  const product = productRegistry.get(productId);
+  return product?.currentStake;
 }
 
 // =============================================================================

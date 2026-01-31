@@ -16,6 +16,7 @@ import {
   getMarketplaceStats,
   subscribeToEvents,
   getProductSummaryForAgent,
+  rateProduct,
 } from '../services/marketplaceService.js';
 import type {
   PublishProductRequest,
@@ -212,6 +213,7 @@ router.post('/publish', (req: Request, res: Response): void => {
         type: product.type,
         createdAt: product.createdAt,
         salesCount: product.salesCount,
+        currentStake: product.currentStake,
       },
     };
 
@@ -470,6 +472,56 @@ router.post('/product/:id/record-sale', (req: Request, res: Response): void => {
   } catch (error) {
     logError('POST', `/api/market/product/${req.params.id}/record-sale`, error);
     res.status(500).json(createErrorResponse('Failed to record sale', 'INTERNAL_ERROR'));
+  }
+});
+
+/**
+ * POST /api/market/product/:id/rate
+ * Rate a product and apply slashing/reward to seller's stake.
+ * 
+ * The "Vicious" Algorithm:
+ * - Rating 1-2: SLASH -$2.00 (poor quality)
+ * - Rating 3: SLASH -$0.50 (mediocre)
+ * - Rating 4-5: REWARD +$0.05 (high quality)
+ * 
+ * Body: { rating: number (1-5), reason?: string }
+ * Returns: { success, productId, rating, eventType, stakeChange, newStake, reason }
+ */
+router.post('/product/:id/rate', (req: Request, res: Response): void => {
+  try {
+    const id = req.params.id as string;
+    const { rating, reason } = req.body as { rating?: number; reason?: string };
+    
+    logRequest('POST', `/api/market/product/${id}/rate`, { rating, reason });
+
+    // Validate rating
+    if (typeof rating !== 'number' || rating < 1 || rating > 5) {
+      res.status(400).json(createErrorResponse('Rating must be a number between 1 and 5', 'VALIDATION_ERROR'));
+      return;
+    }
+
+    const result = rateProduct(id, rating, reason || 'No reason provided');
+
+    if (!result) {
+      res.status(404).json(createErrorResponse(`Product not found: ${id}`, 'PRODUCT_NOT_FOUND'));
+      return;
+    }
+
+    res.json({
+      success: true,
+      productId: result.productId,
+      rating: result.rating,
+      eventType: result.eventType,
+      stakeChange: result.stakeChange,
+      newStake: result.newStake,
+      reason: result.reason,
+      message: result.eventType === 'slash' 
+        ? `⚠️ Seller stake slashed by $${Math.abs(result.stakeChange).toFixed(2)}. New stake: $${result.newStake.toFixed(2)}`
+        : `✅ Seller stake rewarded by $${result.stakeChange.toFixed(2)}. New stake: $${result.newStake.toFixed(2)}`,
+    });
+  } catch (error) {
+    logError('POST', `/api/market/product/${req.params.id}/rate`, error);
+    res.status(500).json(createErrorResponse('Failed to rate product', 'INTERNAL_ERROR'));
   }
 });
 
