@@ -3,7 +3,6 @@
   "version": "2.0.0",
   "description": "DueDiligence: Just-in-Time Intelligence Platform with x402 payments",
   "type": "module",
-  "main": "dist/server.js",
   "scripts": {
     "start": "npx tsx src/server.ts",
     "start:server": "npx tsx src/server.ts",

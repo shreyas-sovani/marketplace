@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Zap, Package, TrendingUp, Lock, AlertCircle, Brain } from 'lucide-react'
+import { Zap, Package, TrendingUp, Lock, AlertCircle, ExternalLink, Brain } from 'lucide-react'
 
 // Types
 interface ProductListing {
@@ -137,23 +137,41 @@ function LiveEarningsCard({
             Recent Sales
           </p>
           <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-thin">
-            {recentSales.slice(0, 5).map((sale, i) => (
+            {recentSales.slice(0, 5).map((sale, i) => {
+              const isValidTxHash = sale.txHash && sale.txHash.startsWith('0x') && sale.txHash.length === 66
+              return (
                 <div
-                key={i}
-                className="flex items-center justify-between text-sm bg-card-bg/50 rounded-lg px-3 py-2 animate-fadeIn text-secondary-text"
-              >
-                <div className="flex items-center gap-2 flex-1">
-                  <Zap className="w-3 h-3 text-accent flex-shrink-0" />
-                  <span className="text-accent font-space-grotesk font-semibold">
-                    +${sale.amount?.toFixed(2)}
-                  </span>
-                  <span className="text-secondary-text truncate text-xs">{sale.productTitle}</span>
+                  key={i}
+                  className="flex flex-col gap-1 text-sm bg-card-bg/50 rounded-lg px-3 py-2 border border-border/20 animate-fadeIn"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 flex-1">
+                      <Zap className="w-3 h-3 text-accent flex-shrink-0" />
+                      <span className="text-accent font-space-grotesk font-semibold">
+                        +${sale.amount?.toFixed(2)}
+                      </span>
+                      <span className="text-secondary-text truncate text-xs">{sale.productTitle}</span>
+                    </div>
+                    <span className="text-xs text-muted-text font-share-tech flex-shrink-0">
+                      {new Date(sale.timestamp).toLocaleTimeString()}
+                    </span>
+                  </div>
+                  {isValidTxHash && sale.txHash ? (
+                    <a 
+                      href={`https://sepolia.basescan.org/tx/${sale.txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-accent/80 hover:text-accent transition-colors font-share-tech group ml-5"
+                    >
+                      <span>Verify: {sale.txHash.slice(0, 10)}...{sale.txHash.slice(-6)}</span>
+                      <ExternalLink className="w-3 h-3 opacity-70 group-hover:opacity-100" />
+                    </a>
+                  ) : (
+                    <span className="text-xs text-muted-text font-share-tech ml-5">Payment verified ✓</span>
+                  )}
                 </div>
-                <span className="text-xs text-secondary-text font-share-tech flex-shrink-0">
-                  {new Date(sale.timestamp).toLocaleTimeString()}
-                </span>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}

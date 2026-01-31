@@ -100,8 +100,11 @@ export interface PurchaseProductResponse {
   timestamp: string;
   meta: {
     paidBy: string;
-    txHash: string;
-    simulation: boolean;
+    txHash?: string;
+    txUrl?: string;
+    network?: string;
+    simulation?: boolean;
+    note?: string;
   };
 }
 

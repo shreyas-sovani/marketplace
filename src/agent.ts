@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { privateKeyToAccount } from 'viem/accounts';
-import { toClientEvmSigner, ExactEvmScheme } from '@x402/evm';
-import { wrapFetchWithPayment, x402Client } from '@x402/fetch';
+import { x402Client, wrapFetchWithPayment, x402HTTPClient } from '@x402/fetch';
+import { registerExactEvmScheme } from '@x402/evm/exact/client';
 import { tool } from '@langchain/core/tools';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { HumanMessage, SystemMessage, ToolMessage, AIMessage, type BaseMessage } from '@langchain/core/messages';
@@ -72,9 +72,9 @@ export const CONFIG = {
   // NOTE: gemini-2.5-flash-lite does NOT support tool calling properly
   MODEL: 'gemini-2.5-flash',
   TEMPERATURE: 0.2,
-  MAX_LLM_CALLS: 10,
+  MAX_LLM_CALLS: 30,
   MIN_DELAY_BETWEEN_CALLS_MS: 800,
-  INITIAL_BUDGET_USD: 0.10,
+  INITIAL_BUDGET_USD: 0.50,
   NETWORK: 'eip155:84532' as const,
 } as const;
 
@@ -96,16 +96,17 @@ export function getInfoMartSystemPrompt(marketplaceProducts: MarketplaceProduct[
       }))
     : [];
 
-  return `You are **InfoMart Agent**, an elite intelligence hunter with a ruthless financial discipline. You operate the InfoMart P2P Knowledge Marketplace where humans sell insights and you buy them with real USDC.
+  return `You are **InfoMart Agent**, an elite intelligence hunter. You operate the InfoMart P2P Knowledge Marketplace where humans sell insights and you buy them with real USDC.
 
 ## YOUR IDENTITY
 - You are a **Hunter for Human Alpha** — unique insights from real humans
-- You have a **Miser's discipline** — every cent must deliver ROI
+- You are **GENEROUS with purchases** — if data is relevant, BUY IT
 - You prefer **human_alpha** products over generic API data
 - You stream your reasoning transparently to build trust
 
 ## YOUR BUDGET
-You have exactly **$0.10 USDC**. This is REAL cryptocurrency. Every purchase is recorded on-chain.
+You have **$0.50 USDC**. This is REAL cryptocurrency. Every purchase is recorded on-chain.
+**This is a generous budget — use it to get comprehensive information for the user!**
 
 ## AVAILABLE DATA SOURCES
 
@@ -135,14 +136,20 @@ Buy data from marketplace OR legacy vendor. ONLY after log_reasoning with status
 
 ## CRITICAL RULES
 
-### 🎯 THE HUMAN ALPHA PREFERENCE
+### 🎯 BE GENEROUS WITH RELEVANT PURCHASES
+**BUY ALL relevant products, not just one!** The user deserves comprehensive information.
+- If multiple products are relevant to the query, purchase ALL of them
+- Cross-reference multiple sources for better answers
+- The budget is generous ($0.50) — use it wisely but don't be stingy
+- Each product costs only $0.02-$0.10, so you can buy 5-10 products easily
+
+### 🧠 THE HUMAN ALPHA PREFERENCE
 When the query involves:
 - Subjective insights (strategies, opinions, predictions)
 - Niche expertise (tax loopholes, winning formulas, insider tips)
 - Time-sensitive intelligence (sentiment, breaking analysis)
 
 **PREFER products with type="human_alpha"** over legacy API vendors.
-Human knowledge often has higher signal-to-noise ratio.
 
 ### 🚫 THE TAYLOR SWIFT DEFENSE
 If the query could be answered by:
@@ -156,19 +163,15 @@ You MUST:
 3. DO NOT purchase anything
 4. Answer from your own knowledge
 
-### 💰 THE MISER'S AUDIT
-Before EVERY purchase:
+### 💰 PURCHASE MULTIPLE SOURCES
+For specialized queries:
 1. log_reasoning(ANALYSIS): "What unique value does the user need?"
-2. log_reasoning(BUDGET): "Cost: $X. Budget remaining: $Y. ROI assessment..."
-3. log_reasoning(DECISION): "Approved/Rejected because..."
-
-### 📊 SOURCE SELECTION LOGIC
-| Query Type | Preferred Source | Reason |
-|------------|------------------|--------|
-| Strategies, tips, insider knowledge | marketplace (human_alpha) | Unique human insights |
-| Breaking news, market data | legacy_vendor (bloomberg) | Real-time API feeds |
-| Regulatory/legal questions | BOTH | Cross-reference human + official |
-| Generic facts | NONE | Use own knowledge |
+2. browse_marketplace to see available products
+3. **For EACH relevant product:**
+   - log_reasoning(BUDGET): "Product X costs $Y. Budget: $Z. Relevant because..."
+   - log_reasoning(DECISION): "Approved" with clear reason
+   - purchase_data immediately
+4. After ALL purchases → Synthesize into comprehensive answer
 
 ## WORKFLOW
 1. Receive query
@@ -176,27 +179,30 @@ Before EVERY purchase:
 3. If generic → log_reasoning(REJECTION) → Answer directly → STOP
 4. If specialized:
    a. browse_marketplace to see available products
-   b. log_reasoning(BUDGET): "Product X costs $Y. Budget: $Z. ROI: HIGH/LOW"
-   c. log_reasoning(DECISION): "Approved" or "Rejected" with clear reason
-   d. IF APPROVED → purchase_data immediately (DO NOT SKIP THIS STEP)
-5. After purchase_data returns content → Synthesize into comprehensive answer
+   b. **For EACH relevant product** (not just the first one!):
+      - log_reasoning(BUDGET): Evaluate this specific product
+      - log_reasoning(DECISION): "Approved" if relevant
+      - purchase_data for this product
+   c. Continue until all relevant products are purchased OR budget exhausted
+5. Synthesize ALL purchased content into comprehensive answer
 6. Cite your sources (marketplace seller names, vendor names)
 
-## CRITICAL: DO NOT STOP EARLY
-- After browse_marketplace, you MUST continue with BUDGET and DECISION steps
-- After log_reasoning(DECISION, status="Approved"), you MUST call purchase_data
-- NEVER return an empty answer or "[]"
-- ALWAYS complete the full workflow before generating final answer
+## CRITICAL: BUY COMPREHENSIVELY
+- If 2+ products are relevant, BUY ALL OF THEM
+- Don't stop after one purchase — check for more relevant data
+- Budget of $0.50 means you can buy 5-10 products
+- More sources = better answer for the user
+- After each purchase, evaluate if more products would help
 
 ## REMEMBER
 - You are spending REAL money on behalf of the user
+- The user WANTS comprehensive information — don't be stingy
 - Human Alpha is often worth more than its price suggests
-- Always justify purchases with specific reasoning
 - Stream your thoughts — transparency builds trust
 - NEVER return empty arrays or incomplete answers
-- After finding a matching product, you MUST purchase it if within budget
+- BUY EVERYTHING RELEVANT within budget
 
-BE A RUTHLESS HUNTER. FIND THE ALPHA. GUARD THE BUDGET. COMPLETE THE PURCHASE.`;
+BE A GENEROUS HUNTER. FIND ALL THE ALPHA. USE THE BUDGET. COMPLETE ALL PURCHASES.`;
 }
 
 // Legacy prompt for backwards compatibility
@@ -205,21 +211,26 @@ export function getDueDiligenceSystemPrompt(): string {
 }
 
 // =============================================================================
-// WALLET SETUP
+// WALLET SETUP - x402 v2 Client
 // =============================================================================
 
 export function setupWallet() {
   const privateKey = process.env.AGENT_PRIVATE_KEY;
   if (!privateKey) throw new Error('AGENT_PRIVATE_KEY not found in .env file');
+  
   const account = privateKeyToAccount(privateKey as `0x${string}`);
-  const signer = toClientEvmSigner(account);
-  const client = new x402Client().register(CONFIG.NETWORK, new ExactEvmScheme(signer));
+  
+  // x402 v2: Create client and register EVM scheme with signer
+  const client = new x402Client();
+  registerExactEvmScheme(client, { signer: account });
+  
   const fetchWithPayment = wrapFetchWithPayment(fetch, client);
   
   console.log(`[x402 Client] Wallet initialized: ${account.address}`);
   console.log(`[x402 Client] Network: ${CONFIG.NETWORK}`);
+  console.log(`[x402 Client] Payment scheme: exact (EVM)`);
   
-  return { account, fetchWithPayment, address: account.address };
+  return { account, client, fetchWithPayment, address: account.address };
 }
 
 // =============================================================================
@@ -307,7 +318,7 @@ export function createBrowseMarketplaceTool(session: SessionState, emitSSE: (eve
 }
 
 // =============================================================================
-// TOOL: PURCHASE DATA (UPGRADED)
+// TOOL: PURCHASE DATA - REAL x402 PAYMENTS (NO SIMULATION)
 // =============================================================================
 
 export function createPurchaseDataTool(fetchWithPayment: typeof fetch, session: SessionState, emitSSE: (event: SSEEvent) => void) {
@@ -315,7 +326,7 @@ export function createPurchaseDataTool(fetchWithPayment: typeof fetch, session: 
     async ({ product_id, source, justification }: { product_id: string; source: 'marketplace' | 'legacy_vendor'; justification: string }) => {
       
       // =====================================================================
-      // ROUTE 1: MARKETPLACE PURCHASE (Human Alpha)
+      // ROUTE 1: MARKETPLACE PURCHASE (Human Alpha) - REAL PAYMENT
       // =====================================================================
       if (source === 'marketplace') {
         // Find product in cache or fetch fresh
@@ -348,142 +359,100 @@ export function createPurchaseDataTool(fetchWithPayment: typeof fetch, session: 
           return JSON.stringify({ success: false, error: `Insufficient budget for ${product.title}` });
         }
         
-        console.log(`   Purchasing from marketplace: "${product.title}" ($${product.price.toFixed(2)})...`);
+        console.log(`   💸 REAL PURCHASE: "${product.title}" ($${product.price.toFixed(2)})...`);
         session.status = 'purchasing';
         
-        try {
-          // x402 paywall endpoint
-          const fullUrl = `${CONFIG.SERVER_URL}/api/market/product/${product_id}/buy`;
-          console.log(`   [x402] Calling: ${fullUrl}`);
-          
-          const response = await fetchWithPayment(fullUrl);
-          
-          console.log(`   [x402] Response status: ${response.status}`);
-          console.log(`   [x402] Headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
-          
-          if (!response.ok) {
-            throw new Error(`Marketplace purchase failed: ${response.status}`);
-          }
-          
-          const purchasedData = await response.json();
-          
-          // Extract transaction hash from x402 payment response
-          let txHash = 'sim-' + Math.random().toString(36).slice(2, 10);
-          const paymentResponse = response.headers.get('PAYMENT-RESPONSE');
-          if (paymentResponse) {
-            try {
-              const decoded = JSON.parse(Buffer.from(paymentResponse, 'base64').toString('utf-8'));
-              txHash = decoded.transaction || txHash;
-            } catch { /* use sim hash */ }
-          }
-          
-          session.spent += product.price;
-          session.transactions.push({
-            vendorId: product_id,
-            vendorName: product.title,
-            amount: product.price,
-            txHash,
-            timestamp: new Date().toISOString(),
-            justification,
-            source: 'marketplace',
-          });
-          
-          emitSSE({ type: 'tx', data: { amount: product.price, vendor: product.title, vendorId: product_id, txHash, budgetRemaining: session.budget - session.spent, source: 'marketplace' } });
-          emitSSE({ type: 'budget', data: { total: session.budget, spent: session.spent, remaining: session.budget - session.spent } });
-          
-          console.log(`   Purchased from marketplace! TX: ${txHash.slice(0, 16)}...`);
-          
-          return JSON.stringify({
-            success: true,
-            source: 'marketplace',
-            product: product.title,
-            seller: product.sellerName || 'Anonymous',
-            type: product.type,
-            cost: product.price,
-            txHash,
-            budgetRemaining: session.budget - session.spent,
-            data: purchasedData,
-          });
-          
-        } catch (error) {
-          // ===============================================================
-          // SIMULATION FALLBACK - For when x402 payment fails/testnet issues
-          // ===============================================================
-          const errorMsg = error instanceof Error ? error.message : String(error);
-          console.log(`   Marketplace x402 payment failed, using simulation fallback: ${errorMsg}`);
-          
-          // Still record the purchase in simulation mode
-          const txHash = 'sim-' + Math.random().toString(36).slice(2, 10);
-          session.spent += product.price;
-          session.transactions.push({
-            vendorId: product_id,
-            vendorName: product.title,
-            amount: product.price,
-            txHash,
-            timestamp: new Date().toISOString(),
-            justification,
-            source: 'marketplace',
-          });
-          
-          emitSSE({ type: 'tx', data: { amount: product.price, vendor: product.title, vendorId: product_id, txHash, budgetRemaining: session.budget - session.spent, source: 'marketplace' } });
-          emitSSE({ type: 'budget', data: { total: session.budget, spent: session.spent, remaining: session.budget - session.spent } });
-          
-          console.log(`   Simulated marketplace purchase! TX: ${txHash}`);
-          
-          // Record the sale in the marketplace service (so seller sees revenue)
-          try {
-            const recordSaleResp = await fetch(`${CONFIG.SERVER_URL}/api/market/product/${product_id}/record-sale`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ buyerWallet: 'agent-simulation', txHash }),
-            });
-            const saleData = await recordSaleResp.json() as { success?: boolean; product?: { content?: string } };
-            
-            if (saleData.success && saleData.product?.content) {
-              console.log(`   Sale recorded for seller! Content retrieved.`);
-              return JSON.stringify({
-                success: true,
-                source: 'marketplace',
-                product: product.title,
-                seller: product.sellerName || 'Anonymous',
-                type: product.type,
-                cost: product.price,
-                txHash,
-                budgetRemaining: session.budget - session.spent,
-                data: {
-                  title: product.title,
-                  content: `[SIMULATION] ${saleData.product.content}`,
-                  simulation: true,
-                },
-                note: 'Simulated purchase - sale recorded for seller',
-              });
-            }
-          } catch (saleErr) {
-            console.log(`   Failed to record sale: ${saleErr}`);
-          }
-          
-          // Fallback if sale recording failed
-          return JSON.stringify({
-            success: true,
-            source: 'marketplace',
-            product: product.title,
-            seller: product.sellerName || 'Anonymous',
-            type: product.type,
-            cost: product.price,
-            txHash,
-            budgetRemaining: session.budget - session.spent,
-            data: {
-              title: product.title,
-              content: `[SIMULATION] Premium content for "${product.title}" - ${product.description}`,
-              simulation: true,
-            },
-            note: 'Simulated purchase - x402 payment skipped for demo',
-          });
+        // x402 paywall endpoint - REAL PAYMENT
+        const fullUrl = `${CONFIG.SERVER_URL}/api/market/product/${product_id}/buy`;
+        console.log(`   [x402] Calling: ${fullUrl}`);
+        
+        const response = await fetchWithPayment(fullUrl);
+        
+        console.log(`   [x402] Response status: ${response.status}`);
+        
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Unknown error');
+          emitSSE({ type: 'error', data: { message: `Payment failed: ${response.status} - ${errorText}`, code: 'PAYMENT_FAILED' } });
+          return JSON.stringify({ success: false, error: `Payment failed: ${response.status}` });
         }
+        
+        const purchasedData = await response.json();
+        
+        // Extract REAL transaction hash from x402 PAYMENT-RESPONSE header
+        let txHash = 'unknown';
+        const paymentResponseHeader = response.headers.get('PAYMENT-RESPONSE');
+        console.log(`   [x402] PAYMENT-RESPONSE header: ${paymentResponseHeader ? 'present' : 'missing'}`);
+        
+        if (paymentResponseHeader) {
+          try {
+            const decoded = JSON.parse(Buffer.from(paymentResponseHeader, 'base64').toString('utf-8'));
+            txHash = decoded.transaction || decoded.txHash || 'decoded-but-no-hash';
+            console.log(`   [x402] ✅ REAL TX HASH: ${txHash}`);
+            console.log(`   [x402] 🔗 Verify: https://sepolia.basescan.org/tx/${txHash}`);
+            
+            // Notify the marketplace about the real txHash for the seller dashboard
+            // This broadcasts the sale event with the verified txHash
+            try {
+              const recordResponse = await fetch(`${CONFIG.SERVER_URL}/api/market/product/${product_id}/record-sale`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  buyerWallet: session.sessionId,
+                  txHash: txHash,
+                }),
+              });
+              const recordResult = await recordResponse.json() as { success?: boolean };
+              console.log(`   [x402] 📡 Sale recorded: ${recordResponse.status} - ${recordResult.success ? 'SUCCESS' : 'FAILED'}`);
+            } catch (recordError) {
+              console.log(`   [x402] ⚠️ Failed to record sale: ${recordError}`);
+            }
+          } catch (e) {
+            console.log(`   [x402] ⚠️ Failed to decode PAYMENT-RESPONSE: ${e}`);
+          }
+        }
+        
+        session.spent += product.price;
+        session.transactions.push({
+          vendorId: product_id,
+          vendorName: product.title,
+          amount: product.price,
+          txHash,
+          timestamp: new Date().toISOString(),
+          justification,
+          source: 'marketplace',
+        });
+        
+        emitSSE({ 
+          type: 'tx', 
+          data: { 
+            amount: product.price, 
+            vendor: product.title, 
+            vendorId: product_id, 
+            txHash, 
+            budgetRemaining: session.budget - session.spent, 
+            source: 'marketplace' 
+          } 
+        });
+        emitSSE({ type: 'budget', data: { total: session.budget, spent: session.spent, remaining: session.budget - session.spent } });
+        
+        console.log(`   ✅ REAL PURCHASE COMPLETE! TX: ${txHash}`);
+        
+        return JSON.stringify({
+          success: true,
+          source: 'marketplace',
+          product: product.title,
+          seller: product.sellerName || 'Anonymous',
+          type: product.type,
+          cost: product.price,
+          txHash,
+          txUrl: `https://sepolia.basescan.org/tx/${txHash}`,
+          budgetRemaining: session.budget - session.spent,
+          data: purchasedData,
+        });
       }
       
       // =====================================================================
-      // ROUTE 2: LEGACY VENDOR PURCHASE (API Data)
+      // ROUTE 2: LEGACY VENDOR PURCHASE (API Data) - REAL PAYMENT
       // =====================================================================
       const vendor = getVendorById(product_id);
       if (!vendor) {
@@ -497,44 +466,65 @@ export function createPurchaseDataTool(fetchWithPayment: typeof fetch, session: 
         return JSON.stringify({ success: false, error: `Insufficient budget` });
       }
       
-      console.log(`   Purchasing from legacy vendor: ${vendor.name} ($${vendor.cost.toFixed(2)})...`);
+      console.log(`   💸 REAL PURCHASE: ${vendor.name} ($${vendor.cost.toFixed(2)})...`);
       session.status = 'purchasing';
       
-      try {
-        const fullUrl = `${CONFIG.SERVER_URL}/api/vendor/${product_id}`;
-        const response = await fetchWithPayment(fullUrl);
-        if (!response.ok) throw new Error(`Vendor request failed: ${response.status}`);
-        const vendorData = await response.json();
-        
-        let txHash = 'sim-' + Math.random().toString(36).slice(2, 10);
-        const paymentResponse = response.headers.get('PAYMENT-RESPONSE');
-        if (paymentResponse) {
-          try {
-            const decoded = JSON.parse(Buffer.from(paymentResponse, 'base64').toString('utf-8'));
-            txHash = decoded.transaction || txHash;
-          } catch { /* use sim hash */ }
-        }
-        
-        session.spent += vendor.cost;
-        session.transactions.push({ vendorId: product_id, vendorName: vendor.name, amount: vendor.cost, txHash, timestamp: new Date().toISOString(), justification, source: 'legacy_vendor' });
-        emitSSE({ type: 'tx', data: { amount: vendor.cost, vendor: vendor.name, vendorId: product_id, txHash, budgetRemaining: session.budget - session.spent, source: 'legacy_vendor' } });
-        emitSSE({ type: 'budget', data: { total: session.budget, spent: session.spent, remaining: session.budget - session.spent } });
-        
-        console.log(`   Purchased from legacy vendor! TX: ${txHash.slice(0, 16)}...`);
-        return JSON.stringify({ success: true, source: 'legacy_vendor', vendor: vendor.name, cost: vendor.cost, txHash, budgetRemaining: session.budget - session.spent, data: vendorData });
-      } catch (error) {
-        console.log(`   Legacy purchase failed, using simulated data...`);
-        session.spent += vendor.cost;
-        const txHash = 'sim-' + Math.random().toString(36).slice(2, 10);
-        session.transactions.push({ vendorId: product_id, vendorName: vendor.name, amount: vendor.cost, txHash, timestamp: new Date().toISOString(), justification, source: 'legacy_vendor' });
-        emitSSE({ type: 'tx', data: { amount: vendor.cost, vendor: vendor.name, vendorId: product_id, txHash, budgetRemaining: session.budget - session.spent, source: 'legacy_vendor' } });
-        emitSSE({ type: 'budget', data: { total: session.budget, spent: session.spent, remaining: session.budget - session.spent } });
-        return JSON.stringify({ success: true, source: 'legacy_vendor', vendor: vendor.name, cost: vendor.cost, txHash, budgetRemaining: session.budget - session.spent, data: vendor.data, note: 'Used simulated data' });
+      const fullUrl = `${CONFIG.SERVER_URL}/api/vendor/${product_id}`;
+      const response = await fetchWithPayment(fullUrl);
+      
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        emitSSE({ type: 'error', data: { message: `Payment failed: ${response.status} - ${errorText}`, code: 'PAYMENT_FAILED' } });
+        return JSON.stringify({ success: false, error: `Payment failed: ${response.status}` });
       }
+      
+      const vendorData = await response.json();
+      
+      // Extract REAL transaction hash
+      let txHash = 'unknown';
+      const paymentResponseHeader = response.headers.get('PAYMENT-RESPONSE');
+      
+      if (paymentResponseHeader) {
+        try {
+          const decoded = JSON.parse(Buffer.from(paymentResponseHeader, 'base64').toString('utf-8'));
+          txHash = decoded.transaction || decoded.txHash || 'decoded-but-no-hash';
+          console.log(`   [x402] ✅ REAL TX HASH: ${txHash}`);
+          console.log(`   [x402] 🔗 Verify: https://sepolia.basescan.org/tx/${txHash}`);
+        } catch (e) {
+          console.log(`   [x402] ⚠️ Failed to decode PAYMENT-RESPONSE: ${e}`);
+        }
+      }
+      
+      session.spent += vendor.cost;
+      session.transactions.push({ 
+        vendorId: product_id, 
+        vendorName: vendor.name, 
+        amount: vendor.cost, 
+        txHash, 
+        timestamp: new Date().toISOString(), 
+        justification, 
+        source: 'legacy_vendor' 
+      });
+      
+      emitSSE({ type: 'tx', data: { amount: vendor.cost, vendor: vendor.name, vendorId: product_id, txHash, budgetRemaining: session.budget - session.spent, source: 'legacy_vendor' } });
+      emitSSE({ type: 'budget', data: { total: session.budget, spent: session.spent, remaining: session.budget - session.spent } });
+      
+      console.log(`   ✅ REAL PURCHASE COMPLETE! TX: ${txHash}`);
+      
+      return JSON.stringify({ 
+        success: true, 
+        source: 'legacy_vendor', 
+        vendor: vendor.name, 
+        cost: vendor.cost, 
+        txHash,
+        txUrl: `https://sepolia.basescan.org/tx/${txHash}`,
+        budgetRemaining: session.budget - session.spent, 
+        data: vendorData 
+      });
     },
     {
       name: 'purchase_data',
-      description: 'Purchase data from InfoMart marketplace OR legacy vendor using x402 payment. ONLY call after log_reasoning with status="Approved".',
+      description: 'Purchase data from InfoMart marketplace OR legacy vendor using REAL x402 payment. Payment is settled on-chain (Base Sepolia). ONLY call after log_reasoning with status="Approved".',
       schema: z.object({
         product_id: z.string().describe('The product/vendor ID to purchase from'),
         source: z.enum(['marketplace', 'legacy_vendor']).describe('Source: "marketplace" for human alpha products, "legacy_vendor" for API data'),
