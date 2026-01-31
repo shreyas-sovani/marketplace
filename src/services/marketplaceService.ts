@@ -30,6 +30,85 @@ const productRegistry: Map<string, Product> = new Map();
 type EventCallback = (event: MarketplaceEvent) => void;
 const eventSubscribers: Set<EventCallback> = new Set();
 
+// =============================================================================
+// PROTOCOL TREASURY - Platform Revenue Tracking
+// =============================================================================
+
+/**
+ * Protocol Treasury - tracks platform revenue from:
+ * 1. Transaction Fees: 10% of every sale
+ * 2. Slashing Yield: 100% of penalties from bad sellers
+ */
+export interface ProtocolTreasury {
+  feeCollected: number;      // 10% cut from every sale
+  slashCollected: number;    // 100% of slashing penalties
+}
+
+/**
+ * Global treasury state - platform revenue accumulator
+ */
+const protocolTreasury: ProtocolTreasury = {
+  feeCollected: 0.00,
+  slashCollected: 0.00,
+};
+
+/**
+ * Treasury event log for live feed
+ */
+export interface TreasuryEvent {
+  type: 'fee' | 'slash';
+  amount: number;
+  productTitle: string;
+  sellerName?: string;
+  timestamp: string;
+}
+
+const treasuryEvents: TreasuryEvent[] = [];
+
+/**
+ * Get the current treasury state
+ */
+export function getProtocolTreasury(): ProtocolTreasury & { 
+  totalRevenue: number; 
+  recentEvents: TreasuryEvent[];
+} {
+  return {
+    ...protocolTreasury,
+    totalRevenue: protocolTreasury.feeCollected + protocolTreasury.slashCollected,
+    recentEvents: treasuryEvents.slice(-20).reverse(), // Last 20 events, newest first
+  };
+}
+
+/**
+ * Record a fee collection event
+ */
+function recordTreasuryFee(amount: number, productTitle: string, sellerName?: string): void {
+  protocolTreasury.feeCollected += amount;
+  treasuryEvents.push({
+    type: 'fee',
+    amount,
+    productTitle,
+    sellerName,
+    timestamp: new Date().toISOString(),
+  });
+  console.log(`[Treasury] 💰 Fee collected: $${amount.toFixed(4)} from "${productTitle}"`);
+}
+
+/**
+ * Record a slash collection event
+ */
+function recordTreasurySlash(amount: number, productTitle: string, sellerName?: string): void {
+  protocolTreasury.slashCollected += amount;
+  treasuryEvents.push({
+    type: 'slash',
+    amount,
+    productTitle,
+    sellerName,
+    timestamp: new Date().toISOString(),
+  });
+  console.log(`[Treasury] 🛡️ Slash collected: $${amount.toFixed(2)} from "${productTitle}"`);
+}
+
 /**
  * Marketplace statistics tracker.
  */
@@ -325,6 +404,10 @@ export function getFullProduct(id: string): Product | undefined {
 /**
  * Records a sale and returns the full product content.
  * Called after successful x402 payment verification.
+ * 
+ * PROTOCOL FEE: 10% of every sale goes to the protocol treasury.
+ * - Seller receives: price * 0.90
+ * - Protocol receives: price * 0.10
  */
 export function recordSale(
   productId: string,
@@ -334,10 +417,17 @@ export function recordSale(
   const product = productRegistry.get(productId);
   if (!product) return undefined;
 
+  // Calculate protocol fee (10% cut)
+  const protocolFee = product.price * 0.10;
+  const sellerRevenue = product.price - protocolFee;
+
   // Update sales count
   product.salesCount++;
   stats.totalSales++;
   stats.totalRevenue += product.price;
+
+  // Credit the protocol treasury with the 10% fee
+  recordTreasuryFee(protocolFee, product.title, product.sellerName);
 
   // Emit sale event to subscribers
   emitEvent({
@@ -358,6 +448,8 @@ export function recordSale(
   console.log(`💰 SALE RECORDED!`);
   console.log(`   Product: "${product.title}" ($${product.price.toFixed(2)})`);
   console.log(`   Seller: ${product.sellerName} (${product.sellerWallet.slice(0, 10)}...)`);
+  console.log(`   Seller Revenue: $${sellerRevenue.toFixed(4)} (90%)`);
+  console.log(`   Protocol Fee: $${protocolFee.toFixed(4)} (10%)`);
   console.log(`   Buyer: ${buyerWallet.slice(0, 20)}...`);
   if (isValidTxHash) {
     console.log(`   ✅ TX Hash: ${txHash}`);
@@ -506,10 +598,17 @@ export function rateProduct(
   const newStake = Math.max(0, product.currentStake + stakeChange);
   product.currentStake = newStake;
   
+  // Credit slashing penalties to protocol treasury (100% of slash goes to protocol)
+  if (stakeChange < 0) {
+    const slashAmount = Math.abs(stakeChange);
+    recordTreasurySlash(slashAmount, product.title, product.sellerName);
+  }
+  
   // Log the rating event
   console.log(`\n${'='.repeat(70)}`);
   if (stakeChange < 0) {
     console.log(`🔴 STAKE SLASHED!`);
+    console.log(`   → Protocol Treasury receives: $${Math.abs(stakeChange).toFixed(2)}`);
   } else {
     console.log(`⚪ STAKE UNCHANGED (Meets expectations)`);
   }

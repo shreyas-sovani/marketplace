@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
-import { Menu, X, ArrowRight, Zap, Brain, TrendingUp, Check, Lock, ExternalLink, LogOut } from 'lucide-react'
+import { Menu, X, ArrowRight, Zap, Brain, TrendingUp, Check, Lock, ExternalLink, LogOut, Shield } from 'lucide-react'
 import SellerDashboard from './pages/SellerDashboard'
 import LoginPage from './pages/LoginPage'
 import LoginModal from './components/LoginModal'
 import MarketTicker from './components/MarketTicker'
+import ProtocolAdmin from './pages/ProtocolAdmin'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
@@ -602,9 +603,19 @@ function Footer() {
         </div>
 
         <div className="border-t border-border/20 pt-8">
-          <p className="text-center text-sm text-text-secondary">
-            © 2026 InfoMart. All rights reserved. Building the future of knowledge commerce.
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <p className="text-sm text-text-secondary">
+              © 2026 InfoMart. All rights reserved. Building the future of knowledge commerce.
+            </p>
+            {/* Admin Access - Discreet link for protocol operators */}
+            <Link 
+              to="/admin" 
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-text-secondary hover:text-accent hover:bg-secondary-bg/50 transition-all border border-transparent hover:border-border/30"
+            >
+              <Shield className="w-3 h-3" />
+              Protocol Stats
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
@@ -907,6 +918,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/admin" element={<ProtocolAdmin />} />
       <Route 
         path="/terminal" 
         element={<ProtectedRoute element={<AgentTerminal />} requiredRole="buyer" />} 

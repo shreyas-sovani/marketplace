@@ -17,6 +17,7 @@ import {
   subscribeToEvents,
   getProductSummaryForAgent,
   rateProduct,
+  getProtocolTreasury,
 } from '../services/marketplaceService.js';
 import type {
   PublishProductRequest,
@@ -417,6 +418,42 @@ router.get('/stats', (_req: Request, res: Response): void => {
   } catch (error) {
     logError('GET', '/api/market/stats', error);
     res.status(500).json(createErrorResponse('Failed to fetch stats', 'INTERNAL_ERROR'));
+  }
+});
+
+/**
+ * GET /api/market/treasury
+ * Returns protocol treasury state (admin endpoint).
+ * 
+ * Revenue Sources:
+ * 1. Transaction Fees: 10% of every sale
+ * 2. Slashing Yield: 100% of penalties from bad sellers
+ * 
+ * Returns: { success, treasury: { feeCollected, slashCollected, totalRevenue, recentEvents } }
+ */
+router.get('/treasury', (_req: Request, res: Response): void => {
+  try {
+    logRequest('GET', '/api/market/treasury');
+
+    const treasury = getProtocolTreasury();
+
+    res.json({
+      success: true,
+      treasury: {
+        feeCollected: treasury.feeCollected,
+        slashCollected: treasury.slashCollected,
+        totalRevenue: treasury.totalRevenue,
+        recentEvents: treasury.recentEvents,
+      },
+      meta: {
+        feeRate: '10%',
+        slashRate: '100%',
+        description: 'Protocol revenue from transaction fees and slashing penalties',
+      },
+    });
+  } catch (error) {
+    logError('GET', '/api/market/treasury', error);
+    res.status(500).json(createErrorResponse('Failed to fetch treasury', 'INTERNAL_ERROR'));
   }
 });
 

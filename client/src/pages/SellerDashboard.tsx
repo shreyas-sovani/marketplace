@@ -149,10 +149,8 @@ function LiveEarningsCard({
               const isValidTxHash = sale.txHash && sale.txHash.startsWith('0x') && sale.txHash.length === 66
               return (
                 <div
-                  key={i}
-                  className="flex flex-col gap-1 text-sm bg-card-bg/50 rounded-xl px-3 py-2 border border-border/20 animate-fadeIn"
                   key={`${sale.productId}-${sale.timestamp}-${i}`}
-                  className="flex flex-col gap-1 text-sm bg-card-bg/50 rounded-lg px-3 py-2 border border-border/20 animate-fadeIn"
+                  className="flex flex-col gap-1 text-sm bg-card-bg/50 rounded-xl px-3 py-2 border border-border/20 animate-fadeIn"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 flex-1">
