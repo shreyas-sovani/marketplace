@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
-import { Menu, X, ArrowRight, Zap, Brain, TrendingUp, Check, Lock, ExternalLink } from 'lucide-react'
+import { Menu, X, ArrowRight, Zap, Brain, TrendingUp, Check, Lock, ExternalLink, LogOut } from 'lucide-react'
 import SellerDashboard from './pages/SellerDashboard'
 import LoginPage from './pages/LoginPage'
 import LoginModal from './components/LoginModal'
@@ -42,17 +42,17 @@ function Navigation() {
   const isLogin = location.pathname === '/login'
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-40 bg-primary-bg/80 backdrop-blur-xl border-b border-secondary-bg">
+    <nav className="fixed top-0 left-0 right-0 z-40 bg-primary-bg/80 backdrop-blur-xl border-b border-border/30">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent flex items-center justify-center group-hover:shadow-lg group-hover:shadow-accent/30 transition-all duration-300">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-accent flex items-center justify-center group-hover:shadow-soft-accent transition-all duration-300">
                 <Brain className="w-5 h-5 text-primary-bg" />
             </div>
             <div>
                 <h1 className="text-lg font-space-grotesk font-bold text-accent">InfoMart</h1>
-              <p className="text-xs text-secondary-text">Knowledge Economy</p>
+              <p className="text-xs text-text-secondary">Knowledge Economy</p>
             </div>
           </Link>
 
@@ -62,20 +62,20 @@ function Navigation() {
               <>
                 <Link
                   to="/"
-                  className={`px-4 py-2 rounded-lg font-space-grotesk text-sm font-semibold transition-all duration-300 ${
+                  className={`px-4 py-2 rounded-xl font-space-grotesk text-sm font-semibold transition-all duration-300 ${
                     isTerminal && isLoggedIn
                       ? 'bg-accent/20 text-accent'
-                      : 'text-secondary-text hover:text-accent'
+                      : 'text-text-secondary hover:text-accent'
                   }`}
                 >
                   Agent Terminal
                 </Link>
                 <Link
                   to="/sell"
-                  className={`px-4 py-2 rounded-lg font-space-grotesk text-sm font-semibold transition-all duration-300 ${
+                  className={`px-4 py-2 rounded-xl font-space-grotesk text-sm font-semibold transition-all duration-300 ${
                     isSell && isLoggedIn
                       ? 'bg-accent/20 text-accent'
-                      : 'text-secondary-text hover:text-accent'
+                      : 'text-text-secondary hover:text-accent'
                   }`}
                 >
                   Publish Knowledge
@@ -84,17 +84,17 @@ function Navigation() {
             )}
             
             {isLoggedIn && user && (
-              <div className="flex items-center gap-4 pl-4 border-l border-secondary-bg">
+                <div className="flex items-center gap-4 pl-4 border-l border-border/30">
                 <div className="text-right">
                   <p className="text-sm font-space-grotesk font-semibold text-text-primary">{user.username}</p>
-                  <p className="text-xs text-muted-text capitalize">{user.role}</p>
+                  <p className="text-xs text-text-secondary capitalize">{user.role}</p>
                 </div>
                 <button
                   onClick={() => {
                     logout()
                     setMobileMenuOpen(false)
                   }}
-                  className="px-4 py-2 rounded-lg bg-red-900/20 text-red-400 hover:bg-red-900/30 font-space-grotesk text-sm font-semibold transition-all duration-300 flex items-center gap-2"
+                  className="px-4 py-2 rounded-xl bg-red-900/20 text-red-400 hover:bg-red-900/30 font-space-grotesk text-sm font-semibold transition-all duration-300 flex items-center gap-2"
                 >
                   <LogOut className="w-4 h-4" />
                   Logout
@@ -114,20 +114,20 @@ function Navigation() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-4 pt-4 border-t border-secondary-bg space-y-2">
+          <div className="md:hidden mt-4 pt-4 border-t border-border/30 space-y-2">
             {!isLogin && (
               <>
                 <Link
                   to="/"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-4 py-2 rounded-lg text-secondary-text hover:text-accent transition-colors"
+                  className="block px-4 py-2 rounded-xl text-text-secondary hover:text-accent transition-colors"
                 >
                   Agent Terminal
                 </Link>
                 <Link
                   to="/sell"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-4 py-2 rounded-lg text-secondary-text hover:text-accent transition-colors"
+                  className="block px-4 py-2 rounded-xl text-text-secondary hover:text-accent transition-colors"
                 >
                   Publish Knowledge
                 </Link>
@@ -136,16 +136,16 @@ function Navigation() {
             
             {isLoggedIn && user && (
               <>
-                <div className="px-4 py-2 border-t border-secondary-bg">
+                <div className="px-4 py-2 border-t border-border/30">
                   <p className="text-sm font-space-grotesk font-semibold text-text-primary">{user.username}</p>
-                  <p className="text-xs text-muted-text capitalize">{user.role}</p>
+                  <p className="text-xs text-text-secondary capitalize">{user.role}</p>
                 </div>
                 <button
                   onClick={() => {
                     logout()
                     setMobileMenuOpen(false)
                   }}
-                  className="w-full text-left px-4 py-2 rounded-lg bg-red-900/20 text-red-400 hover:bg-red-900/30 font-space-grotesk text-sm font-semibold transition-all duration-300 flex items-center gap-2"
+                  className="w-full text-left px-4 py-2 rounded-xl bg-red-900/20 text-red-400 hover:bg-red-900/30 font-space-grotesk text-sm font-semibold transition-all duration-300 flex items-center gap-2"
                 >
                   <LogOut className="w-4 h-4" />
                   Logout
@@ -238,11 +238,11 @@ function LogEntryComponent({ entry, index }: { entry: LogEntry; index: number })
         <StepIcon step={entry.step} />
         <span className="text-xs font-space-grotesk font-bold text-accent uppercase">{entry.step}</span>
         <StatusBadge status={entry.status} />
-        <span className="text-xs text-secondary-text ml-auto font-share-tech">
+        <span className="text-xs text-text-secondary ml-auto font-inter">
           {new Date(entry.timestamp).toLocaleTimeString()}
         </span>
       </div>
-      <p className="text-sm text-secondary-text pl-6">{entry.thought}</p>
+      <p className="text-sm text-text-secondary pl-6">{entry.thought}</p>
     </div>
   )
 }
@@ -258,7 +258,7 @@ function TransactionComponent({ tx }: { tx: Transaction }) {
     <div className="card p-3 border border-accent/20 bg-accent/5 animate-fadeIn hover:border-accent/40 transition-colors">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-2xl bg-accent/20 flex items-center justify-center">
             <Zap className="w-4 h-4 text-accent" />
           </div>
           <div>
@@ -268,13 +268,13 @@ function TransactionComponent({ tx }: { tx: Transaction }) {
                 href={baseScanUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-accent hover:text-accent-hover transition-colors font-share-tech group"
+                className="inline-flex items-center gap-1 text-xs text-accent hover:text-accent-hover transition-colors font-inter group"
               >
                 <span>TX: {tx.txHash.slice(0, 10)}...{tx.txHash.slice(-6)}</span>
                 <ExternalLink className="w-3 h-3 opacity-70 group-hover:opacity-100" />
               </a>
             ) : (
-              <span className="text-xs text-muted-text font-share-tech">Payment verified ✓</span>
+              <span className="text-xs text-text-secondary">Payment verified ✓</span>
             )}
           </div>
         </div>
@@ -293,11 +293,11 @@ function TransactionComponent({ tx }: { tx: Transaction }) {
 function FeatureCard({ icon: Icon, title, description }: { icon: React.ComponentType<{ className?: string }>; title: string; description: string }) {
   return (
     <div className="group card p-6 cursor-pointer hover:bg-card-bg/80 transition-all duration-300">
-      <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-all duration-300">
+      <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-all duration-300">
         <Icon className="w-6 h-6 text-accent" />
       </div>
       <h3 className="text-lg font-space-grotesk font-bold text-text-primary mb-2">{title}</h3>
-      <p className="text-sm text-secondary-text leading-relaxed">{description}</p>
+      <p className="text-sm text-text-secondary leading-relaxed">{description}</p>
     </div>
   )
 }
@@ -332,8 +332,8 @@ function HeroSection() {
           {/* Left: Hero Content */}
           <div className="space-y-8 animate-slideInFromLeft">
             <div>
-              <div className="inline-block mb-4 px-4 py-2 rounded-lg bg-accent/10 border border-accent/30">
-                <p className="text-sm font-share-tech text-accent font-semibold">The Future of Knowledge Trading</p>
+              <div className="inline-block mb-4 px-4 py-2 rounded-xl bg-accent/10 border border-accent/30">
+                <p className="text-sm font-inter text-accent font-semibold">The Future of Knowledge Trading</p>
               </div>
               <h1 className="text-5xl lg:text-6xl font-space-grotesk font-bold text-text-primary leading-tight mb-4">
                 Trade Knowledge<br />
@@ -382,9 +382,9 @@ function HeroSection() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-sm font-space-grotesk font-semibold text-green-400">Live Session</span>
+                  <span className="text-sm font-inter font-semibold text-green-400">Live Session</span>
                 </div>
-                <span className="text-xs text-muted-text">session-1738369600</span>
+                <span className="text-xs text-text-secondary">session-1738369600</span>
               </div>
               <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-thin">
                 <LogEntryComponent
@@ -602,7 +602,7 @@ function Footer() {
         </div>
 
         <div className="border-t border-border/20 pt-8">
-          <p className="text-center text-sm text-muted-text">
+          <p className="text-center text-sm text-text-secondary">
             © 2026 InfoMart. All rights reserved. Building the future of knowledge commerce.
           </p>
         </div>
@@ -871,10 +871,10 @@ function AgentTerminal() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {[
-                { label: '🚫 Reject', query: 'Who is Taylor Swift?' },
-                { label: '✅ Purchase', query: 'What are crypto tax regulations in India?' },
-                { label: '🚫 Reject', query: 'What is 2+2?' },
-                { label: '✅ Multi-Buy', query: "What's the latest crypto market sentiment?" },
+                { label: 'Reject', query: 'Who is Taylor Swift?' },
+                { label: 'Purchase', query: 'What are crypto tax regulations in India?' },
+                { label: 'Reject', query: 'What is 2+2?' },
+                { label: 'Multi-Buy', query: "What's the latest crypto market sentiment?" },
               ].map((test, i) => (
                 <button
                   key={i}
