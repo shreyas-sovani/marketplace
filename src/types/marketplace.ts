@@ -113,6 +113,7 @@ export interface MarketplaceSaleEvent {
   productId: string;
   productTitle: string;
   sellerWallet: string;
+  sellerName?: string;
   buyerWallet: string;
   amount: number;
   txHash: string;
@@ -127,6 +128,7 @@ export interface MarketplaceListingEvent {
   productId: string;
   productTitle: string;
   sellerWallet: string;
+  sellerName?: string;
   price: number;
   productType: ProductType;
   timestamp: string;

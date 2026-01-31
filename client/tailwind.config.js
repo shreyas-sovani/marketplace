@@ -23,11 +23,16 @@ export default {
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'glow': 'glow 2s ease-in-out infinite alternate',
+        'marquee': 'marquee 30s linear infinite',
       },
       keyframes: {
         glow: {
           '0%': { boxShadow: '0 0 5px #22c55e, 0 0 10px #22c55e' },
           '100%': { boxShadow: '0 0 10px #22c55e, 0 0 20px #22c55e, 0 0 30px #22c55e' },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-50%)' },
         }
       }
     },

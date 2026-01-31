@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
 import SellerDashboard from './pages/SellerDashboard'
+import MarketTicker from './components/MarketTicker'
 
 // Types
 interface LogEntry {
@@ -304,7 +305,7 @@ function AgentTerminal() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto p-6">
+      <main className="max-w-7xl mx-auto p-6 pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left: Chat Interface */}
           <div className="space-y-4">
@@ -448,6 +449,11 @@ function AgentTerminal() {
           </div>
         </div>
       </main>
+
+      {/* Market Ticker - Fixed at bottom */}
+      <div className="fixed bottom-0 left-0 right-0 z-50">
+        <MarketTicker />
+      </div>
     </div>
   )
 }
