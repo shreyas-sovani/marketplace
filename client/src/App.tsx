@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
+import SellerDashboard from './pages/SellerDashboard'
 
 // Types
 interface LogEntry {
@@ -118,8 +120,42 @@ function TransactionComponent({ tx }: { tx: Transaction }) {
   )
 }
 
-// Main App
-export default function App() {
+// Navigation Component
+function Navigation() {
+  const location = useLocation()
+  const isTerminal = location.pathname === '/' || location.pathname === '/terminal'
+  const isSell = location.pathname === '/sell'
+
+  return (
+    <nav className="flex items-center gap-1 bg-gray-900/50 rounded-lg p-1">
+      <Link
+        to="/"
+        className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+          isTerminal
+            ? 'bg-green-600 text-white'
+            : 'text-gray-400 hover:text-white hover:bg-gray-800'
+        }`}
+      >
+        <span>🤖</span>
+        Agent Terminal
+      </Link>
+      <Link
+        to="/sell"
+        className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+          isSell
+            ? 'bg-purple-600 text-white'
+            : 'text-gray-400 hover:text-white hover:bg-gray-800'
+        }`}
+      >
+        <span>💡</span>
+        Sell Knowledge
+      </Link>
+    </nav>
+  )
+}
+
+// Agent Terminal (formerly the main app)
+function AgentTerminal() {
   const [query, setQuery] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [logs, setLogs] = useState<LogEntry[]>([])
@@ -248,15 +284,20 @@ export default function App() {
       {/* Header */}
       <header className="bg-gray-800/50 border-b border-gray-700 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center">
-              <span className="text-xl">🧠</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center">
+                <span className="text-xl">🧠</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-green-400">InfoMart</h1>
+                <p className="text-xs text-gray-500">Agent Terminal</p>
+                {currentSessionId && (
+                  <p className="text-xs text-gray-600 font-mono">{currentSessionId}</p>
+                )}
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-green-400">DueDiligence</h1>
-              <p className="text-xs text-gray-500">Just-in-Time Intelligence Platform</p>
-              {currentSessionId && <p className="text-xs text-gray-600 font-mono">{currentSessionId}</p>}
-            </div>
+            <Navigation />
           </div>
           <BudgetDisplay budget={budget} />
         </div>
@@ -408,5 +449,18 @@ export default function App() {
         </div>
       </main>
     </div>
+  )
+}
+
+// Main App with Router
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<AgentTerminal />} />
+        <Route path="/terminal" element={<AgentTerminal />} />
+        <Route path="/sell" element={<SellerDashboard />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
