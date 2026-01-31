@@ -59,7 +59,7 @@ client/
 
 ### 1. `tailwind.config.js`
 Added design system configuration:
-- Custom color palette (primary-bg, secondary-bg, card-bg, accent, etc.)
+- Custom color palette (primary-bg, secondary-bg, accent, etc.)
 - Typography fonts (Space Grotesk, Playfair Display, Inter, Share Tech)
 - Extended spacing and border radius
 - Custom animations
@@ -180,8 +180,8 @@ App
 ### Color Usage
 - **Accent (#7F5A83)** - CTAs, buttons, highlights, hover states
 - **Primary BG (#020202)** - Main page background
-- **Secondary BG (#081A28)** - Section backgrounds
-- **Card BG (#0D324D)** - Card and elevated surfaces
+- **Secondary BG (#081A28)** - Section backgrounds (used for card surfaces as `secondary-bg`)
+- **Card BG (#081A28)** - Card and elevated surfaces (mapped to `secondary-bg`)
 - **Border (#464668)** - Borders, dividers, subtle elements
 - **Text (#A188A6)** - Secondary content
 - **Muted Text (#9DA2AB)** - Tertiary content
@@ -239,7 +239,7 @@ export function NewComponent() {
 // Backgrounds
 className="bg-primary-bg"    // Main background
 className="bg-secondary-bg"  // Section background
-className="bg-card-bg"       // Card background
+className="bg-secondary-bg"  // Card background (use secondary-bg)
 
 // Borders
 className="border border-border"       // Standard border

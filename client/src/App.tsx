@@ -36,16 +36,16 @@ function Navigation() {
   const isSell = location.pathname === '/sell'
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-40 bg-primary-bg/80 backdrop-blur-xl border-b border-border/20">
+    <nav className="fixed top-0 left-0 right-0 z-40 bg-primary-bg/80 backdrop-blur-xl border-b border-secondary-bg">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center group-hover:shadow-lg group-hover:shadow-accent/30 transition-all duration-300">
-              <Brain className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent flex items-center justify-center group-hover:shadow-lg group-hover:shadow-accent/30 transition-all duration-300">
+                <Brain className="w-5 h-5 text-primary-bg" />
             </div>
             <div>
-              <h1 className="text-lg font-space-grotesk font-bold text-white">InfoMart</h1>
+                <h1 className="text-lg font-space-grotesk font-bold text-accent">InfoMart</h1>
               <p className="text-xs text-secondary-text">Knowledge Economy</p>
             </div>
           </Link>
@@ -56,27 +56,27 @@ function Navigation() {
               to="/"
               className={`px-4 py-2 rounded-lg font-space-grotesk text-sm font-semibold transition-all duration-300 ${
                 isTerminal
-                  ? 'bg-accent/20 text-accent border border-accent/50'
-                  : 'text-secondary-text hover:text-white hover:border-border border border-transparent'
+                  ? 'bg-accent/20 text-accent'
+                    : 'text-secondary-text hover:text-accent'
               }`}
             >
-              Agent Terminal
+                  Agent Terminal
             </Link>
             <Link
               to="/sell"
               className={`px-4 py-2 rounded-lg font-space-grotesk text-sm font-semibold transition-all duration-300 ${
                 isSell
-                  ? 'bg-accent/20 text-accent border border-accent/50'
-                  : 'text-secondary-text hover:text-white hover:border-border border border-transparent'
+                  ? 'bg-accent/20 text-accent'
+                    : 'text-secondary-text hover:text-accent'
               }`}
             >
-              Publish Knowledge
+                  Publish Knowledge
             </Link>
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-secondary-text hover:text-white transition-colors"
+            className="md:hidden text-secondary-text hover:text-accent transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -85,18 +85,18 @@ function Navigation() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-4 pt-4 border-t border-border space-y-2">
+          <div className="md:hidden mt-4 pt-4 border-t border-secondary-bg space-y-2">
             <Link
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-4 py-2 rounded-lg text-secondary-text hover:text-white transition-colors"
+                className="block px-4 py-2 rounded-lg text-secondary-text hover:text-accent transition-colors"
             >
               Agent Terminal
             </Link>
             <Link
               to="/sell"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-4 py-2 rounded-lg text-secondary-text hover:text-white transition-colors"
+                className="block px-4 py-2 rounded-lg text-secondary-text hover:text-accent transition-colors"
             >
               Publish Knowledge
             </Link>
@@ -118,7 +118,7 @@ function StatusBadge({ status }: { status: string }) {
     Complete: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
   }
   return (
-    <span className={`px-2.5 py-1 text-xs rounded-md border font-space-grotesk font-semibold ${colors[status] || 'bg-border/10 text-muted-text'}`}>
+    <span className={`px-2.5 py-1 text-xs rounded-md border font-space-grotesk font-semibold ${colors[status] || 'bg-secondary-bg/10 text-secondary-text'}`}>
       {status}
     </span>
   )
@@ -156,15 +156,15 @@ function BudgetDisplay({ budget }: { budget: Budget }) {
         </span>
       </div>
       <div className="space-y-2">
-        <div className="w-full h-2 bg-card-bg rounded-full overflow-hidden border border-border/20">
+        <div className="w-full h-2 bg-secondary-bg rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
-              isCritical ? 'bg-red-500' : isLow ? 'bg-yellow-500' : 'bg-gradient-to-r from-accent to-accent-hover'
+              isCritical ? 'bg-red-500' : isLow ? 'bg-yellow-500' : 'bg-accent'
             }`}
             style={{ width: `${Math.max(0, percentage)}%` }}
           />
         </div>
-        <div className="flex justify-between text-xs text-muted-text">
+        <div className="flex justify-between text-xs text-secondary-text">
           <span>Spent: ${budget.spent.toFixed(2)}</span>
           <span>Total: ${budget.total.toFixed(2)}</span>
         </div>
@@ -186,7 +186,7 @@ function LogEntryComponent({ entry, index }: { entry: LogEntry; index: number })
         <StepIcon step={entry.step} />
         <span className="text-xs font-space-grotesk font-bold text-accent uppercase">{entry.step}</span>
         <StatusBadge status={entry.status} />
-        <span className="text-xs text-muted-text ml-auto font-share-tech">
+        <span className="text-xs text-secondary-text ml-auto font-share-tech">
           {new Date(entry.timestamp).toLocaleTimeString()}
         </span>
       </div>
@@ -207,13 +207,13 @@ function TransactionComponent({ tx }: { tx: Transaction }) {
             <Zap className="w-4 h-4 text-accent" />
           </div>
           <div>
-            <div className="text-sm font-space-grotesk font-semibold text-white">{tx.vendor}</div>
-            <div className="text-xs text-muted-text font-share-tech">TX: {tx.txHash.slice(0, 16)}...</div>
+            <div className="text-sm font-space-grotesk font-semibold text-accent">{tx.vendor}</div>
+            <div className="text-xs text-secondary-text font-share-tech">TX: {tx.txHash.slice(0, 16)}...</div>
           </div>
         </div>
         <div className="text-right">
           <div className="text-sm font-space-grotesk font-bold text-red-400">-${tx.amount.toFixed(2)}</div>
-          <div className="text-xs text-muted-text">Remaining: ${tx.budgetRemaining.toFixed(2)}</div>
+          <div className="text-xs text-secondary-text">Remaining: ${tx.budgetRemaining.toFixed(2)}</div>
         </div>
       </div>
     </div>
@@ -225,11 +225,11 @@ function TransactionComponent({ tx }: { tx: Transaction }) {
 // ============================================================================
 function FeatureCard({ icon: Icon, title, description }: { icon: React.ComponentType<{ className?: string }>; title: string; description: string }) {
   return (
-    <div className="group card p-6 cursor-pointer hover:border-accent/50 hover:bg-card-bg/80 transition-all duration-300">
+    <div className="group card p-6 cursor-pointer hover:bg-card-bg/80 transition-all duration-300">
       <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-all duration-300">
         <Icon className="w-6 h-6 text-accent" />
       </div>
-      <h3 className="text-lg font-space-grotesk font-bold text-white mb-2">{title}</h3>
+      <h3 className="text-lg font-space-grotesk font-bold text-text-primary mb-2">{title}</h3>
       <p className="text-sm text-secondary-text leading-relaxed">{description}</p>
     </div>
   )
@@ -253,7 +253,7 @@ function HeroSection() {
               <div className="inline-block mb-4 px-4 py-2 rounded-lg bg-accent/10 border border-accent/30">
                 <p className="text-sm font-share-tech text-accent font-semibold">The Future of Knowledge Trading</p>
               </div>
-              <h1 className="text-5xl lg:text-6xl font-space-grotesk font-bold text-white leading-tight mb-4">
+              <h1 className="text-5xl lg:text-6xl font-space-grotesk font-bold text-text-primary leading-tight mb-4">
                 Trade Knowledge<br />
                 <span className="bg-gradient-to-r from-accent via-accent-hover to-accent bg-clip-text text-transparent">
                   With AI Agents
@@ -372,7 +372,7 @@ function FeaturesSection() {
     <div className="bg-secondary-bg border-t border-border/20 py-16 md:py-24">
       <div className="section-container">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-space-grotesk font-bold text-white mb-4">
+          <h2 className="text-4xl md:text-5xl font-space-grotesk font-bold text-text-primary mb-4">
             The Future of Knowledge Trading
           </h2>
           <p className="text-lg text-secondary-text max-w-2xl mx-auto">
@@ -399,7 +399,7 @@ function EditorialSection() {
       <div className="section-container">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6 order-2 lg:order-1">
-            <h2 className="text-4xl lg:text-5xl font-playfair font-bold text-white">
+            <h2 className="text-4xl lg:text-5xl font-playfair font-bold text-text-primary">
               A New Economy Forms
             </h2>
             <p className="text-lg text-secondary-text leading-relaxed font-inter">
@@ -437,7 +437,7 @@ function CTASection() {
     <div className="bg-secondary-bg py-16 md:py-24 border-t border-border/20">
       <div className="section-container">
         <div className="card p-12 border border-accent/30 bg-card-bg/50 text-center space-y-6">
-          <h2 className="text-4xl lg:text-5xl font-space-grotesk font-bold text-white">
+          <h2 className="text-4xl lg:text-5xl font-space-grotesk font-bold text-text-primary">
             Ready to Trade Knowledge?
           </h2>
           <p className="text-lg text-secondary-text max-w-2xl mx-auto">
@@ -469,9 +469,9 @@ function Footer() {
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2 group">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center">
-                <Brain className="w-4 h-4 text-white" />
+                <Brain className="w-4 h-4 text-accent" />
               </div>
-              <span className="font-space-grotesk font-bold text-white">InfoMart</span>
+              <span className="font-space-grotesk font-bold text-text-primary">InfoMart</span>
             </Link>
             <p className="text-sm text-secondary-text">
               A decentralized marketplace where human knowledge meets artificial intelligence.
@@ -480,7 +480,7 @@ function Footer() {
 
           {/* Product */}
           <div className="space-y-4">
-            <h4 className="font-space-grotesk font-semibold text-white">Product</h4>
+            <h4 className="font-space-grotesk font-semibold text-text-primary">Product</h4>
             <ul className="space-y-2 text-sm text-secondary-text">
               <li><Link to="/" className="hover:text-accent transition-colors">Agent Terminal</Link></li>
               <li><Link to="/sell" className="hover:text-accent transition-colors">Publish</Link></li>
@@ -490,7 +490,7 @@ function Footer() {
 
           {/* Resources */}
           <div className="space-y-4">
-            <h4 className="font-space-grotesk font-semibold text-white">Resources</h4>
+            <h4 className="font-space-grotesk font-semibold text-text-primary">Resources</h4>
             <ul className="space-y-2 text-sm text-secondary-text">
               <li><a href="#" className="hover:text-accent transition-colors">Documentation</a></li>
               <li><a href="#" className="hover:text-accent transition-colors">API Reference</a></li>
@@ -500,7 +500,7 @@ function Footer() {
 
           {/* Legal */}
           <div className="space-y-4">
-            <h4 className="font-space-grotesk font-semibold text-white">Legal</h4>
+            <h4 className="font-space-grotesk font-semibold text-text-primary">Legal</h4>
             <ul className="space-y-2 text-sm text-secondary-text">
               <li><a href="#" className="hover:text-accent transition-colors">Privacy</a></li>
               <li><a href="#" className="hover:text-accent transition-colors">Terms</a></li>
@@ -661,7 +661,7 @@ function AgentTerminal() {
         <div className="section-container">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <h1 className="text-3xl font-space-grotesk font-bold text-white">Agent Terminal</h1>
+              <h1 className="text-3xl font-space-grotesk font-bold text-text-primary">Agent Terminal</h1>
               <p className="text-secondary-text">
                 {currentSessionId ? `Session: ${currentSessionId}` : 'Watch AI agents analyze queries in real-time'}
               </p>
@@ -687,7 +687,7 @@ function AgentTerminal() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="e.g., What are crypto tax strategies in India?"
-                  className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-white placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
+                  className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-secondary-text placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
                   disabled={isProcessing}
                 />
               </label>
@@ -712,7 +712,7 @@ function AgentTerminal() {
             {/* Answer Display */}
             {answer && (
               <div className="card p-6 space-y-4 border-accent/30">
-                <h3 className="text-lg font-space-grotesk font-bold text-white flex items-center gap-2">
+                <h3 className="text-lg font-space-grotesk font-bold text-text-primary flex items-center gap-2">
                   <Brain className="w-5 h-5 text-accent" />
                   Analysis Result
                 </h3>
@@ -725,7 +725,7 @@ function AgentTerminal() {
             {/* Transactions */}
             {transactions.length > 0 && (
               <div className="card p-6 space-y-4">
-                <h3 className="text-lg font-space-grotesk font-bold text-white flex items-center gap-2">
+                <h3 className="text-lg font-space-grotesk font-bold text-text-primary flex items-center gap-2">
                   <Zap className="w-5 h-5 text-accent" />
                   Purchases ({transactions.length})
                 </h3>
@@ -741,7 +741,7 @@ function AgentTerminal() {
           {/* Right Column: Neural Log */}
           <div className="card p-6 h-[600px] flex flex-col">
             <div className="flex items-center justify-between mb-4 pb-4 border-b border-border/20">
-              <h3 className="text-lg font-space-grotesk font-bold text-white flex items-center gap-2">
+              <h3 className="text-lg font-space-grotesk font-bold text-text-primary flex items-center gap-2">
                 <Brain className="w-5 h-5 text-accent" />
                 Neural Log
               </h3>
@@ -790,7 +790,7 @@ function AgentTerminal() {
                   disabled={isProcessing}
                   className="p-3 card text-left text-sm hover:border-accent/50 transition-all disabled:opacity-50"
                 >
-                  <div className="font-space-grotesk font-semibold text-white mb-1">{test.label}</div>
+                  <div className="font-space-grotesk font-semibold text-text-primary mb-1">{test.label}</div>
                   <div className="text-xs text-secondary-text">{test.query}</div>
                 </button>
               ))}

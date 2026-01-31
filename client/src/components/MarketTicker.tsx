@@ -36,7 +36,7 @@ function TickerItem({ event }: { event: TickerEvent }) {
           <Package className="w-3 h-3 text-accent" />
           <span className="text-accent font-share-tech font-semibold text-xs">[NEW]</span>
         </span>
-        <span className="text-white font-inter text-sm">{event.data.productTitle}</span>
+        <span className="text-text-primary font-inter text-sm">{event.data.productTitle}</span>
         <span className="text-accent font-share-tech">${event.data.price.toFixed(2)}</span>
         <span className="text-muted-text text-xs">by {event.data.sellerName || 'Anonymous'}</span>
       </span>
@@ -50,7 +50,7 @@ function TickerItem({ event }: { event: TickerEvent }) {
           <Zap className="w-3 h-3 text-accent" />
           <span className="text-accent font-share-tech font-semibold text-xs">[SALE]</span>
         </span>
-        <span className="text-white font-inter text-sm">
+        <span className="text-text-primary font-inter text-sm">
           {event.data.buyerName || 'Agent'} acquired from {event.data.sellerName || 'Human'}
         </span>
         <span className="text-accent font-share-tech">${event.data.price.toFixed(2)}</span>

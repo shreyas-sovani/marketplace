@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Zap, Package, TrendingUp, Lock, AlertCircle } from 'lucide-react'
+import { Zap, Package, TrendingUp, Lock, AlertCircle, Brain } from 'lucide-react'
 
 // Types
 interface ProductListing {
@@ -48,7 +48,7 @@ function PriceSlider({ value, onChange }: { value: number; onChange: (val: numbe
         <label className="text-sm font-space-grotesk font-semibold text-secondary-text uppercase tracking-wider">
           Price
         </label>
-        <span className="text-3xl font-space-grotesk font-bold bg-gradient-to-r from-accent to-accent-hover bg-clip-text text-transparent">
+        <span className="text-3xl font-space-grotesk font-bold bg-gradient-to-r from-accent to-accent bg-clip-text text-transparent">
           ${value.toFixed(2)}
         </span>
       </div>
@@ -59,16 +59,16 @@ function PriceSlider({ value, onChange }: { value: number; onChange: (val: numbe
         step="0.01"
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-2 bg-card-bg rounded-full appearance-none cursor-pointer accent-accent"
+        className="w-full h-2 bg-secondary-bg rounded-full appearance-none cursor-pointer accent-accent"
       />
       <div className="flex items-center justify-between text-xs">
-        <span className="text-muted-text">$0.01 min</span>
+        <span className="text-secondary-text">$0.01 min</span>
         <span className="text-secondary-text font-share-tech">Higher price = Higher perceived value</span>
-        <span className="text-muted-text">$0.10 max</span>
+        <span className="text-secondary-text">$0.10 max</span>
       </div>
-      <div className="h-1 bg-card-bg rounded-full overflow-hidden border border-border/20">
+      <div className="h-1 bg-secondary-bg rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-accent to-accent-hover transition-all duration-200"
+          className="h-full bg-accent transition-all duration-200"
           style={{ width: `${percentage}%` }}
         />
       </div>
@@ -119,28 +119,28 @@ function LiveEarningsCard({
           <p className="text-xs font-space-grotesk font-semibold text-secondary-text uppercase tracking-wider">
             Live Earnings
           </p>
-          <p className="text-xs text-muted-text">Real-time USDC balance</p>
+          <p className="text-xs text-secondary-text">Real-time USDC balance</p>
         </div>
       </div>
 
-      <div className="space-y-1 bg-secondary-bg rounded-lg p-4">
+      <div className="space-y-1 bg-card-bg rounded-lg p-4 text-secondary-text">
         <div className="text-4xl font-space-grotesk font-bold text-accent">
           ${displayEarnings.toFixed(4)}
         </div>
-        <p className="text-xs text-muted-text font-share-tech">USDC on Base Sepolia</p>
+        <p className="text-xs text-secondary-text font-share-tech">USDC on Base Sepolia</p>
       </div>
 
       {/* Recent Sales Feed */}
       {recentSales.length > 0 && (
-        <div className="border-t border-border/20 pt-4 space-y-2">
+        <div className="border-t border-secondary-bg pt-4 space-y-2">
           <p className="text-xs font-space-grotesk font-semibold text-secondary-text uppercase tracking-wider">
             Recent Sales
           </p>
           <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-thin">
             {recentSales.slice(0, 5).map((sale, i) => (
-              <div
+                <div
                 key={i}
-                className="flex items-center justify-between text-sm bg-card-bg/50 rounded-lg px-3 py-2 border border-border/20 animate-fadeIn"
+                className="flex items-center justify-between text-sm bg-card-bg/50 rounded-lg px-3 py-2 animate-fadeIn text-secondary-text"
               >
                 <div className="flex items-center gap-2 flex-1">
                   <Zap className="w-3 h-3 text-accent flex-shrink-0" />
@@ -149,7 +149,7 @@ function LiveEarningsCard({
                   </span>
                   <span className="text-secondary-text truncate text-xs">{sale.productTitle}</span>
                 </div>
-                <span className="text-xs text-muted-text font-share-tech flex-shrink-0">
+                <span className="text-xs text-secondary-text font-share-tech flex-shrink-0">
                   {new Date(sale.timestamp).toLocaleTimeString()}
                 </span>
               </div>
@@ -159,7 +159,7 @@ function LiveEarningsCard({
       )}
 
       {recentSales.length === 0 && (
-        <div className="border-t border-border/20 pt-4 text-center text-muted-text text-sm">
+        <div className="border-t border-secondary-bg pt-4 text-center text-secondary-text text-sm">
           <Package className="w-6 h-6 mx-auto mb-2 opacity-50" />
           <p>Waiting for sales...</p>
         </div>
@@ -178,7 +178,7 @@ function MyProductsList({ products, walletFilter }: { products: ProductListing[]
 
   if (!walletFilter) {
     return (
-      <div className="card p-8 text-center border-border/50">
+      <div className="card p-8 text-center">
         <AlertCircle className="w-8 h-8 mx-auto text-secondary-text mb-3 opacity-50" />
         <p className="text-secondary-text text-sm">Enter your wallet address to see your products</p>
       </div>
@@ -187,7 +187,7 @@ function MyProductsList({ products, walletFilter }: { products: ProductListing[]
 
   if (myProducts.length === 0) {
     return (
-      <div className="card p-8 text-center border-border/50">
+      <div className="card p-8 text-center">
         <Package className="w-8 h-8 mx-auto text-secondary-text mb-3 opacity-50" />
         <p className="text-secondary-text text-sm">No products yet. Publish your first knowledge!</p>
       </div>
@@ -196,7 +196,7 @@ function MyProductsList({ products, walletFilter }: { products: ProductListing[]
 
   return (
     <div className="card p-6 space-y-4">
-      <h3 className="text-lg font-space-grotesk font-bold text-white flex items-center gap-2">
+      <h3 className="text-lg font-space-grotesk font-bold text-accent flex items-center gap-2">
         <Package className="w-5 h-5 text-accent" />
         My Products ({myProducts.length})
       </h3>
@@ -209,18 +209,16 @@ function MyProductsList({ products, walletFilter }: { products: ProductListing[]
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs">
-                      {product.type === 'human_alpha' ? '🧠' : '🤖'}
-                    </span>
-                  </div>
-                  <h4 className="font-space-grotesk font-semibold text-white truncate">{product.title}</h4>
+                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                      {product.type === 'human_alpha' ? <Brain className="w-4 h-4 text-accent" /> : <Package className="w-4 h-4 text-accent" />}
+                    </div>
+                  <h4 className="font-space-grotesk font-semibold text-accent truncate">{product.title}</h4>
                 </div>
                 <p className="text-xs text-secondary-text line-clamp-2">{product.description}</p>
               </div>
               <div className="text-right flex-shrink-0">
                 <div className="text-accent font-space-grotesk font-bold text-sm">${product.price.toFixed(2)}</div>
-                <div className="text-xs text-muted-text font-share-tech">{product.salesCount} sales</div>
+                <div className="text-xs text-secondary-text font-share-tech">{product.salesCount} sales</div>
               </div>
             </div>
           </div>
@@ -372,21 +370,21 @@ export default function SellerDashboard() {
   return (
     <div className="min-h-screen bg-primary-bg pt-20 pb-8">
       {/* Navigation Bar - Reuse from App */}
-      <nav className="fixed top-0 left-0 right-0 z-40 bg-primary-bg/80 backdrop-blur-xl border-b border-border/20">
+      <nav className="fixed top-0 left-0 right-0 z-40 bg-primary-bg/80 backdrop-blur-xl border-b border-secondary-bg">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center group-hover:shadow-lg group-hover:shadow-accent/30 transition-all duration-300">
-                <Zap className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent flex items-center justify-center group-hover:shadow-lg group-hover:shadow-accent/30 transition-all duration-300">
+                <Zap className="w-5 h-5 text-primary-bg" />
               </div>
               <div>
-                <h1 className="text-lg font-space-grotesk font-bold text-white">InfoMart</h1>
+                <h1 className="text-lg font-space-grotesk font-bold text-accent">InfoMart</h1>
                 <p className="text-xs text-secondary-text">Seller Dashboard</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-muted-text'}`} />
-              <span className="text-xs text-muted-text font-share-tech">{connected ? 'Live' : 'Offline'}</span>
+              <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-secondary-text'}`} />
+              <span className="text-xs text-secondary-text font-share-tech">{connected ? 'Live' : 'Offline'}</span>
             </div>
           </div>
         </div>
@@ -399,7 +397,7 @@ export default function SellerDashboard() {
           <div className="lg:col-span-2 space-y-6">
             <form onSubmit={handlePublish} className="card p-8 space-y-6">
               <div>
-                <h2 className="text-2xl font-space-grotesk font-bold text-white flex items-center gap-3">
+                <h2 className="text-2xl font-space-grotesk font-bold text-accent flex items-center gap-3">
                   <Package className="w-6 h-6 text-accent" />
                   Publish Knowledge
                 </h2>
@@ -416,7 +414,7 @@ export default function SellerDashboard() {
                   value={form.title}
                   onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
                   placeholder="e.g., Crypto Tax Loopholes India 2026"
-                  className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-white placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
+                  className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-secondary-text placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
                   maxLength={100}
                 />
                 <p className="text-xs text-muted-text">{form.title.length}/100 characters</p>
@@ -431,7 +429,7 @@ export default function SellerDashboard() {
                   value={form.description}
                   onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                   placeholder="Describe what the buyer will learn. Be specific about the value you provide..."
-                  className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-white placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all resize-none"
+                  className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-secondary-text placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all resize-none"
                   rows={3}
                   maxLength={500}
                 />
@@ -448,14 +446,14 @@ export default function SellerDashboard() {
                   value={form.content}
                   onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
                   placeholder="This is the valuable content that buyers pay for. Include all your insights, data, strategies, and actionable takeaways..."
-                  className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-white placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all resize-none font-share-tech text-sm"
+                  className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-secondary-text placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all resize-none font-share-tech text-sm"
                   rows={10}
                 />
                 <p className="text-xs text-muted-text">{form.content.length} characters • Markdown supported</p>
               </div>
 
               {/* Price Slider */}
-              <div className="bg-secondary-bg/50 rounded-lg p-4 border border-border/20">
+              <div className="bg-card-bg/50 rounded-lg p-4 text-secondary-text">
                 <PriceSlider
                   value={form.price}
                   onChange={(val) => setForm((prev) => ({ ...prev, price: val }))}
@@ -471,13 +469,13 @@ export default function SellerDashboard() {
                   {[
                     {
                       key: 'human_alpha' as const,
-                      icon: '🧠',
+                      icon: <Brain className="w-6 h-6 text-accent" />,
                       title: 'Human Alpha',
                       subtitle: 'Unique insights, strategies',
                     },
                     {
                       key: 'api' as const,
-                      icon: '🤖',
+                      icon: <Package className="w-6 h-6 text-accent" />,
                       title: 'API / Data',
                       subtitle: 'Automated data feeds',
                     },
@@ -492,8 +490,8 @@ export default function SellerDashboard() {
                           : 'border-border hover:border-border/70'
                       }`}
                     >
-                      <div className="text-2xl mb-2">{type.icon}</div>
-                      <div className="font-space-grotesk font-bold text-white text-sm">{type.title}</div>
+                      <div className="mb-2">{type.icon}</div>
+                      <div className="font-space-grotesk font-bold text-text-primary text-sm">{type.title}</div>
                       <div className="text-xs text-secondary-text">{type.subtitle}</div>
                     </button>
                   ))}
@@ -511,7 +509,7 @@ export default function SellerDashboard() {
                     value={form.wallet}
                     onChange={(e) => setForm((prev) => ({ ...prev, wallet: e.target.value }))}
                     placeholder="0x..."
-                    className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-white placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all font-share-tech text-sm"
+                    className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-secondary-text placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all font-share-tech text-sm"
                   />
                   <p className="text-xs text-muted-text">Receives USDC payments</p>
                 </div>
@@ -524,7 +522,7 @@ export default function SellerDashboard() {
                     value={form.sellerName}
                     onChange={(e) => setForm((prev) => ({ ...prev, sellerName: e.target.value }))}
                     placeholder="e.g., CryptoTaxPro"
-                    className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-white placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
+                    className="w-full bg-secondary-bg border border-border/50 rounded-lg px-4 py-3 text-secondary-text placeholder-muted-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
                   />
                   <p className="text-xs text-muted-text">Visible to buyers</p>
                 </div>
@@ -579,12 +577,12 @@ export default function SellerDashboard() {
 
             {/* Marketplace Stats */}
             <div className="card p-6 space-y-4">
-              <h3 className="text-lg font-space-grotesk font-bold text-white flex items-center gap-2">
+              <h3 className="text-lg font-space-grotesk font-bold text-text-primary flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-accent" />
                 Marketplace
               </h3>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-secondary-bg rounded-lg p-4 text-center border border-border/20">
+                <div className="bg-card-bg rounded-lg p-4 text-center text-secondary-text">
                   <div className="text-2xl font-space-grotesk font-bold text-accent">{products.length}</div>
                   <div className="text-xs text-muted-text mt-1">Total Products</div>
                 </div>

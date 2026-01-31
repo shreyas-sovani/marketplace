@@ -75,7 +75,7 @@
 ```
 Primary Background:    #020202 (deep black)
 Secondary Background:  #081A28 (navy)
-Card Background:       #0D324D (blue-black)
+Card Background:       #081A28 (uses `secondary-bg`)
 Border:                #464668 (gray-purple)
 Accent:                #7F5A83 (purple)
 Accent Hover:          #907195 (lighter purple)
