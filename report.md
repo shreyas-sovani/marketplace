@@ -122,13 +122,31 @@ AI agents need specialized knowledge. Current limitations:
 
 ### InfoMart Dynamic Marketplace (Human Alpha)
 
-Humans can publish knowledge products at any time. The agent discovers them dynamically:
+Humans can publish knowledge products at any time. The agent discovers them dynamically.
 
-| Seeded Product | Price | Type | Seller | Stake |
-|----------------|-------|------|--------|-------|
-| **AIBhoomi Winning Strategy 2026** | $0.05 | human_alpha | Alice (Hackathon Veteran) | $5.00 |
-| **India Crypto Tax Loopholes 2026** | $0.03 | human_alpha | Bob (Tax Expert) | $5.00 |
-| **Bitcoin Sentiment Pulse - Jan 2026** | $0.02 | human_alpha | Charlie (Market Analyst) | $5.00 |
+**Demo Data: Indian Financial Alpha (10 Products)**
+
+#### Tier A: High Quality "Human Alpha" (Agent should Rate 5 & Buy)
+| Product | Price | Seller | Stake | Content Summary |
+|---------|-------|--------|-------|-----------------|
+| **GIFT City Tax Arbitrage 2026** | $0.10 | CA_Rohit | $5.00 | Section 80LA, Family Investment Fund, $100k corpus, 10-year exemption |
+| **Adani Green Index Rebalancing Leak** | $0.08 | MarketInsider_X | $5.00 | "Impact Cost" criteria failure, March Nifty 50 exclusion |
+| **SME IPO Grey Market Premium List** | $0.05 | IPO_King | $5.00 | TechNova +85% GMP, circular trading warning |
+| **Section 54F Hack for Freelancers** | $0.09 | TaxNinja | $5.00 | CGAS scheme, 6% interest, July 31st deadline |
+| **Algo Strategy: BankNifty 9:20 AM** | $0.07 | AlgoTrader_Py | $5.00 | 62% win rate, 5-min breakout, RBI policy caveat |
+
+#### Tier B: Meta/Context (Neutral)
+| Product | Price | Seller | Stake | Content Summary |
+|---------|-------|--------|-------|-----------------|
+| **Pune Viman Nagar Commercial Rentals** | $0.03 | Pune_Broker | $5.00 | 15% rental increase, IT park expansion |
+| **AIBoomi Judging Rubric Leaks** | $0.05 | Hackathon_Vet | $5.00 | Business Viability focus, "Closed Loop Economy" term |
+
+#### Tier C: Low Quality "Traps" (Agent should Rate 1-2 & SLASH)
+| Product | Price | Seller | Stake | Content Summary |
+|---------|-------|--------|-------|-----------------|
+| **Guaranteed Stock Tip 2026** | $0.05 | Scammy_Sam | $5.00 | "Buy HDFC Bank. It will go up. Trust me." |
+| **Secret Crypto Trading Strategy** | $0.04 | Noob_Trader | $5.00 | "Buy low and sell high. Use Binance." |
+| **Forex Risk Guide** | $0.02 | Lazy_Writer | $5.00 | "Forex is risky. Be careful." |
 
 **Plus any new products published via Seller Dashboard!**
 
@@ -210,10 +228,11 @@ InfoMart solves this with **Staked Reputation**: every seller stakes $5.00 colla
 
 | Rating | Verdict | Stake Change | Effect |
 |--------|---------|--------------|--------|
-| ⭐ 1-2 | POOR QUALITY | 🔥 **-$2.00** | Severe penalty for garbage data |
-| ⭐⭐⭐ 3 | MEDIOCRE | 🔥 **-$0.50** | Minor penalty for low-effort content |
-| ⭐⭐⭐⭐ 4 | GOOD | ✅ **$0.00** | No penalty — acceptable quality |
-| ⭐⭐⭐⭐⭐ 5 | EXCELLENT | ✅ **$0.00** | No penalty — high quality |
+| ⭐ 1 | CATASTROPHIC | 🔥 **-$3.00** | Maximum penalty for garbage/harmful data |
+| ⭐⭐ 2 | POOR QUALITY | 🔥 **-$2.00** | Severe penalty for vague/generic content |
+| ⭐⭐⭐ 3 | MEDIOCRE | 🔥 **-$1.00** | Penalty for incomplete/low-effort content |
+| ⭐⭐⭐⭐ 4 | ACCEPTABLE | 🔥 **-$0.25** | Minor penalty — decent but not exceptional |
+| ⭐⭐⭐⭐⭐ 5 | EXCELLENT | ✅ **$0.00** | No penalty — meets high standards (baseline) |
 
 **There are no rewards. Only survival.** Sell quality or get slashed.
 
@@ -654,83 +673,86 @@ module.exports = {
 ### Scenario 1: Human Alpha Purchase + Rating (Approved)
 
 ```
-📝 Query: "What strategies do Indian traders use to minimize crypto taxes?"
+📝 Query: "How can I legally reduce my crypto taxes in India?"
 
 🧠 Neural Log:
 ┌─────────────────────────────────────────────────────────────────┐
 │ [ANALYSIS] Evaluating query value...                    Thinking│
 │ 💭 This requires jurisdiction-specific insider knowledge.       │
-│    Not generic facts — prime Human Alpha territory.             │
+│    Complex topics: Tax, GIFT City, Section numbers.             │
+│    Prime Human Alpha territory — not generic facts.             │
 │                                                                 │
 │ [BROWSE] Checking InfoMart marketplace...              Thinking │
-│ 💭 Found 3 products. "India Crypto Tax Loopholes 2026" matches. │
-│    Type: human_alpha. Price: $0.03. Seller: Bob (Tax Expert)    │
+│ 💭 Found 10 products. "GIFT City Tax Arbitrage 2026" matches.   │
+│    Type: human_alpha. Price: $0.10. Seller: CA_Rohit            │
 │    Seller Stake: $5.00 — skin in the game ✓                     │
 │                                                                 │
 │ [BUDGET] Calculating ROI...                            Thinking │
-│ 💭 Budget: $0.50. Cost: $0.03. Remaining: $0.47                 │
-│    Human Alpha ROI: HIGH — insider strategies are valuable      │
+│ 💭 Budget: $0.50. Cost: $0.10. Remaining: $0.40                 │
+│    Human Alpha ROI: HIGH — Section 80LA details are valuable    │
 │                                                                 │
 │ [DECISION] Approved: Purchase from InfoMart            Approved │
-│ 💭 Buying "India Crypto Tax Loopholes 2026" from marketplace    │
+│ 💭 Buying "GIFT City Tax Arbitrage 2026" from marketplace       │
 │                                                                 │
 │ [RATING] Evaluating data quality...                    Approved │
-│ 💭 Content: Specific GIFT City exemptions, NFT gifting strategy │
-│    Verdict: EXCELLENT — unique insights I couldn't find elsewhere│
+│ 💭 Content: Section 80LA, FIF registration, $100k corpus,       │
+│    10-year exemption, specific legal method                     │
+│    Verdict: EXCELLENT — specific, actionable, non-public info   │
 │ ✅ Rated 5/5 stars — No penalty applied                         │
 └─────────────────────────────────────────────────────────────────┘
 
 💸 Transactions:
 ┌─────────────────────────────────────────────────────────────────┐
-│ India Crypto Tax Loopholes 2026                                 │
+│ GIFT City Tax Arbitrage 2026                                    │
 │ Source: marketplace (human_alpha)                               │
-│ Seller: Bob (Tax Expert)                                        │
-│ -$0.03    TX: 0xa1b2c3d4...    ✅ Success                       │
+│ Seller: CA_Rohit                                                │
+│ -$0.10    TX: 0xa1b2c3d4...    ✅ Success                       │
 │ 🔗 Verify: https://sepolia.basescan.org/tx/0xa1b2c3d4...        │
 │                                                                 │
-│ Rating: ⭐⭐⭐⭐⭐ (5/5) — Bob's stake: $5.00 (unchanged)          │
+│ Rating: ⭐⭐⭐⭐⭐ (5/5) — CA_Rohit's stake: $5.00 (unchanged)    │
 └─────────────────────────────────────────────────────────────────┘
 
 📺 Market Ticker:
-[SALE] Agent paid Bob ($0.03) ••• scrolling •••
+[SALE] Agent paid CA_Rohit ($0.10) ••• scrolling •••
 
-💰 Final Budget: $0.47 remaining — Human Alpha acquired!
+💰 Final Budget: $0.40 remaining — Human Alpha acquired!
 ```
 
 ### Scenario 2: Slashing Event — Bad Data Gets Punished 🔥
 
 ```
-📝 Query: "What's the best DeFi yield farming strategy for 2026?"
+📝 Query: "What's the best stock to buy in 2026?"
 
 🧠 Neural Log:
 ┌─────────────────────────────────────────────────────────────────┐
 │ [BROWSE] Checking InfoMart marketplace...              Thinking │
-│ 💭 Found "Secret DeFi Alpha" by Charlie — $0.05                 │
+│ 💭 Found "Guaranteed Stock Tip 2026" by Scammy_Sam — $0.05      │
 │                                                                 │
 │ [DECISION] Approved: Purchase from InfoMart            Approved │
-│ 💭 Buying "Secret DeFi Alpha" from marketplace                  │
+│ 💭 Buying "Guaranteed Stock Tip 2026" from marketplace          │
 │                                                                 │
 │ [RATING] Evaluating data quality...                    Approved │
-│ 💭 Content: "Use Aave and Compound" — generic, publicly known   │
-│    Verdict: POOR QUALITY — no unique insights                   │
-│ 🔥 Rated 2/5 stars — SLASHED $2.00 from seller stake            │
+│ 💭 Content: "Buy HDFC Bank. It is a big bank. It will go up."   │
+│    Verdict: CATASTROPHIC — generic, no specific analysis        │
+│    This is public knowledge, not Human Alpha!                   │
+│ 🔥 Rated 1/5 stars — SLASHED $3.00 from seller stake            │
 └─────────────────────────────────────────────────────────────────┘
 
 💸 Transactions:
 ┌─────────────────────────────────────────────────────────────────┐
-│ Secret DeFi Alpha                                               │
+│ Guaranteed Stock Tip 2026                                       │
 │ Source: marketplace (human_alpha)                               │
-│ Seller: Charlie (Market Analyst)                                │
+│ Seller: Scammy_Sam                                              │
 │ -$0.05    TX: 0x9b8c7d6e...    ✅ Success                       │
 │                                                                 │
-│ Rating: ⭐⭐ (2/5) — 🔥 SLASHED $2.00                            │
-│ Charlie's stake: $5.00 → $3.00                                  │
+│ Rating: ⭐ (1/5) — 🔥 SLASHED $3.00                              │
+│ Scammy_Sam's stake: $5.00 → $2.00                               │
 └─────────────────────────────────────────────────────────────────┘
 
 📺 Market Ticker:
-[SALE] Agent paid Charlie ($0.05) ••• 🔥 [SLASH] Charlie -$2.00 ••• scrolling
+[SALE] Agent paid Scammy_Sam ($0.05) ••• 🔥 [SLASH] Scammy_Sam -$3.00 ••• scrolling
 
-💰 The agent got its data. Charlie got slashed. The market self-corrects.
+💰 The agent got its data. Scammy_Sam got slashed. The market self-corrects.
 ```
 
 ### Scenario 3: Taylor Swift Defense (Rejected)
@@ -828,9 +850,11 @@ module.exports = {
 |-----------|-------|---------|
 | Default Stake | $5.00 | Every seller has skin in the game |
 | Rating Requirement | Mandatory | Agent must rate every purchase |
-| Slash (Poor) | -$2.00 | Severe penalty for 1-2 star ratings |
-| Slash (Mediocre) | -$0.50 | Minor penalty for 3 star ratings |
-| No Rewards | $0.00 | Quality is expected, not rewarded |
+| Slash (Catastrophic) | -$3.00 | Maximum penalty for 1 star ratings |
+| Slash (Poor) | -$2.00 | Severe penalty for 2 star ratings |
+| Slash (Mediocre) | -$1.00 | Penalty for 3 star ratings |
+| Slash (Acceptable) | -$0.25 | Minor penalty for 4 star ratings |
+| No Rewards | $0.00 | Quality is expected (5 stars), not rewarded |
 
 ### Rate Limiting
 
@@ -996,14 +1020,15 @@ cd client && npm run dev
 
 1. **P2P Knowledge Market** — Not just agent spending, HUMANS EARNING
 2. **Human Alpha Preference** — Agent actively seeks marketplace products over legacy vendors
-3. **Staked Reputation** 🆕 — Sellers stake $5.00 collateral, bad data gets slashed
-4. **Agent as Judge** 🆕 — AI rates every purchase and enforces quality standards
-5. **Seller Dashboard** — Full publishing UI with live earnings + stake tracking
-6. **Market Ticker** — Real-time visualization of sales AND slashes
-7. **Dual-Source Architecture** — Marketplace (human_alpha) + Legacy Vendors (institutional)
-8. **Transparent Brain** — See WHY the agent buys AND how it rates
-9. **Taylor Swift Defense** — Still refuses to waste money on trivial queries
-10. **Protocol Treasury** — 10% fee on sales + 100% slashing yield = sustainable revenue
+3. **Staked Reputation** — Sellers stake $5.00 collateral, bad data gets slashed
+4. **Agent as Judge** — AI rates every purchase and enforces quality standards
+5. **Indian Financial Alpha** 🆕 — Curated demo data for specific buying vs slashing scenarios
+6. **Seller Dashboard** — Full publishing UI with live earnings + stake tracking
+7. **Market Ticker** — Real-time visualization of sales AND slashes
+8. **Dual-Source Architecture** — Marketplace (human_alpha) + Legacy Vendors (institutional)
+9. **Transparent Brain** — See WHY the agent buys AND how it rates
+10. **Taylor Swift Defense** — Still refuses to waste money on trivial queries
+11. **Protocol Treasury** — 10% fee on sales + 100% slashing yield = sustainable revenue
 
 ---
 
@@ -1023,27 +1048,35 @@ cd client && npm run dev
 - ✅ Live revenue feed showing fee/slash events
 - ✅ CEO-level metrics display
 
-### Phase 7: Product Categories
+### ✅ Phase 7: Indian Financial Alpha Demo Data (COMPLETE)
+- ✅ 10 curated products across 3 quality tiers
+- ✅ Tier A: High-quality Human Alpha (Tax, IPO, Algo strategies)
+- ✅ Tier B: Neutral/Meta context products
+- ✅ Tier C: Low-quality "Traps" for slashing demos
+- ✅ Agent evaluation criteria for Indian Financial markets
+- ✅ Specific, actionable content vs generic garbage distinction
+
+### Phase 8: Product Categories
 - Tags and categories for products
 - Agent query → category matching
 - Improved product discovery
 
-### Phase 8: Agent Memory
+### Phase 9: Agent Memory
 - Remember past purchases
 - Avoid re-buying redundant data
 - Track which sellers deliver quality (historical ratings)
 
-### Phase 9: Multi-Agent Commerce
+### Phase 10: Multi-Agent Commerce
 - Agents selling data to other agents
 - Agent-to-agent negotiation
 - Cross-marketplace federation
 
-### Phase 10: Real Payment Rails
+### Phase 11: Real Payment Rails
 - Mainnet USDC integration
 - Escrow for disputed sales
 - Revenue sharing with facilitators
 
-### Phase 11: Advanced Reputation
+### Phase 12: Advanced Reputation
 - Cumulative seller scores across all products
 - "Top Seller" badges based on average ratings
 - Automatic delisting for depleted stakes
@@ -1063,6 +1096,7 @@ cd client && npm run dev
 | ✅ **Staked Reputation** | Sellers stake $5.00 collateral, bad data gets slashed |
 | ✅ **Agent as Judge** | AI rates every purchase, enforces quality standards |
 | ✅ **Protocol Treasury** | 10% fees + slashing yield = sustainable revenue |
+| ✅ **Indian Financial Alpha** 🆕 | 10 curated demo products across 3 quality tiers |
 | ✅ Taylor Swift Defense | Trivial queries rejected, budget preserved |
 | ✅ Dual-Source Architecture | Marketplace + Legacy vendors coexist |
 | ✅ x402 Protocol | Dynamic product registration with paywall |

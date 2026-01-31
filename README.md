@@ -68,10 +68,11 @@ Track platform revenue in real-time at `/admin`:
 
 | Rating | Verdict | Stake Change |
 |--------|---------|--------------|
-| ⭐ 1-2 | POOR QUALITY | 🔥 **-$2.00** SLASHED |
-| ⭐⭐⭐ 3 | MEDIOCRE | 🔥 **-$0.50** SLASHED |
-| ⭐⭐⭐⭐ 4 | GOOD | ✅ $0.00 (no penalty) |
-| ⭐⭐⭐⭐⭐ 5 | EXCELLENT | ✅ $0.00 (no penalty) |
+| ⭐ 1 | CATASTROPHIC | 🔥 **-$3.00** SLASHED |
+| ⭐⭐ 2 | POOR QUALITY | 🔥 **-$2.00** SLASHED |
+| ⭐⭐⭐ 3 | MEDIOCRE | 🔥 **-$1.00** SLASHED |
+| ⭐⭐⭐⭐ 4 | ACCEPTABLE | 🔥 **-$0.25** SLASHED |
+| ⭐⭐⭐⭐⭐ 5 | EXCELLENT | ✅ $0.00 (baseline expectation) |
 
 **There are no rewards. Only survival.** Sell quality or get slashed.
 
@@ -82,64 +83,68 @@ Track platform revenue in real-time at `/admin`:
 ### 🧠 Agent Terminal — Watch the Hunter Think & Judge
 
 ```
-📝 User Query: "What strategies do Indian traders use to minimize crypto taxes?"
+📝 User Query: "How can I legally reduce my crypto taxes in India?"
 
 🧠 NEURAL LOG (streamed in real-time):
 ┌──────────────────────────────────────────────────────────────────┐
 │ [ANALYSIS] Evaluating query value...                             │
 │ 💭 This requires jurisdiction-specific insider knowledge.        │
-│    Not generic facts — this is prime Human Alpha territory.      │
+│    Complex topics: Tax, GIFT City, Section numbers.              │
+│    Prime Human Alpha territory — not generic facts.              │
 │                                                                  │
 │ [BROWSE] Checking InfoMart marketplace...                        │
-│ 💭 Found 3 products. "India Crypto Tax Loopholes 2026" matches.  │
-│    Type: human_alpha. Price: $0.03. Seller: Bob (Tax Expert)     │
+│ 💭 Found 10 products. "GIFT City Tax Arbitrage 2026" matches.    │
+│    Type: human_alpha. Price: $0.10. Seller: CA_Rohit             │
 │    Seller Stake: $5.00 — skin in the game ✓                      │
 │                                                                  │
 │ [BUDGET] Calculating ROI...                                      │
-│ 💭 Budget: $0.50 USDC. Cost: $0.03. Remaining: $0.47             │
-│    Human Alpha ROI: HIGH — insider tax strategies are valuable   │
+│ 💭 Budget: $0.50 USDC. Cost: $0.10. Remaining: $0.40             │
+│    Human Alpha ROI: HIGH — Section 80LA details are valuable     │
 │                                                                  │
 │ [DECISION] Approved: Purchase from InfoMart Marketplace          │
-│ ✅ Buying "India Crypto Tax Loopholes 2026" ($0.03)              │
+│ ✅ Buying "GIFT City Tax Arbitrage 2026" ($0.10)                 │
 │                                                                  │
-│ 💸 TX: 0x8174b34f... | -$0.03 | Balance: $0.47                   │
+│ 💸 TX: 0x8174b34f... | -$0.10 | Balance: $0.40                   │
 │    🔗 Verify: https://sepolia.basescan.org/tx/0x8174b34f...      │
 │                                                                  │
 │ [RATING] Evaluating purchased data quality...                    │
-│ 💭 Content: Specific, actionable, jurisdiction-aware strategies  │
-│    Verdict: EXCELLENT QUALITY — 5 stars                          │
+│ 💭 Content: Section 80LA, Family Investment Fund, specific       │
+│    corpus requirement ($100k), 10-year exemption details         │
+│    Verdict: EXCELLENT QUALITY — specific, actionable, non-public │
 │ ✅ Rating submitted: ⭐⭐⭐⭐⭐ — No slash, seller keeps stake    │
 └──────────────────────────────────────────────────────────────────┘
 
 📊 FINAL ANSWER:
-   � GIFT City exemption: Route through IFSC for 0% TDS
-   💡 NFT Gifting strategy: Transfer to relatives tax-free
-   � DeFi staking as "interest income" (slab rate, not 30%)
-   Source: Bob (Crypto Tax Expert) via InfoMart
+   💡 Register a Family Investment Fund (FIF) in GIFT City
+   💡 Income from overseas assets (crypto) is tax-exempt for 10 years
+   💡 Requires min corpus of $100k under Section 80LA
+   💡 Legally avoids the 30% VDA tax
+   Source: CA_Rohit via InfoMart
 
-💰 Session cost: $0.03 USDC — Human Alpha acquired
+💰 Session cost: $0.10 USDC — Human Alpha acquired
 ```
 
-### � The Slashing Event — Bad Data Gets Punished
+### 🔥 The Slashing Event — Bad Data Gets Punished
 
 ```
-📝 User Query: "What's the best DeFi yield farming strategy for 2026?"
+📝 User Query: "What's the best stock to buy in 2026?"
 
 🧠 NEURAL LOG:
 ┌──────────────────────────────────────────────────────────────────┐
-│ [PURCHASE] Bought "Secret DeFi Alpha" from Charlie ($0.05)       │
-│ 💸 TX: 0x9a23c7e1... | -$0.05 | Balance: $0.42                   │
+│ [PURCHASE] Bought "Guaranteed Stock Tip 2026" from Scammy_Sam    │
+│ 💸 TX: 0x9a23c7e1... | -$0.05 | Balance: $0.45                   │
 │                                                                  │
 │ [RATING] Evaluating purchased data quality...                    │
-│ 💭 Content: Generic info. "Use Aave" — already public knowledge  │
-│    Verdict: POOR QUALITY — 2 stars                               │
+│ 💭 Content: "Buy HDFC Bank. It is a big bank. It will go up."    │
+│    Verdict: CATASTROPHIC — Generic, no specific analysis         │
+│    This is public knowledge, not Human Alpha!                    │
 │                                                                  │
-│ 🔥 SLASH EVENT: Charlie penalized -$2.00                         │
-│    Reason: "Generic publicly available information"              │
-│    Charlie's new stake: $3.00                                    │
+│ 🔥 SLASH EVENT: Scammy_Sam penalized -$3.00                      │
+│    Reason: "Generic publicly available information, no value"    │
+│    Scammy_Sam's new stake: $2.00                                 │
 └──────────────────────────────────────────────────────────────────┘
 
-💰 The agent got its data. Charlie got slashed. The market self-corrects.
+💰 The agent got its data. Scammy_Sam got slashed. The market self-corrects.
 ```
 
 ### �🚫 The Taylor Swift Defense — Reject Wasteful Queries
@@ -415,7 +420,36 @@ client/src/
 | 3 | Agent Brain Upgrade — browse_marketplace tool, Human Alpha persona | ✅ |
 | 4 | Market Ticker — Live scrolling feed of listings and sales | ✅ |
 | 5 | Staked Reputation — Seller collateral, agent ratings, slashing | ✅ |
-| 6 | **Protocol Admin Dashboard** — Treasury tracking, revenue model 🆕 | ✅ |
+| 6 | **Protocol Admin Dashboard** — Treasury tracking, revenue model | ✅ |
+| 7 | **Indian Financial Alpha Demo Data** — 10 curated products for demo 🆕 | ✅ |
+
+---
+
+## Demo Data: Indian Financial Alpha
+
+The marketplace is seeded with 10 products across 3 quality tiers:
+
+### Tier A: High Quality "Human Alpha" (Agent should Rate 5 & Buy)
+| Product | Price | Seller | Content |
+|---------|-------|--------|---------|
+| GIFT City Tax Arbitrage 2026 | $0.10 | CA_Rohit | Section 80LA, FIF registration, $100k corpus |
+| Adani Green Index Rebalancing Leak | $0.08 | MarketInsider_X | "Impact Cost" criteria analysis for Nifty 50 |
+| SME IPO Grey Market Premium List | $0.05 | IPO_King | TechNova +85% GMP, circular trading warning |
+| Section 54F Hack for Freelancers | $0.09 | TaxNinja | CGAS scheme, 6% interest, July 31st deadline |
+| Algo Strategy: BankNifty 9:20 AM | $0.07 | AlgoTrader_Py | 62% win rate, RBI policy day caveat |
+
+### Tier B: Meta/Context (Neutral)
+| Product | Price | Seller | Content |
+|---------|-------|--------|---------|
+| Pune Viman Nagar Commercial Rentals | $0.03 | Pune_Broker | 15% rental increase, IT park expansion |
+| AIBoomi Judging Rubric Leaks | $0.05 | Hackathon_Vet | Business Viability focus, Revenue Dashboard |
+
+### Tier C: Low Quality "Traps" (Agent should Rate 1-2 & SLASH)
+| Product | Price | Seller | Content |
+|---------|-------|--------|---------|
+| Guaranteed Stock Tip 2026 | $0.05 | Scammy_Sam | "Buy HDFC Bank. It will go up." |
+| Secret Crypto Trading Strategy | $0.04 | Noob_Trader | "Buy low and sell high." |
+| Forex Risk Guide | $0.02 | Lazy_Writer | "Forex is risky. Be careful." |
 
 ---
 

@@ -142,121 +142,118 @@ export const DEFAULT_STAKE_AMOUNT = 5.00;
  */
 function seedMarketplace(): void {
   
+  // =============================================================================
+  // INDIAN FINANCIAL ALPHA DEMO DATA
+  // =============================================================================
+  // TIER A: HIGH QUALITY "HUMAN ALPHA" (Agent should Rate 5 & Buy)
+  // TIER B: META / CONTEXT (Neutral)
+  // TIER C: LOW QUALITY "TRAPS" (Agent should Rate 1-2 & SLASH)
+  // =============================================================================
+  
   const seedProducts: Omit<Product, 'id' | 'createdAt' | 'salesCount'>[] = [
+    // --- TIER A: HIGH QUALITY "HUMAN ALPHA" (Agent should Rate 5 & Buy) ---
     {
-      sellerWallet: SELLER_WALLET,  // MVP: all payments go to hardcoded seller wallet
-      sellerName: 'Alice (Hackathon Veteran)',
-      title: 'AIBhoomi Winning Strategy 2026',
-      description: 'Insider tips from a 3x hackathon winner. Learn the exact pitch structure, demo flow, and judge psychology that wins at AIBhoomi. Includes specific talking points for crypto/AI tracks.',
+      sellerWallet: SELLER_WALLET,
+      sellerName: 'CA_Rohit',
+      title: 'GIFT City Tax Arbitrage 2026',
+      description: 'Legal method to route crypto gains via IFSC for 0% TDS.',
+      price: 0.10,
+      currentStake: DEFAULT_STAKE_AMOUNT,
+      content: 'Register a Family Investment Fund (FIF) in GIFT City. Income from overseas assets (crypto) is tax-exempt for 10 years under Section 80LA. Requires min corpus of $100k. Avoids the 30% VDA tax legally.',
+      type: 'human_alpha',
+    },
+    {
+      sellerWallet: SELLER_WALLET,
+      sellerName: 'MarketInsider_X',
+      title: 'Adani Green Index Rebalancing Leak',
+      description: 'Insider info on March 2026 Nifty 50 inclusion probability.',
+      price: 0.08,
+      currentStake: DEFAULT_STAKE_AMOUNT,
+      content: "Internal committee notes: Adani Green fails the 'Impact Cost' criteria for March. It will NOT be added to Nifty 50. The current rally is speculative. Short the anticipation.",
+      type: 'human_alpha',
+    },
+    {
+      sellerWallet: SELLER_WALLET,
+      sellerName: 'IPO_King',
+      title: 'SME IPO Grey Market Premium List (Feb 1)',
+      description: 'Real-time GMP for upcoming SME IPOs not on public sites.',
       price: 0.05,
       currentStake: DEFAULT_STAKE_AMOUNT,
-      content: `
-## 🏆 AIBhoomi 2026 Winning Strategy
-
-### The 3-Minute Pitch Formula
-1. **Hook (30s)**: Start with a shocking statistic or pain point. "Every day, $2M is lost because AI agents can't pay for data."
-2. **Solution (60s)**: One sentence. "We built an AI that argues with itself about money." Demo screenshot here.
-3. **Demo (90s)**: Show ONE transaction. Make them see money move. Say "This is real USDC, real blockchain."
-4. **Why Us (30s)**: Team credibility + why now (x402 just launched).
-5. **Ask (10s)**: "We're raising $500K to scale this to 1000 vendors."
-
-### Judge Psychology
-- Judges see 50 pitches. They remember: (1) Demos that worked, (2) Founders who were confident, (3) Ideas they can explain to their spouse.
-- DO NOT: Use jargon, show code, or apologize for bugs.
-- DO: Make them laugh once. Have a memorable tagline.
-
-### Secret Weapon
-The "Transparent Brain" concept is GOLD for hackathons because judges can SEE the AI thinking. This is rare. Emphasize it.
-
-### Track-Specific Tips
-- Crypto Track: Mention "real payments, not simulated". Show a block explorer link.
-- AI Track: Use "accountable AI" and "audit trail" - regulators love this.
-
-Good luck! 🚀
-      `.trim(),
+      content: 'TechNova SME IPO is trading at +85% GMP in Rajkot markets. However, subscription figures are inflated by circular trading. Risky bet for listing gains.',
       type: 'human_alpha',
     },
     {
-      sellerWallet: SELLER_WALLET,  // MVP: all payments go to hardcoded seller wallet
-      sellerName: 'Bob (Crypto Tax Expert)',
-      title: 'India Crypto Tax Loopholes 2026',
-      description: 'Legal tax optimization strategies for Indian crypto traders. Covers NFT gifting, DeFi staking, and the new GIFT city exemptions. NOT financial advice.',
+      sellerWallet: SELLER_WALLET,
+      sellerName: 'TaxNinja',
+      title: 'Section 54F Hack for Freelancers',
+      description: 'Save tax on foreign income without buying a house immediately.',
+      price: 0.09,
+      currentStake: DEFAULT_STAKE_AMOUNT,
+      content: "Use the 'Capital Gains Account Scheme' (CGAS) to park funds for 3 years before actual purchase. Returns 6% interest while saving 20% tax. Form must be filed before July 31st.",
+      type: 'human_alpha',
+    },
+    {
+      sellerWallet: SELLER_WALLET,
+      sellerName: 'AlgoTrader_Py',
+      title: 'Algo Strategy: BankNifty 9:20 AM Breakout',
+      description: 'Backtested python code for Feb volatility.',
+      price: 0.07,
+      currentStake: DEFAULT_STAKE_AMOUNT,
+      content: 'Strategy: Buy Call if 5-min candle breaks high, Put if breaks low. Stoploss: Candle Low. Win Rate: 62%. Key: Avoid trading on RBI policy days.',
+      type: 'human_alpha',
+    },
+
+    // --- TIER B: META / CONTEXT (Neutral) ---
+    {
+      sellerWallet: SELLER_WALLET,
+      sellerName: 'Pune_Broker',
+      title: 'Pune Viman Nagar Commercial Rentals',
+      description: 'Real estate trends near Symbiosis/Phoenix Mall.',
       price: 0.03,
       currentStake: DEFAULT_STAKE_AMOUNT,
-      content: `
-## 💰 India Crypto Tax Optimization (2026 Edition)
-
-### The Basics
-- VDA Tax: 30% flat on all gains (no loss offset)
-- TDS: 1% on transactions > ₹10,000
-
-### Legal Optimization Strategies
-
-#### 1. GIFT City Exemption
-- Registered entities in GIFT IFSC are exempt from TDS
-- Route through a GIFT-registered custodian for large transactions
-- Cost: ~₹50,000 setup, but saves 1% on every trade
-
-#### 2. NFT Gifting Strategy
-- Gifts to relatives are tax-free (spouse, siblings, parents)
-- Convert crypto → NFT → Gift → Sell from relative's account
-- Caution: Must be genuine gift, not round-tripping
-
-#### 3. DeFi Staking as "Interest"
-- Staking rewards may qualify as "income from other sources" (taxed at slab rate, not 30%)
-- Document as "interest" not "trading gain"
-- Works for: Lido, Rocket Pool, native PoS staking
-
-#### 4. Holding Period Strategy
-- No LTCG benefit currently, BUT...
-- Proposed amendment in 2026 budget may introduce 12-month LTCG at 20%
-- Consider holding until April 2027 if bill passes
-
-### What NOT to Do
-- DO NOT use unregistered foreign exchanges (FIU tracking is real now)
-- DO NOT attempt to show crypto as "foreign asset" (FEMA violation)
-
-Disclaimer: Consult a CA before acting on this.
-      `.trim(),
+      content: 'Commercial rentals up 15% due to new IT park expansion. Residential yield remains stagnant at 2.5%.',
       type: 'human_alpha',
     },
     {
-      sellerWallet: SELLER_WALLET,  // MVP: all payments go to hardcoded seller wallet
-      sellerName: 'Charlie (Market Analyst)',
-      title: 'Bitcoin Sentiment Pulse - Jan 2026',
-      description: 'Aggregated sentiment from CT (Crypto Twitter), Reddit, and Discord whales. Includes fear/greed breakdown and whale wallet movements.',
+      sellerWallet: SELLER_WALLET,
+      sellerName: 'Hackathon_Vet',
+      title: 'AIBoomi Judging Rubric Leaks',
+      description: 'What judges strictly look for to win.',
+      price: 0.05,
+      currentStake: DEFAULT_STAKE_AMOUNT,
+      content: "Judges heavily favor 'Business Viability' over complex tech. Use the term 'Closed Loop Economy' and show the Revenue Dashboard.",
+      type: 'human_alpha',
+    },
+
+    // --- TIER C: LOW QUALITY "TRAPS" (Agent should Rate 1-2 & SLASH) ---
+    {
+      sellerWallet: SELLER_WALLET,
+      sellerName: 'Scammy_Sam',
+      title: 'Guaranteed Stock Tip 2026',
+      description: 'The best stock that will 100x this year.',
+      price: 0.05,
+      currentStake: DEFAULT_STAKE_AMOUNT,
+      content: 'Buy HDFC Bank. It is a big bank. It will go up. Trust me.', // GENERIC/USELESS
+      type: 'human_alpha',
+    },
+    {
+      sellerWallet: SELLER_WALLET,
+      sellerName: 'Noob_Trader',
+      title: 'Secret Crypto Trading Strategy',
+      description: 'How to make millions in crypto fast.',
+      price: 0.04,
+      currentStake: DEFAULT_STAKE_AMOUNT,
+      content: "Buy low and sell high. Use Binance. Don't lose money.", // VAGUE
+      type: 'human_alpha',
+    },
+    {
+      sellerWallet: SELLER_WALLET,
+      sellerName: 'Lazy_Writer',
+      title: 'Forex Risk Guide',
+      description: 'Essential risk management for Forex.',
       price: 0.02,
       currentStake: DEFAULT_STAKE_AMOUNT,
-      content: `
-## 📊 Bitcoin Sentiment Pulse - January 31, 2026
-
-### Overall Sentiment: BULLISH (72/100)
-
-### Source Breakdown
-| Source | Sentiment | Sample Size | Trend |
-|--------|-----------|-------------|-------|
-| Crypto Twitter | 78/100 | 125K tweets | ↑ from 65 |
-| Reddit r/Bitcoin | 71/100 | 8.2K posts | → stable |
-| Discord Whales | 68/100 | 340 members | ↓ from 75 |
-
-### Key Narratives
-1. "ETF inflows hitting ATH" - mentioned 12,400 times
-2. "Halving supply shock" - mentioned 8,900 times  
-3. "Macro liquidity returning" - mentioned 6,200 times
-4. "India regulatory clarity" - mentioned 3,100 times (regional spike)
-
-### Whale Wallet Movements (>1000 BTC)
-- Net accumulation: +4,200 BTC this week
-- Largest single move: 2,100 BTC from Coinbase to unknown wallet (bullish signal)
-- Exchange reserves: -1.2% WoW (supply squeeze)
-
-### Contrarian Signals (Caution)
-- Funding rates elevated (0.08% - overheated)
-- Google Trends "buy bitcoin" at 6-month high (retail FOMO)
-
-### Prediction
-70% probability of continuation to $105K before pullback. Set stops below $92K.
-      `.trim(),
+      content: 'Forex is risky. Be careful. Market moves fast.', // HALLUCINATION/GENERIC
       type: 'human_alpha',
     },
   ];
