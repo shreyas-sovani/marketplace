@@ -14,7 +14,7 @@
   }
 
   body {
-    @apply font-inter bg-primary-bg text-white antialiased;
+    @apply font-inter bg-primary-bg text-secondary-text antialiased;
     background-color: #020202;
   }
 
@@ -49,23 +49,23 @@
 
 @layer components {
   .card {
-    @apply bg-card-bg border border-border rounded-lg transition-all duration-300;
+    @apply bg-card-bg text-secondary-text rounded-lg transition-all duration-300 p-6;
   }
 
   .card-hover {
-    @apply card hover:border-accent hover:shadow-lg hover:shadow-accent/10;
+    @apply card hover:shadow-lg hover:shadow-accent/10;
   }
 
   .btn-primary {
-    @apply px-6 py-3 bg-accent hover:bg-accent-hover text-white font-space-grotesk font-semibold rounded-lg transition-all duration-200;
+    @apply px-6 py-3 bg-accent hover:bg-accent/90 text-primary-bg font-space-grotesk font-semibold rounded-lg transition-all duration-200;
   }
 
   .btn-secondary {
-    @apply px-6 py-3 bg-secondary-bg border border-border hover:border-accent text-white font-space-grotesk font-semibold rounded-lg transition-all duration-200;
+    @apply px-6 py-3 bg-secondary-bg hover:bg-secondary-bg/80 text-secondary-text font-space-grotesk font-semibold rounded-lg transition-all duration-200;
   }
 
   .text-muted {
-    @apply text-muted-text;
+    @apply text-secondary-text;
   }
 
   .text-secondary {
@@ -73,15 +73,15 @@
   }
 
   .section-container {
-    @apply max-w-7xl mx-auto px-6 py-16 md:py-24;
+    @apply max-w-6xl mx-auto px-8 py-20 md:py-28;
   }
 
   .gradient-accent {
-    @apply bg-gradient-to-r from-accent via-accent-hover to-accent;
+    @apply bg-gradient-to-r from-accent to-accent;
   }
 
   .glass-effect {
-    @apply bg-secondary-bg/50 backdrop-blur-xl border border-border/30;
+    @apply bg-secondary-bg/50 backdrop-blur-xl;
   }
 }
 
@@ -161,5 +161,5 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: #7F5A83;
+  background: #243F55;
 }

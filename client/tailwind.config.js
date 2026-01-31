@@ -7,15 +7,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Design system colors
+        // Simplified design system - 5 colors only
         'primary-bg': '#020202',
-        'secondary-bg': '#081A28',
-        'card-bg': '#0D324D',
-        'border': '#464668',
-        'accent': '#7F5A83',
-        'accent-hover': '#907195',
-        'secondary-text': '#A188A6',
-        'muted-text': '#9DA2AB',
+        'secondary-bg': '#29201D',
+        'card-bg': '#564138',
+        'accent': '#9E7A6B',
+        'secondary-text': '#F6F5AE',
       },
       fontFamily: {
         'space-grotesk': ['Space Grotesk', 'sans-serif'],

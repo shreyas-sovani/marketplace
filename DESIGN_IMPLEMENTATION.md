@@ -10,7 +10,7 @@ The InfoMart frontend has been completely redesigned with a modern, dark-themed,
 ### Color Palette
 - **Primary Background**: `#020202` - Deep black for main surfaces
 - **Secondary Background**: `#081A28` - Navy-tinted secondary surfaces
-- **Card Background**: `#0D324D` - Elevated card surfaces
+- **Card Background**: `#081A28` - Elevated card surfaces (mapped to `secondary-bg`)
 - **Borders**: `#464668` - Subtle dividers and borders
 - **Accent Primary**: `#7F5A83` - Purple accent for CTAs and highlights
 - **Accent Hover**: `#907195` - Lighter purple for hover states
@@ -49,7 +49,6 @@ The InfoMart frontend has been completely redesigned with a modern, dark-themed,
 colors: {
   'primary-bg': '#020202',
   'secondary-bg': '#081A28',
-  'card-bg': '#0D324D',
   'border': '#464668',
   'accent': '#7F5A83',
   'accent-hover': '#907195',
@@ -69,7 +68,7 @@ colors: {
 **Key Additions:**
 ```css
 @layer components {
-  .card { @apply bg-card-bg border border-border rounded-lg; }
+  .card { @apply bg-secondary-bg border border-border rounded-lg; }
   .btn-primary { @apply px-6 py-3 bg-accent hover:bg-accent-hover; }
   .section-container { @apply max-w-7xl mx-auto px-6 py-16 md:py-24; }
 }
@@ -315,7 +314,7 @@ npm run dev
 |------|-----|-------|
 | Primary BG | #020202 | Main background |
 | Secondary BG | #081A28 | Section backgrounds |
-| Card BG | #0D324D | Card surfaces |
+| Card BG | #081A28 | Card surfaces (use `secondary-bg`) |
 | Border | #464668 | Borders, dividers |
 | Accent | #7F5A83 | CTAs, highlights |
 | Accent Hover | #907195 | Hover states |

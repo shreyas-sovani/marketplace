@@ -12,9 +12,9 @@ Secondary Background:  #081A28
 └─ Used for section backgrounds
 └─ Slightly lighter navy tone
 
-Card Background:       #0D324D
+Card Background:       #081A28 (uses `secondary-bg`)
 └─ Used for cards, elevated surfaces
-└─ Blue-black tone
+└─ Navy-toned surface
 ```
 
 ### Accent Colors
@@ -100,7 +100,7 @@ xs (0.75rem)  → Tiny text, captions
 <div className="card p-6">Content</div>
 
 // Properties:
-// - bg-card-bg (background color)
+// - bg-secondary-bg (background color)
 // - border border-border (subtle border)
 // - rounded-lg (rounded corners)
 // - transition-all (smooth transitions)
