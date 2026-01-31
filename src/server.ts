@@ -9,7 +9,7 @@ import dotenv from 'dotenv';
 import { runDueDiligenceAgent, type SSEEvent, type SessionState, createSession, CONFIG as AGENT_CONFIG } from './agent.js';
 import { VENDOR_REGISTRY, getVendorById, getVendorSummary } from './vendors.js';
 import marketRoutes, { generateMarketplaceRouteConfig, initializeRouteConfig } from './routes/market.js';
-import { getAllProductListings } from './services/marketplaceService.js';
+import { getAllProductListings, SELLER_WALLET } from './services/marketplaceService.js';
 
 dotenv.config();
 
@@ -18,7 +18,8 @@ const __dirname = path.dirname(__filename);
 
 // Config
 const PORT = process.env.PORT || 4021;
-const PAYTO_ADDRESS = '0xB9b4aEcFd092514fDAC6339edba6705287464409';
+// MVP: Hardcoded seller address - all payments go here
+const PAYTO_ADDRESS = SELLER_WALLET;
 const NETWORK = 'eip155:84532' as const;
 const FACILITATOR_URL = 'https://x402.org/facilitator';
 
@@ -66,7 +67,8 @@ const httpServer = createServer(app);
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, PAYMENT-SIGNATURE, X-PAYMENT');
+  res.header('Access-Control-Expose-Headers', 'PAYMENT-RESPONSE, PAYMENT-REQUIRED, X-PAYMENT-RESPONSE');
   if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });

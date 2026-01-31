@@ -336,88 +336,51 @@ router.get('/product/:id/buy', (req: Request, res: Response): void => {
       return;
     }
 
-    // x402 middleware handles 402 response if no valid payment
-    // If we reach here, either:
-    // 1. Payment was verified (PAYMENT-RESPONSE header set)
-    // 2. Request includes x-payment header (client attempting payment)
+    // If we reach here, x402 middleware has ALREADY verified the payment.
+    // The middleware only calls next() after successful verification.
+    // We can trust that payment is valid.
     
-    const paymentResponse = res.getHeader('PAYMENT-RESPONSE');
-    const paymentHeader = req.headers['x-payment'] as string | undefined;
-
-    // Extract payment info
-    let txHash = 'unknown';
-    let payer = 'unknown';
-    let simulation = false;
-
-    if (paymentResponse) {
-      // Real x402 payment was verified by middleware
+    // Try to extract payer info from the payment header for logging
+    const paymentHeader = req.headers['payment-signature'] || req.headers['x-payment'];
+    let payer = 'verified-by-x402';
+    
+    if (paymentHeader && typeof paymentHeader === 'string') {
       try {
-        const decoded = JSON.parse(
-          Buffer.from(paymentResponse as string, 'base64').toString('utf-8')
-        );
-        txHash = decoded.transaction || 'unknown';
-        payer = decoded.payer || 'unknown';
-        simulation = false;
-        console.log(`[x402] REAL PAYMENT: TX=${txHash.slice(0, 16)}... Payer=${payer.slice(0, 10)}...`);
+        const decoded = JSON.parse(Buffer.from(paymentHeader, 'base64').toString('utf-8'));
+        payer = decoded.payload?.authorization?.from || decoded.payer || 'verified-by-x402';
       } catch {
-        txHash = 'parse-error-' + Math.random().toString(36).slice(2, 10);
-        simulation = true;
+        // Ignore decode errors
       }
-    } else if (paymentHeader) {
-      // Payment header exists but wasn't verified - simulation mode
-      console.log(`[x402] Payment header present but not verified, simulation mode`);
-      txHash = 'sim-' + Math.random().toString(36).slice(2, 10);
-      simulation = true;
-    } else {
-      // No payment at all - this should not happen if middleware is working
-      // But we handle it gracefully for simulation/demo purposes
-      console.log(`[x402] No payment header, returning 402`);
-      res.status(402).json({
-        error: 'Payment Required',
-        x402: {
-          accepts: [{
-            scheme: 'exact',
-            network: globalNetwork,
-            price: `$${product.price.toFixed(2)}`,
-            payTo: product.sellerWallet || globalPayToAddress,
-          }],
-          description: `Purchase: ${product.title}`,
-        },
-        product: {
-          id: product.id,
-          title: product.title,
-          price: product.price,
-        },
-      });
-      return;
     }
 
-    // Record the sale
-    recordSale(id, payer, txHash);
+    console.log(`[x402] ✅ PAYMENT VERIFIED BY MIDDLEWARE`);
+    console.log(`[x402] 📦 Product: ${product.title} ($${product.price.toFixed(2)})`);
+    console.log(`[x402] 👤 Payer: ${payer}`);
+    console.log(`[x402] NOTE: txHash will be in PAYMENT-RESPONSE header after response`);
+
+    // Don't record sale here - the agent will call /record-sale with the real txHash
+    // after extracting it from the PAYMENT-RESPONSE header
 
     const response: PurchaseProductResponse = {
       success: true,
       productId: product.id,
       title: product.title,
-      content: simulation 
-        ? `[SIMULATION] ${product.content}` 
-        : product.content,
+      content: product.content,
       type: product.type,
       paidAmount: product.price,
       sellerWallet: product.sellerWallet,
       timestamp: new Date().toISOString(),
       meta: {
         paidBy: payer,
-        txHash,
-        simulation,
+        note: 'Check PAYMENT-RESPONSE header for txHash, then call /record-sale',
+        network: 'Base Sepolia (eip155:84532)',
       },
     };
 
     logRequest('GET', `/api/market/product/${id}/buy`, {
       success: true,
-      txHash: txHash.slice(0, 16),
       amount: product.price,
-      simulation,
+      payer: payer.slice(0, 10),
     });
 
     res.json(response);
@@ -467,6 +430,10 @@ router.post('/product/:id/record-sale', (req: Request, res: Response): void => {
   try {
     const id = req.params.id as string;
     const { buyerWallet, txHash } = req.body as { buyerWallet?: string; txHash?: string };
+    
+    console.log(`\n[record-sale] Received request for product: ${id}`);
+    console.log(`[record-sale] buyerWallet: ${buyerWallet}`);
+    console.log(`[record-sale] txHash: ${txHash}`);
     
     logRequest('POST', `/api/market/product/${id}/record-sale`, { buyerWallet, txHash });
 

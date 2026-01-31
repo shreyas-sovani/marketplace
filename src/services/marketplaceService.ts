@@ -44,17 +44,21 @@ const stats: MarketplaceStats = {
 // =============================================================================
 
 /**
+ * HARDCODED SELLER WALLET ADDRESS
+ * All marketplace payments go to this address.
+ * This is an MVP - in production, each seller would have their own wallet.
+ */
+export const SELLER_WALLET = '0xB9b4aEcFd092514fDAC6339edba6705287464409';
+
+/**
  * Seeds the marketplace with initial products for demo purposes.
- * Uses the platform's PayTo address for demo - in production, each seller would have their own wallet.
+ * All payments go to SELLER_WALLET (hardcoded for MVP).
  */
 function seedMarketplace(): void {
-  // Use the platform's receiving address for demo purposes
-  // In production, each seller would provide their own wallet
-  const PLATFORM_WALLET = '0xB9b4aEcFd092514fDAC6339edba6705287464409';
   
   const seedProducts: Omit<Product, 'id' | 'createdAt' | 'salesCount'>[] = [
     {
-      sellerWallet: PLATFORM_WALLET,  // Demo: all payments go to platform wallet
+      sellerWallet: SELLER_WALLET,  // MVP: all payments go to hardcoded seller wallet
       sellerName: 'Alice (Hackathon Veteran)',
       title: 'AIBhoomi Winning Strategy 2026',
       description: 'Insider tips from a 3x hackathon winner. Learn the exact pitch structure, demo flow, and judge psychology that wins at AIBhoomi. Includes specific talking points for crypto/AI tracks.',
@@ -86,7 +90,7 @@ Good luck! 🚀
       type: 'human_alpha',
     },
     {
-      sellerWallet: PLATFORM_WALLET,  // Demo: all payments go to platform wallet
+      sellerWallet: SELLER_WALLET,  // MVP: all payments go to hardcoded seller wallet
       sellerName: 'Bob (Crypto Tax Expert)',
       title: 'India Crypto Tax Loopholes 2026',
       description: 'Legal tax optimization strategies for Indian crypto traders. Covers NFT gifting, DeFi staking, and the new GIFT city exemptions. NOT financial advice.',
@@ -129,7 +133,7 @@ Disclaimer: Consult a CA before acting on this.
       type: 'human_alpha',
     },
     {
-      sellerWallet: PLATFORM_WALLET,  // Demo: all payments go to platform wallet
+      sellerWallet: SELLER_WALLET,  // MVP: all payments go to hardcoded seller wallet
       sellerName: 'Charlie (Market Analyst)',
       title: 'Bitcoin Sentiment Pulse - Jan 2026',
       description: 'Aggregated sentiment from CT (Crypto Twitter), Reddit, and Discord whales. Includes fear/greed breakdown and whale wallet movements.',
@@ -194,6 +198,7 @@ Disclaimer: Consult a CA before acting on this.
 
 /**
  * Publishes a new product to the marketplace.
+ * MVP: All payments go to SELLER_WALLET regardless of input wallet.
  */
 export function publishProduct(request: PublishProductRequest): Product {
   // Validate required fields
@@ -206,9 +211,7 @@ export function publishProduct(request: PublishProductRequest): Product {
   if (!request.content || request.content.trim().length === 0) {
     throw new Error('Content is required');
   }
-  if (!request.wallet || !request.wallet.startsWith('0x')) {
-    throw new Error('Valid wallet address is required');
-  }
+  // Wallet validation is optional for MVP since we use hardcoded SELLER_WALLET
   if (typeof request.price !== 'number' || request.price < 0.01 || request.price > 0.10) {
     throw new Error('Price must be between $0.01 and $0.10');
   }
@@ -216,7 +219,8 @@ export function publishProduct(request: PublishProductRequest): Product {
   const id = uuidv4();
   const product: Product = {
     id,
-    sellerWallet: request.wallet,
+    // MVP: Always use hardcoded seller wallet for real payments
+    sellerWallet: SELLER_WALLET,
     sellerName: request.sellerName,
     title: request.title.trim(),
     description: request.description.trim(),
@@ -335,7 +339,20 @@ export function recordSale(
     timestamp: new Date().toISOString(),
   });
 
-  console.log(`[MarketplaceService] SALE! "${product.title}" sold to ${buyerWallet.slice(0, 10)}... for $${product.price}`);
+  // Log with verifiable link if valid txHash
+  const isValidTxHash = txHash && txHash.startsWith('0x') && txHash.length === 66;
+  console.log(`\n${'='.repeat(70)}`);
+  console.log(`💰 SALE RECORDED!`);
+  console.log(`   Product: "${product.title}" ($${product.price.toFixed(2)})`);
+  console.log(`   Seller: ${product.sellerName} (${product.sellerWallet.slice(0, 10)}...)`);
+  console.log(`   Buyer: ${buyerWallet.slice(0, 20)}...`);
+  if (isValidTxHash) {
+    console.log(`   ✅ TX Hash: ${txHash}`);
+    console.log(`   🔗 Verify: https://sepolia.basescan.org/tx/${txHash}`);
+  } else {
+    console.log(`   ⚠️ TX Hash: ${txHash} (pending verification)`);
+  }
+  console.log(`${'='.repeat(70)}\n`);
 
   return product;
 }

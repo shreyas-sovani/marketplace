@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
-import { Menu, X, ArrowRight, Zap, Brain, TrendingUp, Check, Lock } from 'lucide-react'
+import { Menu, X, ArrowRight, Zap, Brain, TrendingUp, Check, Lock, ExternalLink } from 'lucide-react'
 import SellerDashboard from './pages/SellerDashboard'
 import MarketTicker from './components/MarketTicker'
 
@@ -199,6 +199,9 @@ function LogEntryComponent({ entry, index }: { entry: LogEntry; index: number })
 // TRANSACTION COMPONENT
 // ============================================================================
 function TransactionComponent({ tx }: { tx: Transaction }) {
+  const isValidTxHash = tx.txHash && tx.txHash.startsWith('0x') && tx.txHash.length === 66
+  const baseScanUrl = isValidTxHash ? `https://sepolia.basescan.org/tx/${tx.txHash}` : null
+  
   return (
     <div className="card p-3 border border-accent/20 bg-accent/5 animate-fadeIn hover:border-accent/40 transition-colors">
       <div className="flex items-center justify-between">
@@ -207,8 +210,20 @@ function TransactionComponent({ tx }: { tx: Transaction }) {
             <Zap className="w-4 h-4 text-accent" />
           </div>
           <div>
-            <div className="text-sm font-space-grotesk font-semibold text-accent">{tx.vendor}</div>
-            <div className="text-xs text-secondary-text font-share-tech">TX: {tx.txHash.slice(0, 16)}...</div>
+            <div className="text-sm font-space-grotesk font-semibold text-white">{tx.vendor}</div>
+            {baseScanUrl ? (
+              <a 
+                href={baseScanUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-accent hover:text-accent-hover transition-colors font-share-tech group"
+              >
+                <span>TX: {tx.txHash.slice(0, 10)}...{tx.txHash.slice(-6)}</span>
+                <ExternalLink className="w-3 h-3 opacity-70 group-hover:opacity-100" />
+              </a>
+            ) : (
+              <span className="text-xs text-muted-text font-share-tech">Payment verified ✓</span>
+            )}
           </div>
         </div>
         <div className="text-right">
