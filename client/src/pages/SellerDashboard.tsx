@@ -232,6 +232,26 @@ export default function SellerDashboard() {
   const [connected, setConnected] = useState(false);
   
   const eventSourceRef = useRef<EventSource | null>(null);
+  const walletRef = useRef<string>('');
+
+  // Keep wallet ref in sync with form.wallet
+  useEffect(() => {
+    walletRef.current = form.wallet;
+  }, [form.wallet]);
+
+  // Calculate initial earnings when products load or wallet changes
+  useEffect(() => {
+    if (form.wallet && products.length > 0) {
+      const myProducts = products.filter(
+        p => p.sellerWallet.toLowerCase() === form.wallet.toLowerCase()
+      );
+      const earnings = myProducts.reduce(
+        (sum, p) => sum + (p.price * p.salesCount), 
+        0
+      );
+      setTotalEarnings(earnings);
+    }
+  }, [products, form.wallet]);
 
   // Load initial products
   useEffect(() => {
@@ -269,10 +289,20 @@ export default function SellerDashboard() {
       const data = JSON.parse(e.data) as MarketplaceEvent;
       setRecentSales(prev => [data, ...prev].slice(0, 10));
       
-      // Update earnings if it's for our wallet
-      if (form.wallet && data.sellerWallet.toLowerCase() === form.wallet.toLowerCase()) {
+      // Update earnings if it's for our wallet (use ref for latest value)
+      const currentWallet = walletRef.current;
+      if (currentWallet && data.sellerWallet && data.sellerWallet.toLowerCase() === currentWallet.toLowerCase()) {
         setTotalEarnings(prev => prev + (data.amount || 0));
       }
+      
+      // Refresh products list to update salesCount
+      fetch('/api/market/products')
+        .then(res => res.json())
+        .then(result => {
+          if (result.success) {
+            setProducts(result.products);
+          }
+        });
     });
 
     es.onerror = () => {
@@ -282,7 +312,7 @@ export default function SellerDashboard() {
     return () => {
       es.close();
     };
-  }, [form.wallet]);
+  }, []); // Now empty dependency since we use walletRef
 
   // Handle form submission
   const handlePublish = async (e: React.FormEvent) => {

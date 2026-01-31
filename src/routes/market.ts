@@ -64,23 +64,28 @@ export function initializeRouteConfig(
 /**
  * Register all existing marketplace products with x402 paywall.
  * Called during initialization to ensure seeded products are protected.
+ * Uses each product's sellerWallet for P2P payments.
  */
 function registerAllExistingProducts(): void {
   const products = getAllProductListings();
   for (const product of products) {
-    registerProductWithX402(product.id, product.price, product.title);
+    registerProductWithX402(product.id, product.price, product.title, product.sellerWallet);
   }
   console.log(`[MarketRoutes] Registered ${products.length} existing products with x402 paywall`);
 }
 
 /**
  * Dynamically register a new product with the x402 paywall.
+ * Payment goes to the SELLER's wallet for true P2P commerce.
  */
-function registerProductWithX402(productId: string, price: number, title: string): void {
+function registerProductWithX402(productId: string, price: number, title: string, sellerWallet?: string): void {
   if (!globalRouteConfig) {
     console.warn('[MarketRoutes] x402 route config not initialized, skipping registration');
     return;
   }
+
+  // Use seller's wallet for P2P payment, fall back to global address if not provided
+  const payTo = sellerWallet || globalPayToAddress;
 
   const routeKey = `GET /api/market/product/${productId}/buy`;
   globalRouteConfig[routeKey] = {
@@ -88,12 +93,12 @@ function registerProductWithX402(productId: string, price: number, title: string
       scheme: 'exact',
       network: globalNetwork,
       price: `$${price.toFixed(2)}`,
-      payTo: globalPayToAddress,
+      payTo: payTo,
     }],
     description: `Purchase: ${title}`,
   };
 
-  console.log(`[MarketRoutes] Registered x402 paywall for product: ${productId} ($${price.toFixed(2)})`);
+  console.log(`[MarketRoutes] Registered x402 paywall for product: ${productId} ($${price.toFixed(2)}) -> ${payTo.slice(0, 10)}...`);
 }
 
 // =============================================================================
@@ -190,8 +195,8 @@ router.post('/publish', (req: Request, res: Response): void => {
 
     const product = publishProduct(body);
 
-    // Register the new product with x402 paywall dynamically
-    registerProductWithX402(product.id, product.price, product.title);
+    // Register the new product with x402 paywall dynamically (payment goes to seller)
+    registerProductWithX402(product.id, product.price, product.title, product.sellerWallet);
 
     const response: PublishProductResponse = {
       success: true,
@@ -331,20 +336,42 @@ router.get('/product/:id/buy', (req: Request, res: Response): void => {
       return;
     }
 
-    // Check if x402 payment was made
-    // The x402 middleware sets PAYMENT-RESPONSE header if payment was verified
+    // x402 middleware handles 402 response if no valid payment
+    // If we reach here, either:
+    // 1. Payment was verified (PAYMENT-RESPONSE header set)
+    // 2. Request includes x-payment header (client attempting payment)
+    
     const paymentResponse = res.getHeader('PAYMENT-RESPONSE');
     const paymentHeader = req.headers['x-payment'] as string | undefined;
 
-    // If no payment header and no payment response, return 402
-    if (!paymentResponse && !paymentHeader) {
-      logRequest('GET', `/api/market/product/${id}/buy`, { 
-        status: 402, 
-        reason: 'No payment provided',
-        price: product.price 
-      });
-      
-      // Return 402 with x402 payment requirements
+    // Extract payment info
+    let txHash = 'unknown';
+    let payer = 'unknown';
+    let simulation = false;
+
+    if (paymentResponse) {
+      // Real x402 payment was verified by middleware
+      try {
+        const decoded = JSON.parse(
+          Buffer.from(paymentResponse as string, 'base64').toString('utf-8')
+        );
+        txHash = decoded.transaction || 'unknown';
+        payer = decoded.payer || 'unknown';
+        simulation = false;
+        console.log(`[x402] REAL PAYMENT: TX=${txHash.slice(0, 16)}... Payer=${payer.slice(0, 10)}...`);
+      } catch {
+        txHash = 'parse-error-' + Math.random().toString(36).slice(2, 10);
+        simulation = true;
+      }
+    } else if (paymentHeader) {
+      // Payment header exists but wasn't verified - simulation mode
+      console.log(`[x402] Payment header present but not verified, simulation mode`);
+      txHash = 'sim-' + Math.random().toString(36).slice(2, 10);
+      simulation = true;
+    } else {
+      // No payment at all - this should not happen if middleware is working
+      // But we handle it gracefully for simulation/demo purposes
+      console.log(`[x402] No payment header, returning 402`);
       res.status(402).json({
         error: 'Payment Required',
         x402: {
@@ -352,7 +379,7 @@ router.get('/product/:id/buy', (req: Request, res: Response): void => {
             scheme: 'exact',
             network: globalNetwork,
             price: `$${product.price.toFixed(2)}`,
-            payTo: globalPayToAddress,
+            payTo: product.sellerWallet || globalPayToAddress,
           }],
           description: `Purchase: ${product.title}`,
         },
@@ -363,29 +390,6 @@ router.get('/product/:id/buy', (req: Request, res: Response): void => {
         },
       });
       return;
-    }
-
-    // Extract payment info from x402 middleware (reuse paymentResponse from above)
-    let txHash = 'unknown';
-    let payer = 'unknown';
-    let simulation = true;
-
-    if (paymentResponse) {
-      try {
-        const decoded = JSON.parse(
-          Buffer.from(paymentResponse as string, 'base64').toString('utf-8')
-        );
-        txHash = decoded.transaction || 'unknown';
-        payer = decoded.payer || 'unknown';
-        simulation = false;
-      } catch {
-        // Payment response parsing failed, use simulation mode
-        txHash = 'sim-' + Math.random().toString(36).slice(2, 10);
-      }
-    } else if (paymentHeader) {
-      // Payment header exists but not verified by middleware - simulation mode
-      txHash = 'sim-' + Math.random().toString(36).slice(2, 10);
-      simulation = true;
     }
 
     // Record the sale

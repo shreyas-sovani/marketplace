@@ -45,11 +45,16 @@ const stats: MarketplaceStats = {
 
 /**
  * Seeds the marketplace with initial products for demo purposes.
+ * Uses the platform's PayTo address for demo - in production, each seller would have their own wallet.
  */
 function seedMarketplace(): void {
+  // Use the platform's receiving address for demo purposes
+  // In production, each seller would provide their own wallet
+  const PLATFORM_WALLET = '0xB9b4aEcFd092514fDAC6339edba6705287464409';
+  
   const seedProducts: Omit<Product, 'id' | 'createdAt' | 'salesCount'>[] = [
     {
-      sellerWallet: '0xAlice000000000000000000000000000000001',
+      sellerWallet: PLATFORM_WALLET,  // Demo: all payments go to platform wallet
       sellerName: 'Alice (Hackathon Veteran)',
       title: 'AIBhoomi Winning Strategy 2026',
       description: 'Insider tips from a 3x hackathon winner. Learn the exact pitch structure, demo flow, and judge psychology that wins at AIBhoomi. Includes specific talking points for crypto/AI tracks.',
@@ -81,7 +86,7 @@ Good luck! 🚀
       type: 'human_alpha',
     },
     {
-      sellerWallet: '0xBob00000000000000000000000000000000002',
+      sellerWallet: PLATFORM_WALLET,  // Demo: all payments go to platform wallet
       sellerName: 'Bob (Crypto Tax Expert)',
       title: 'India Crypto Tax Loopholes 2026',
       description: 'Legal tax optimization strategies for Indian crypto traders. Covers NFT gifting, DeFi staking, and the new GIFT city exemptions. NOT financial advice.',
@@ -124,7 +129,7 @@ Disclaimer: Consult a CA before acting on this.
       type: 'human_alpha',
     },
     {
-      sellerWallet: '0xCharlie0000000000000000000000000000003',
+      sellerWallet: PLATFORM_WALLET,  // Demo: all payments go to platform wallet
       sellerName: 'Charlie (Market Analyst)',
       title: 'Bitcoin Sentiment Pulse - Jan 2026',
       description: 'Aggregated sentiment from CT (Crypto Twitter), Reddit, and Discord whales. Includes fear/greed breakdown and whale wallet movements.',

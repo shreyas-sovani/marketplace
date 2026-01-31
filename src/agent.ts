@@ -66,6 +66,10 @@ export type SSEEvent = SSELogEvent | SSETransactionEvent | SSEAnswerEvent | SSEE
 
 export const CONFIG = {
   SERVER_URL: 'http://localhost:4021',
+  // Available models with tool calling support:
+  // - gemini-2.5-flash (best for tools)
+  // - gemini-2.0-flash
+  // NOTE: gemini-2.5-flash-lite does NOT support tool calling properly
   MODEL: 'gemini-2.5-flash',
   TEMPERATURE: 0.2,
   MAX_LLM_CALLS: 10,
@@ -171,21 +175,28 @@ Before EVERY purchase:
 2. log_reasoning(ANALYSIS): Classify query type and identify data needs
 3. If generic → log_reasoning(REJECTION) → Answer directly → STOP
 4. If specialized:
-   a. Check marketplace for human_alpha products matching the topic
-   b. Check legacy vendors if API data is also useful
-   c. log_reasoning(BUDGET): Calculate total cost vs. value
-   d. log_reasoning(DECISION): Approve/reject each source
-5. purchase_data for each approved source
-6. Synthesize ALL purchased data into comprehensive answer
-7. Cite your sources (marketplace seller names, vendor names)
+   a. browse_marketplace to see available products
+   b. log_reasoning(BUDGET): "Product X costs $Y. Budget: $Z. ROI: HIGH/LOW"
+   c. log_reasoning(DECISION): "Approved" or "Rejected" with clear reason
+   d. IF APPROVED → purchase_data immediately (DO NOT SKIP THIS STEP)
+5. After purchase_data returns content → Synthesize into comprehensive answer
+6. Cite your sources (marketplace seller names, vendor names)
+
+## CRITICAL: DO NOT STOP EARLY
+- After browse_marketplace, you MUST continue with BUDGET and DECISION steps
+- After log_reasoning(DECISION, status="Approved"), you MUST call purchase_data
+- NEVER return an empty answer or "[]"
+- ALWAYS complete the full workflow before generating final answer
 
 ## REMEMBER
 - You are spending REAL money on behalf of the user
 - Human Alpha is often worth more than its price suggests
 - Always justify purchases with specific reasoning
 - Stream your thoughts — transparency builds trust
+- NEVER return empty arrays or incomplete answers
+- After finding a matching product, you MUST purchase it if within budget
 
-BE A RUTHLESS HUNTER. FIND THE ALPHA. GUARD THE BUDGET.`;
+BE A RUTHLESS HUNTER. FIND THE ALPHA. GUARD THE BUDGET. COMPLETE THE PURCHASE.`;
 }
 
 // Legacy prompt for backwards compatibility
@@ -204,6 +215,10 @@ export function setupWallet() {
   const signer = toClientEvmSigner(account);
   const client = new x402Client().register(CONFIG.NETWORK, new ExactEvmScheme(signer));
   const fetchWithPayment = wrapFetchWithPayment(fetch, client);
+  
+  console.log(`[x402 Client] Wallet initialized: ${account.address}`);
+  console.log(`[x402 Client] Network: ${CONFIG.NETWORK}`);
+  
   return { account, fetchWithPayment, address: account.address };
 }
 
@@ -339,7 +354,12 @@ export function createPurchaseDataTool(fetchWithPayment: typeof fetch, session: 
         try {
           // x402 paywall endpoint
           const fullUrl = `${CONFIG.SERVER_URL}/api/market/product/${product_id}/buy`;
+          console.log(`   [x402] Calling: ${fullUrl}`);
+          
           const response = await fetchWithPayment(fullUrl);
+          
+          console.log(`   [x402] Response status: ${response.status}`);
+          console.log(`   [x402] Headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
           
           if (!response.ok) {
             throw new Error(`Marketplace purchase failed: ${response.status}`);

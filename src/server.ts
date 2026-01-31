@@ -73,10 +73,13 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client/dist')));
-app.use(paymentMiddleware(routeConfig, x402Server));
 
-// Initialize dynamic x402 registration for marketplace
+// Initialize marketplace routes and register seeded products with x402 BEFORE middleware
+// This ensures all existing products are protected when the middleware is created
 initializeRouteConfig(routeConfig, PAYTO_ADDRESS, NETWORK);
+
+// x402 Payment Middleware - must come AFTER route config is fully populated
+app.use(paymentMiddleware(routeConfig, x402Server));
 
 // Mount InfoMart Marketplace Routes
 app.use('/api/market', marketRoutes);
