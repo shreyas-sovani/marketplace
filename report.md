@@ -5,7 +5,7 @@
 > **Protocol**: x402 v2 (Coinbase Open Payment Protocol)  
 > **Network**: Base Sepolia Testnet (`eip155:84532`)  
 > **Status**: ✅ **FULLY OPERATIONAL**  
-> **Architecture**: SSE Streaming + React Marketplace UI + Dynamic Product Registry
+> **Architecture**: SSE Streaming + React Marketplace UI + Dynamic Product Registry + **Staked Reputation System**
 
 ---
 
@@ -14,12 +14,13 @@
 This report documents **InfoMart** — a peer-to-peer knowledge marketplace where humans sell expertise and AI agents buy it with real cryptocurrency. Unlike traditional chatbots, InfoMart:
 
 1. **Humans publish knowledge** to a dynamic marketplace (strategies, insider tips, expertise)
-2. **AI agents browse and evaluate** available products in real-time
-3. **Agents prefer "Human Alpha"** — unique insights that APIs can't provide
-4. **Real USDC flows** via x402 protocol with full transaction transparency
-5. **A live ticker** shows every listing and sale in the closed-loop economy
+2. **AI agents browse, evaluate, and purchase** available products in real-time
+3. **Agents rate every purchase** and penalize low-quality sellers via staking/slashing
+4. **Sellers stake collateral** ($5.00) — bad ratings = instant slashing
+5. **Real USDC flows** via x402 protocol with full transaction transparency
+6. **A live ticker** shows every listing, sale, AND slash in the closed-loop economy
 
-**Key Innovation**: The "Closed Loop Economy" — humans earn money from AI, agents get unique alpha, and you watch it all happen on a scrolling market ticker. This isn't just an AI assistant; it's a **functioning P2P marketplace for human-machine commerce**.
+**Key Innovation**: The "Staked Reputation System" — sellers put skin in the game. AI agents don't just buy, they **judge**. Bad data gets punished with real economic penalties. This isn't just a marketplace; it's a **self-correcting economy with built-in quality enforcement**.
 
 ---
 
@@ -35,6 +36,7 @@ AI agents need specialized knowledge. Current limitations:
 | **Overspending** | Agent spends on everything | Taylor Swift Defense + Human Alpha preference |
 | **No audit trail** | No accountability | Full transaction ledger with reasoning |
 | **Static vendors** | Hardcoded data sources | Dynamic marketplace with new listings |
+| **No quality control** | Anyone can sell garbage | 🆕 **Staked Reputation** — sellers stake collateral, bad data gets slashed |
 
 ---
 
@@ -84,8 +86,9 @@ AI agents need specialized knowledge. Current limitations:
 │  │   📺 MARKET TICKER     │   SSE   │  │  • log_reasoning (→ SSE log)     │  │  │
 │  │   (Scrolling Marquee)  │◄────────┤  │  • browse_marketplace (→ list)   │  │  │
 │  │                        │/market/ │  │  • purchase_data (→ SSE tx)      │  │  │
-│  │  [NEW] Tax Tips $0.03  │ stream  │  │                                  │  │  │
-│  │  [SALE] Agent → Human  │         │  │  LangChain + Gemini 2.5 Flash    │  │  │
+│  │  [NEW] Tax Tips $0.03  │ stream  │  │  • rate_product (→ SSE slash) 🆕 │  │  │
+│  │  [SALE] Agent → Human  │         │  │                                  │  │  │
+│  │  [SLASH] 🔥 -$2.00     │         │  │  LangChain + Gemini 2.5 Flash    │  │  │
 │  │  ••• scrolling •••     │         │  └────────────────┬─────────────────┘  │  │
 │  └────────────────────────┘         │                   │                    │  │
 │                                     │         ┌─────────┴─────────┐          │  │
@@ -99,7 +102,8 @@ AI agents need specialized knowledge. Current limitations:
 │                                     │  │ (dynamic)   │     │ sentiment   │   │  │
 │                                     │  │             │     │ (static)    │   │  │
 │                                     │  │ x402 Paywall│     │ x402 Paywall│   │  │
-│                                     │  └─────────────┘     └─────────────┘   │  │
+│                                     │  │ STAKE: $5.00│     └─────────────┘   │  │
+│                                     │  └─────────────┘                       │  │
 │                                     └────────────────────────────────────────┘  │
 │                                                                                 │
 │  ┌─────────────────────────────────────────────────────────────────────────────┐│
@@ -119,11 +123,11 @@ AI agents need specialized knowledge. Current limitations:
 
 Humans can publish knowledge products at any time. The agent discovers them dynamically:
 
-| Seeded Product | Price | Type | Seller |
-|----------------|-------|------|--------|
-| **AIBhoomi Winning Strategy 2026** | $0.05 | human_alpha | Alice (Hackathon Veteran) |
-| **India Crypto Tax Loopholes 2026** | $0.03 | human_alpha | Bob (Tax Expert) |
-| **Bitcoin Sentiment Pulse - Jan 2026** | $0.02 | human_alpha | Charlie (Market Analyst) |
+| Seeded Product | Price | Type | Seller | Stake |
+|----------------|-------|------|--------|-------|
+| **AIBhoomi Winning Strategy 2026** | $0.05 | human_alpha | Alice (Hackathon Veteran) | $5.00 |
+| **India Crypto Tax Loopholes 2026** | $0.03 | human_alpha | Bob (Tax Expert) | $5.00 |
+| **Bitcoin Sentiment Pulse - Jan 2026** | $0.02 | human_alpha | Charlie (Market Analyst) | $5.00 |
 
 **Plus any new products published via Seller Dashboard!**
 
@@ -195,6 +199,105 @@ DO NOT spend money on trivial queries. Preserve budget for high-value intelligen
 
 ---
 
+## 🔥 The Staked Reputation System
+
+The biggest problem with data marketplaces? **Anyone can sell garbage.** There's no skin in the game.
+
+InfoMart solves this with **Staked Reputation**: every seller stakes $5.00 collateral. The AI agent rates every purchase. Bad ratings = instant slashing.
+
+### The "Ruthless" Slashing Algorithm
+
+| Rating | Verdict | Stake Change | Effect |
+|--------|---------|--------------|--------|
+| ⭐ 1-2 | POOR QUALITY | 🔥 **-$2.00** | Severe penalty for garbage data |
+| ⭐⭐⭐ 3 | MEDIOCRE | 🔥 **-$0.50** | Minor penalty for low-effort content |
+| ⭐⭐⭐⭐ 4 | GOOD | ✅ **$0.00** | No penalty — acceptable quality |
+| ⭐⭐⭐⭐⭐ 5 | EXCELLENT | ✅ **$0.00** | No penalty — high quality |
+
+**There are no rewards. Only survival.** Sell quality or get slashed.
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         STAKED REPUTATION FLOW                                  │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  1. SELLER PUBLISHES                                                            │
+│     └─► Product created with $5.00 default stake                                │
+│                                                                                 │
+│  2. AGENT PURCHASES                                                             │
+│     └─► x402 payment completes, seller receives revenue                         │
+│                                                                                 │
+│  3. AGENT RATES (IMMEDIATELY after purchase)                                    │
+│     └─► rate_product tool called with 1-5 star rating                           │
+│                                                                                 │
+│  4. SLASHING ALGORITHM EXECUTES                                                 │
+│     ├─► Rating 1-2: SLASH $2.00 from seller stake                               │
+│     ├─► Rating 3:   SLASH $0.50 from seller stake                               │
+│     └─► Rating 4-5: No change (seller survives)                                 │
+│                                                                                 │
+│  5. SSE BROADCAST                                                               │
+│     └─► 'slash' event sent to Market Ticker + Seller Dashboard                  │
+│                                                                                 │
+│  6. STAKE UPDATED                                                               │
+│     └─► Seller sees new stake balance in real-time                              │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Agent Rating Instructions
+
+The agent is explicitly instructed to rate EVERY purchase:
+
+```
+## QUALITY RATING PROTOCOL
+IMMEDIATELY after calling `purchase_data`, you MUST evaluate the quality of 
+what you received and call `rate_product` with:
+- productId: The product you just purchased
+- rating: 1-5 (be BRUTALLY HONEST)
+- reason: Brief explanation
+
+Rating Guidelines:
+- 5 stars: Exceptional, unique insights I couldn't find elsewhere
+- 4 stars: Good quality, useful information
+- 3 stars: Mediocre, mostly generic or partially useful
+- 2 stars: Poor quality, misleading or very generic
+- 1 star: Garbage, wrong information or completely useless
+
+LOW RATINGS SLASH THE SELLER'S STAKE. This keeps the marketplace clean.
+Be ruthless but fair.
+```
+
+### SSE Event Types for Reputation
+
+```typescript
+// Slash event (sent when seller is penalized)
+type MarketplaceSlashEvent = {
+  type: 'slash';
+  productId: string;
+  productTitle: string;
+  sellerWallet: string;
+  sellerName: string;
+  rating: number;
+  stakeChange: number;  // Negative value (e.g., -2.00)
+  newStake: number;     // Remaining stake after slash
+  reason?: string;
+  timestamp: string;
+};
+
+// Reward event (legacy — now always $0.00)
+type MarketplaceRewardEvent = {
+  type: 'reward';
+  productId: string;
+  stakeChange: number;  // Always 0 in current algorithm
+  newStake: number;
+  timestamp: string;
+};
+```
+
+---
+
 ## 🔬 Technical Implementation
 
 ### SSE Event Types
@@ -211,7 +314,9 @@ type SSEEvent =
 // Market events (for ticker)
 type MarketplaceEvent = 
   | { type: 'listing'; productId: string; productTitle: string; price: number; sellerName?: string }
-  | { type: 'sale'; productId: string; buyerWallet: string; amount: number; txHash: string };
+  | { type: 'sale'; productId: string; buyerWallet: string; amount: number; txHash: string }
+  | { type: 'slash'; productId: string; sellerName: string; rating: number; stakeChange: number }  // 🆕
+  | { type: 'reward'; productId: string; stakeChange: number };  // 🆕 (legacy, always $0)
 ```
 
 ### Agent Tools
@@ -229,7 +334,7 @@ const logReasoningTool = tool(
   {
     name: 'log_reasoning',
     schema: z.object({
-      step: z.enum(['ANALYSIS', 'BUDGET', 'DECISION', 'REJECTION', 'BROWSE']),
+      step: z.enum(['ANALYSIS', 'BUDGET', 'DECISION', 'REJECTION', 'BROWSE', 'RATING']),  // 🆕 RATING added
       thought: z.string(),
       status: z.enum(['Thinking', 'Approved', 'Rejected']),
     }),
@@ -297,6 +402,56 @@ const purchaseDataTool = tool(
 );
 ```
 
+#### Tool 4: `rate_product` 🆕
+
+Rates purchased data and triggers slashing algorithm:
+
+```typescript
+const rateProductTool = tool(
+  async ({ productId, rating, reason }) => {
+    // Call the rating endpoint
+    const response = await fetch(`${CONFIG.SERVER_URL}/api/market/product/${productId}/rate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating, reason }),
+    });
+    
+    const result = await response.json();
+    
+    // Log the rating action
+    emitSSE({
+      type: 'log',
+      data: {
+        step: 'RATING',
+        thought: `Rated "${result.productTitle}" ${rating}/5 stars. ${result.eventType === 'slash' 
+          ? `🔥 SLASHED $${Math.abs(result.stakeChange).toFixed(2)}` 
+          : '✅ No penalty'}`,
+        status: 'Approved',
+      },
+    });
+    
+    return JSON.stringify({
+      success: true,
+      productId,
+      rating,
+      eventType: result.eventType,  // 'slash' or 'reward'
+      stakeChange: result.stakeChange,
+      newStake: result.newStake,
+      reason,
+    });
+  },
+  {
+    name: 'rate_product',
+    description: 'Rate a purchased product (1-5 stars). Low ratings slash seller stake.',
+    schema: z.object({
+      productId: z.string().describe('The ID of the product to rate'),
+      rating: z.number().min(1).max(5).describe('Rating from 1 (terrible) to 5 (excellent)'),
+      reason: z.string().optional().describe('Brief explanation for the rating'),
+    }),
+  }
+);
+```
+
 ### x402 v2 Compliance
 
 | Requirement | Implementation | Status |
@@ -320,20 +475,22 @@ client/src/
 │   ├── Navigation           # Routes: / (Terminal) and /sell (Dashboard)
 │   ├── BudgetDisplay        # Progress bar showing spent/remaining
 │   ├── AgentTerminal        # Main query interface + neural log
-│   │   ├── LogEntryComponent   # Individual reasoning step
+│   │   ├── LogEntryComponent   # Individual reasoning step (incl. RATING)
 │   │   ├── TransactionComponent # Payment display
 │   │   └── QuickTestButtons    # Pre-built test queries
-│   └── MarketTicker         # Fixed at bottom, SSE-powered
+│   └── MarketTicker         # Fixed at bottom, SSE-powered (sales + slashes)
 │
 ├── pages/
 │   └── SellerDashboard.tsx
 │       ├── PublishForm      # Title, description, price slider, wallet
 │       ├── LiveEarnings     # SSE updates on sales
+│       ├── StakedCollateralCard  # 🆕 Shows current stake + health bar
+│       ├── RecentStakeEvents    # 🆕 Recent slash/reward history
 │       └── ProductList      # Your published products
 │
 └── components/
     └── MarketTicker.tsx
-        ├── TickerItem       # [NEW] or [SALE] event display
+        ├── TickerItem       # [NEW], [SALE], or [SLASH] 🔥 event display
         ├── StatsBar         # Products, sales, volume
         └── Marquee          # Tailwind animation
 ```
@@ -359,6 +516,19 @@ const connectSSE = () => {
       data: { buyerName: formatWallet(data.buyerWallet), sellerName: data.sellerName, price: data.amount },
     }]);
     setStats(prev => ({ ...prev, totalSales: prev.totalSales + 1, totalVolume: prev.totalVolume + data.amount }));
+  });
+  
+  // 🆕 Handle slash events
+  es.addEventListener('slash', (e: MessageEvent) => {
+    const data = JSON.parse(e.data);
+    setEvents(prev => [...prev.slice(-19), {
+      type: 'slash',
+      data: { 
+        sellerName: data.sellerName, 
+        stakeChange: data.stakeChange,
+        rating: data.rating,
+      },
+    }]);
   });
 };
 ```
@@ -388,7 +558,7 @@ module.exports = {
 
 ## 📊 Demo Scenarios
 
-### Scenario 1: Human Alpha Purchase (Approved)
+### Scenario 1: Human Alpha Purchase + Rating (Approved)
 
 ```
 📝 Query: "What strategies do Indian traders use to minimize crypto taxes?"
@@ -402,6 +572,7 @@ module.exports = {
 │ [BROWSE] Checking InfoMart marketplace...              Thinking │
 │ 💭 Found 3 products. "India Crypto Tax Loopholes 2026" matches. │
 │    Type: human_alpha. Price: $0.03. Seller: Bob (Tax Expert)    │
+│    Seller Stake: $5.00 — skin in the game ✓                     │
 │                                                                 │
 │ [BUDGET] Calculating ROI...                            Thinking │
 │ 💭 Budget: $0.50. Cost: $0.03. Remaining: $0.47                 │
@@ -409,6 +580,11 @@ module.exports = {
 │                                                                 │
 │ [DECISION] Approved: Purchase from InfoMart            Approved │
 │ 💭 Buying "India Crypto Tax Loopholes 2026" from marketplace    │
+│                                                                 │
+│ [RATING] Evaluating data quality...                    Approved │
+│ 💭 Content: Specific GIFT City exemptions, NFT gifting strategy │
+│    Verdict: EXCELLENT — unique insights I couldn't find elsewhere│
+│ ✅ Rated 5/5 stars — No penalty applied                         │
 └─────────────────────────────────────────────────────────────────┘
 
 💸 Transactions:
@@ -418,6 +594,8 @@ module.exports = {
 │ Seller: Bob (Tax Expert)                                        │
 │ -$0.03    TX: 0xa1b2c3d4...    ✅ Success                       │
 │ 🔗 Verify: https://sepolia.basescan.org/tx/0xa1b2c3d4...        │
+│                                                                 │
+│ Rating: ⭐⭐⭐⭐⭐ (5/5) — Bob's stake: $5.00 (unchanged)          │
 └─────────────────────────────────────────────────────────────────┘
 
 📺 Market Ticker:
@@ -426,7 +604,43 @@ module.exports = {
 💰 Final Budget: $0.47 remaining — Human Alpha acquired!
 ```
 
-### Scenario 2: Taylor Swift Defense (Rejected)
+### Scenario 2: Slashing Event — Bad Data Gets Punished 🔥
+
+```
+📝 Query: "What's the best DeFi yield farming strategy for 2026?"
+
+🧠 Neural Log:
+┌─────────────────────────────────────────────────────────────────┐
+│ [BROWSE] Checking InfoMart marketplace...              Thinking │
+│ 💭 Found "Secret DeFi Alpha" by Charlie — $0.05                 │
+│                                                                 │
+│ [DECISION] Approved: Purchase from InfoMart            Approved │
+│ 💭 Buying "Secret DeFi Alpha" from marketplace                  │
+│                                                                 │
+│ [RATING] Evaluating data quality...                    Approved │
+│ 💭 Content: "Use Aave and Compound" — generic, publicly known   │
+│    Verdict: POOR QUALITY — no unique insights                   │
+│ 🔥 Rated 2/5 stars — SLASHED $2.00 from seller stake            │
+└─────────────────────────────────────────────────────────────────┘
+
+💸 Transactions:
+┌─────────────────────────────────────────────────────────────────┐
+│ Secret DeFi Alpha                                               │
+│ Source: marketplace (human_alpha)                               │
+│ Seller: Charlie (Market Analyst)                                │
+│ -$0.05    TX: 0x9b8c7d6e...    ✅ Success                       │
+│                                                                 │
+│ Rating: ⭐⭐ (2/5) — 🔥 SLASHED $2.00                            │
+│ Charlie's stake: $5.00 → $3.00                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+📺 Market Ticker:
+[SALE] Agent paid Charlie ($0.05) ••• 🔥 [SLASH] Charlie -$2.00 ••• scrolling
+
+💰 The agent got its data. Charlie got slashed. The market self-corrects.
+```
+
+### Scenario 3: Taylor Swift Defense (Rejected)
 
 ```
 📝 Query: "Who is Taylor Swift?"
@@ -447,10 +661,11 @@ module.exports = {
 💰 Final Budget: $0.50 remaining — MISER MODE ACTIVATED
 ```
 
-### Scenario 3: New Listing + Sale Flow
+### Scenario 4: New Listing + Sale Flow
 
 ```
 💡 Human: Publishes "ETH Merge Trading Playbook" ($0.04) via Seller Dashboard
+          Stake: $5.00 (default)
 
 📺 Market Ticker immediately shows:
 [NEW] 'ETH Merge Trading Playbook' ($0.04) by CryptoWhale ••• scrolling •••
@@ -459,15 +674,17 @@ module.exports = {
    → browse_marketplace() returns the new product
    → Evaluates Human Alpha potential
    → Purchases if query matches
+   → RATES the data quality
 
-📺 Market Ticker shows sale:
+📺 Market Ticker shows sale + rating result:
 [SALE] Agent paid CryptoWhale ($0.04) ••• scrolling •••
 
 💡 Human: Sees sale notification in Seller Dashboard
    → Revenue: $0.04 (1 sale)
+   → Stake: $5.00 (if rated 4-5 stars) or SLASHED (if rated poorly)
 ```
 
-### Scenario 4: Multi-Source Query
+### Scenario 5: Multi-Source Query
 
 ```
 📝 Query: "India crypto news, sentiment, and insider tax tips"
@@ -512,11 +729,21 @@ module.exports = {
 | Taylor Swift Defense | Query filter | Reject trivial queries |
 | Human Alpha Preference | Priority logic | Marketplace products checked first |
 
+### Quality Control 🆕
+
+| Safeguard | Value | Purpose |
+|-----------|-------|---------|
+| Default Stake | $5.00 | Every seller has skin in the game |
+| Rating Requirement | Mandatory | Agent must rate every purchase |
+| Slash (Poor) | -$2.00 | Severe penalty for 1-2 star ratings |
+| Slash (Mediocre) | -$0.50 | Minor penalty for 3 star ratings |
+| No Rewards | $0.00 | Quality is expected, not rewarded |
+
 ### Rate Limiting
 
 | Safeguard | Value | Purpose |
 |-----------|-------|---------|
-| Max Iterations | 30 | Prevent infinite agent loops |
+| Max Iterations | 25 | Prevent infinite agent loops (increased for multi-purchase + rating flows) |
 | Min Delay | 800ms | Respect API rate limits |
 | SSE Reconnect | 5000ms | Prevent connection flood |
 
@@ -529,6 +756,7 @@ module.exports = {
 | Budget exceeded | Cost check | Reject, explain to user |
 | SSE disconnect | Connection close | Auto-reconnect with backoff |
 | Marketplace empty | browse result | Fall back to legacy vendors |
+| Rating failed | API error | Log warning, continue (don't block agent) |
 
 ---
 
@@ -544,8 +772,9 @@ infomart/
 │   ├── agent.ts           # 🤖 InfoMart Hunter Agent
 │   │                       #   - "Hunter for Human Alpha" persona
 │   │                       #   - log_reasoning tool
-│   │                       #   - browse_marketplace tool (NEW)
+│   │                       #   - browse_marketplace tool
 │   │                       #   - purchase_data tool (dual-source)
+│   │                       #   - rate_product tool 🆕 (triggers slashing)
 │   │                       #   - runDueDiligenceAgent()
 │   │
 │   ├── server.ts          # 🌐 Express Server + Marketplace API
@@ -558,30 +787,35 @@ infomart/
 │   │   └── market.ts      # 📦 Marketplace REST API
 │   │                       #   - POST /products (publish)
 │   │                       #   - GET /products (browse)
-│   │                       #   - GET /stream (SSE events)
+│   │                       #   - POST /product/:id/rate 🆕 (rating endpoint)
+│   │                       #   - GET /stream (SSE events incl. slash)
 │   │
 │   ├── services/
 │   │   └── marketplaceService.ts  # 🗄️ In-Memory Product Store
 │   │                               #   - Dynamic product registry
 │   │                               #   - Event emitter for SSE
 │   │                               #   - Sale tracking
+│   │                               #   - rateProduct() + slashing algorithm 🆕
+│   │                               #   - DEFAULT_STAKE_AMOUNT = $5.00
 │   │
 │   └── types/
 │       └── marketplace.ts # 📝 TypeScript Interfaces
-│                           #   - MarketplaceProduct
-│                           #   - MarketplaceEvent
+│                           #   - MarketplaceProduct (with currentStake 🆕)
+│                           #   - MarketplaceEvent (incl. slash/reward 🆕)
 │
 ├── client/
 │   ├── src/
 │   │   ├── App.tsx        # 🖥️ Main App with Routing
 │   │   │                   #   - / (AgentTerminal)
 │   │   │                   #   - /sell (SellerDashboard)
-│   │   │                   #   - MarketTicker (bottom)
+│   │   │                   #   - MarketTicker (bottom, shows slashes)
 │   │   │
 │   │   ├── pages/
 │   │   │   └── SellerDashboard.tsx  # 💰 Seller UI
 │   │   │                             #   - Publish form
 │   │   │                             #   - Live earnings
+│   │   │                             #   - StakedCollateralCard 🆕
+│   │   │                             #   - Recent stake events 🆕
 │   │   │                             #   - Product list
 │   │   │
 │   │   ├── components/
@@ -589,6 +823,7 @@ infomart/
 │   │   │                             #   - SSE connection
 │   │   │                             #   - Marquee animation
 │   │   │                             #   - Live stats
+│   │   │                             #   - Slash events in red 🆕
 │   │   │
 │   │   ├── main.tsx       # React + Router entry
 │   │   └── index.css      # Tailwind + animations
@@ -647,32 +882,36 @@ cd client && npm run dev
 
 | Criteria | Our Solution |
 |----------|--------------|
-| **Innovation** | First P2P marketplace where humans sell alpha to AI agents |
-| **User Experience** | Dual UI: Agent Terminal + Seller Dashboard |
-| **Economic Reasoning** | Taylor Swift Defense + Human Alpha Preference |
-| **Closed Loop Economy** | Humans → Marketplace → Agents → Payments → Humans |
-| **Technical Depth** | Full x402 v2, SSE streaming, React routing, LangChain tools |
-| **Production Ready** | Budget caps, error handling, audit trails |
-| **Protocol Showcase** | Dynamic product registry with x402 paywall auto-registration |
+| **Innovation** | First P2P marketplace where humans sell alpha to AI agents + **agent-enforced quality via staking** |
+| **User Experience** | Dual UI: Agent Terminal + Seller Dashboard with live stake tracking |
+| **Economic Reasoning** | Taylor Swift Defense + Human Alpha Preference + **Ruthless Slashing** |
+| **Closed Loop Economy** | Humans → Marketplace → Agents → Payments → Ratings → Slashing → Humans |
+| **Technical Depth** | Full x402 v2, SSE streaming, React routing, LangChain tools, **staking system** |
+| **Production Ready** | Budget caps, error handling, audit trails, **quality enforcement** |
+| **Protocol Showcase** | Dynamic product registry with x402 paywall + **reputation layer** |
 
 ### Key Differentiators
 
 1. **P2P Knowledge Market** — Not just agent spending, HUMANS EARNING
 2. **Human Alpha Preference** — Agent actively seeks marketplace products over legacy vendors
-3. **Seller Dashboard** — Full publishing UI with live earnings via SSE
-4. **Market Ticker** — Real-time visualization of the closed loop economy
-5. **Dual-Source Architecture** — Marketplace (human_alpha) + Legacy Vendors (institutional)
-6. **Transparent Brain** — See WHY the agent buys from whom
-7. **Taylor Swift Defense** — Still refuses to waste money on trivial queries
+3. **Staked Reputation** 🆕 — Sellers stake $5.00 collateral, bad data gets slashed
+4. **Agent as Judge** 🆕 — AI rates every purchase and enforces quality standards
+5. **Seller Dashboard** — Full publishing UI with live earnings + stake tracking
+6. **Market Ticker** — Real-time visualization of sales AND slashes
+7. **Dual-Source Architecture** — Marketplace (human_alpha) + Legacy Vendors (institutional)
+8. **Transparent Brain** — See WHY the agent buys AND how it rates
+9. **Taylor Swift Defense** — Still refuses to waste money on trivial queries
 
 ---
 
 ## 🔮 Future Roadmap
 
-### Phase 5: Seller Reputation
-- Buyer ratings after purchase
-- Seller quality scores
-- "Top Seller" badges in marketplace
+### ✅ Phase 5: Staked Reputation (COMPLETE)
+- ✅ Seller stakes $5.00 collateral per product
+- ✅ Agent rates every purchase 1-5 stars
+- ✅ "Ruthless" slashing algorithm (no rewards, only penalties)
+- ✅ Real-time stake updates via SSE
+- ✅ Seller dashboard shows stake health
 
 ### Phase 6: Product Categories
 - Tags and categories for products
@@ -682,7 +921,7 @@ cd client && npm run dev
 ### Phase 7: Agent Memory
 - Remember past purchases
 - Avoid re-buying redundant data
-- Track which sellers deliver quality
+- Track which sellers deliver quality (historical ratings)
 
 ### Phase 8: Multi-Agent Commerce
 - Agents selling data to other agents
@@ -694,22 +933,29 @@ cd client && npm run dev
 - Escrow for disputed sales
 - Revenue sharing with facilitators
 
+### Phase 10: Advanced Reputation
+- Cumulative seller scores across all products
+- "Top Seller" badges based on average ratings
+- Automatic delisting for depleted stakes
+
 ---
 
 ## ✅ Conclusion
 
-**InfoMart** proves that **Humans sell alpha. Agents hunt and buy it.**
+**InfoMart** proves that **Humans sell alpha. Agents hunt, buy, and JUDGE it.**
 
 | Achievement | Details |
 |-------------|---------|
 | ✅ P2P Marketplace | Humans publish products, agents purchase them |
-| ✅ Seller Dashboard | Full publishing UI with live earnings |
-| ✅ Agent Brain Upgrade | browse_marketplace tool + Human Alpha preference |
-| ✅ Market Ticker | Real-time SSE visualization of closed loop economy |
+| ✅ Seller Dashboard | Full publishing UI with live earnings + stake tracking |
+| ✅ Agent Brain Upgrade | browse_marketplace + purchase_data + **rate_product** tools |
+| ✅ Market Ticker | Real-time SSE visualization of sales AND slashes |
+| ✅ **Staked Reputation** | Sellers stake $5.00 collateral, bad data gets slashed |
+| ✅ **Agent as Judge** | AI rates every purchase, enforces quality standards |
 | ✅ Taylor Swift Defense | Trivial queries rejected, budget preserved |
 | ✅ Dual-Source Architecture | Marketplace + Legacy vendors coexist |
 | ✅ x402 Protocol | Dynamic product registration with paywall |
-| ✅ Production Ready | Budget caps ($0.50), 30 iterations max, error handling |
+| ✅ Production Ready | Budget caps ($0.50), 25 iterations max, error handling |
 | ✅ Verifiable Transactions | BaseScan links for all purchases |
 
 ### The Vision
@@ -717,6 +963,7 @@ cd client && npm run dev
 A world where:
 - **Humans monetize** their specialized knowledge directly
 - **AI agents hunt** for the best human alpha
+- **Bad actors get slashed** — quality is enforced economically
 - **Payments flow automatically** via x402 protocol
 - **Everyone can watch** the economy scroll by in real-time
 
@@ -724,15 +971,15 @@ A world where:
 
 Not humans building AI. Not AI replacing humans.
 
-**Humans selling to AI. AI buying from humans.**
+**Humans selling to AI. AI buying from humans. AI judging humans.**
 
-The closed loop economy. The P2P future.
+The closed loop economy. The P2P future. **Now with teeth.** 🦷
 
 ---
 
 *Built with 🧠 using x402, LangChain, Google Gemini, React, and Base*
 
-**Humans sell alpha. Agents hunt and buy it.**
+**Humans sell alpha. Agents hunt, buy, and JUDGE it.**
 
 ---
 
