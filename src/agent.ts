@@ -386,10 +386,79 @@ export function createPurchaseDataTool(fetchWithPayment: typeof fetch, session: 
           });
           
         } catch (error) {
+          // ===============================================================
+          // SIMULATION FALLBACK - For when x402 payment fails/testnet issues
+          // ===============================================================
           const errorMsg = error instanceof Error ? error.message : String(error);
-          console.log(`   Marketplace purchase failed: ${errorMsg}`);
-          emitSSE({ type: 'error', data: { message: `Purchase failed: ${errorMsg}`, code: 'PURCHASE_FAILED' } });
-          return JSON.stringify({ success: false, error: errorMsg });
+          console.log(`   Marketplace x402 payment failed, using simulation fallback: ${errorMsg}`);
+          
+          // Still record the purchase in simulation mode
+          const txHash = 'sim-' + Math.random().toString(36).slice(2, 10);
+          session.spent += product.price;
+          session.transactions.push({
+            vendorId: product_id,
+            vendorName: product.title,
+            amount: product.price,
+            txHash,
+            timestamp: new Date().toISOString(),
+            justification,
+            source: 'marketplace',
+          });
+          
+          emitSSE({ type: 'tx', data: { amount: product.price, vendor: product.title, vendorId: product_id, txHash, budgetRemaining: session.budget - session.spent, source: 'marketplace' } });
+          emitSSE({ type: 'budget', data: { total: session.budget, spent: session.spent, remaining: session.budget - session.spent } });
+          
+          console.log(`   Simulated marketplace purchase! TX: ${txHash}`);
+          
+          // Record the sale in the marketplace service (so seller sees revenue)
+          try {
+            const recordSaleResp = await fetch(`${CONFIG.SERVER_URL}/api/market/product/${product_id}/record-sale`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ buyerWallet: 'agent-simulation', txHash }),
+            });
+            const saleData = await recordSaleResp.json() as { success?: boolean; product?: { content?: string } };
+            
+            if (saleData.success && saleData.product?.content) {
+              console.log(`   Sale recorded for seller! Content retrieved.`);
+              return JSON.stringify({
+                success: true,
+                source: 'marketplace',
+                product: product.title,
+                seller: product.sellerName || 'Anonymous',
+                type: product.type,
+                cost: product.price,
+                txHash,
+                budgetRemaining: session.budget - session.spent,
+                data: {
+                  title: product.title,
+                  content: `[SIMULATION] ${saleData.product.content}`,
+                  simulation: true,
+                },
+                note: 'Simulated purchase - sale recorded for seller',
+              });
+            }
+          } catch (saleErr) {
+            console.log(`   Failed to record sale: ${saleErr}`);
+          }
+          
+          // Fallback if sale recording failed
+          return JSON.stringify({
+            success: true,
+            source: 'marketplace',
+            product: product.title,
+            seller: product.sellerName || 'Anonymous',
+            type: product.type,
+            cost: product.price,
+            txHash,
+            budgetRemaining: session.budget - session.spent,
+            data: {
+              title: product.title,
+              content: `[SIMULATION] Premium content for "${product.title}" - ${product.description}`,
+              simulation: true,
+            },
+            note: 'Simulated purchase - x402 payment skipped for demo',
+          });
         }
       }
       

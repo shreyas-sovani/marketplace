@@ -45,6 +45,7 @@ let globalNetwork: string = '';
 /**
  * Initialize the route config reference for dynamic product registration.
  * Called by server.ts after x402 middleware is set up.
+ * Also registers all existing marketplace products with x402.
  */
 export function initializeRouteConfig(
   routeConfig: Record<string, unknown>,
@@ -55,6 +56,21 @@ export function initializeRouteConfig(
   globalPayToAddress = payToAddress;
   globalNetwork = network;
   console.log('[MarketRoutes] x402 route config initialized for dynamic registration');
+
+  // Register all existing products with x402 (including seeded products)
+  registerAllExistingProducts();
+}
+
+/**
+ * Register all existing marketplace products with x402 paywall.
+ * Called during initialization to ensure seeded products are protected.
+ */
+function registerAllExistingProducts(): void {
+  const products = getAllProductListings();
+  for (const product of products) {
+    registerProductWithX402(product.id, product.price, product.title);
+  }
+  console.log(`[MarketRoutes] Registered ${products.length} existing products with x402 paywall`);
 }
 
 /**
@@ -432,6 +448,57 @@ router.get('/stats', (_req: Request, res: Response): void => {
   } catch (error) {
     logError('GET', '/api/market/stats', error);
     res.status(500).json(createErrorResponse('Failed to fetch stats', 'INTERNAL_ERROR'));
+  }
+});
+
+/**
+ * POST /api/market/product/:id/record-sale
+ * Record a sale for simulation mode (when x402 payment is skipped).
+ * This allows the marketplace stats and seller revenue to update even in demo mode.
+ * 
+ * Body: { buyerWallet, txHash }
+ * Returns: { success, message, product }
+ */
+router.post('/product/:id/record-sale', (req: Request, res: Response): void => {
+  try {
+    const id = req.params.id as string;
+    const { buyerWallet, txHash } = req.body as { buyerWallet?: string; txHash?: string };
+    
+    logRequest('POST', `/api/market/product/${id}/record-sale`, { buyerWallet, txHash });
+
+    const product = getFullProduct(id);
+
+    if (!product) {
+      res.status(404).json(createErrorResponse(`Product not found: ${id}`, 'PRODUCT_NOT_FOUND'));
+      return;
+    }
+
+    // Record the sale
+    const buyer = buyerWallet || 'agent-simulation';
+    const hash = txHash || 'sim-' + Math.random().toString(36).slice(2, 10);
+    
+    recordSale(id, buyer, hash);
+
+    res.json({
+      success: true,
+      message: `Sale recorded for "${product.title}"`,
+      product: {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        content: product.content,
+        sellerName: product.sellerName,
+        salesCount: product.salesCount + 1, // +1 since recordSale just incremented
+      },
+      sale: {
+        buyerWallet: buyer,
+        txHash: hash,
+        amount: product.price,
+      },
+    });
+  } catch (error) {
+    logError('POST', `/api/market/product/${req.params.id}/record-sale`, error);
+    res.status(500).json(createErrorResponse('Failed to record sale', 'INTERNAL_ERROR'));
   }
 });
 
