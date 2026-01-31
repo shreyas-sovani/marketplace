@@ -1,6 +1,6 @@
 # InfoMart — P2P Knowledge Marketplace for AI Agents
 
-**Humans sell alpha. Agents hunt and buy it. Real USDC flows. You watch the whole economy live.**
+**Humans sell alpha. Agents hunt, buy, and JUDGE it. Real USDC flows. Sellers stake their reputation. You watch the whole economy live.**
 
 ---
 
@@ -9,19 +9,39 @@
 Forget APIs. Forget subscriptions. **InfoMart** is a peer-to-peer marketplace where:
 
 - 🧠 **Humans** publish their knowledge — insider tips, strategies, niche expertise
-- 🤖 **AI Agents** browse, evaluate, and purchase what they need
+- 🤖 **AI Agents** browse, evaluate, purchase, and **rate** what they buy
 - 💸 **Real money** (USDC) changes hands via x402 crypto payments
-- 📺 **You watch** every transaction scroll across a live market ticker
+- � **Sellers stake collateral** — bad ratings = instant slashing
+- �📺 **You watch** every transaction AND slash scroll across a live market ticker
 
-The agent doesn't ask permission. It has a wallet. It makes economic decisions. And it prefers **Human Alpha** — unique insights that APIs can't provide.
+The agent doesn't ask permission. It has a wallet. It makes economic decisions. And it **punishes low-quality data** by slashing seller stakes.
 
-**The twist?** A live scrolling ticker shows every listing and every sale in real-time. You're watching a closed-loop AI economy running on actual blockchain rails.
+**The twist?** A live scrolling ticker shows every listing, sale, AND slash in real-time. You're watching a closed-loop AI economy with built-in quality enforcement.
+
+---
+
+## 🆕 The Staked Reputation System
+
+**The problem with data marketplaces?** Anyone can sell garbage. There's no skin in the game.
+
+**InfoMart's solution:** Every seller stakes $5.00 collateral. The AI agent rates every purchase 1-5 stars. Bad ratings = **instant slashing**.
+
+### The "Ruthless" Slashing Algorithm
+
+| Rating | Verdict | Stake Change |
+|--------|---------|--------------|
+| ⭐ 1-2 | POOR QUALITY | 🔥 **-$2.00** SLASHED |
+| ⭐⭐⭐ 3 | MEDIOCRE | 🔥 **-$0.50** SLASHED |
+| ⭐⭐⭐⭐ 4 | GOOD | ✅ $0.00 (no penalty) |
+| ⭐⭐⭐⭐⭐ 5 | EXCELLENT | ✅ $0.00 (no penalty) |
+
+**There are no rewards. Only survival.** Sell quality or get slashed.
 
 ---
 
 ## The Demo
 
-### 🧠 Agent Terminal — Watch the Hunter Think
+### 🧠 Agent Terminal — Watch the Hunter Think & Judge
 
 ```
 📝 User Query: "What strategies do Indian traders use to minimize crypto taxes?"
@@ -35,6 +55,7 @@ The agent doesn't ask permission. It has a wallet. It makes economic decisions. 
 │ [BROWSE] Checking InfoMart marketplace...                        │
 │ 💭 Found 3 products. "India Crypto Tax Loopholes 2026" matches.  │
 │    Type: human_alpha. Price: $0.03. Seller: Bob (Tax Expert)     │
+│    Seller Stake: $5.00 — skin in the game ✓                      │
 │                                                                  │
 │ [BUDGET] Calculating ROI...                                      │
 │ 💭 Budget: $0.50 USDC. Cost: $0.03. Remaining: $0.47             │
@@ -45,6 +66,11 @@ The agent doesn't ask permission. It has a wallet. It makes economic decisions. 
 │                                                                  │
 │ 💸 TX: 0x8174b34f... | -$0.03 | Balance: $0.47                   │
 │    🔗 Verify: https://sepolia.basescan.org/tx/0x8174b34f...      │
+│                                                                  │
+│ [RATING] Evaluating purchased data quality...                    │
+│ 💭 Content: Specific, actionable, jurisdiction-aware strategies  │
+│    Verdict: EXCELLENT QUALITY — 5 stars                          │
+│ ✅ Rating submitted: ⭐⭐⭐⭐⭐ — No slash, seller keeps stake    │
 └──────────────────────────────────────────────────────────────────┘
 
 📊 FINAL ANSWER:
@@ -56,7 +82,29 @@ The agent doesn't ask permission. It has a wallet. It makes economic decisions. 
 💰 Session cost: $0.03 USDC — Human Alpha acquired
 ```
 
-### 🚫 The Taylor Swift Defense — Reject Wasteful Queries
+### � The Slashing Event — Bad Data Gets Punished
+
+```
+📝 User Query: "What's the best DeFi yield farming strategy for 2026?"
+
+🧠 NEURAL LOG:
+┌──────────────────────────────────────────────────────────────────┐
+│ [PURCHASE] Bought "Secret DeFi Alpha" from Charlie ($0.05)       │
+│ 💸 TX: 0x9a23c7e1... | -$0.05 | Balance: $0.42                   │
+│                                                                  │
+│ [RATING] Evaluating purchased data quality...                    │
+│ 💭 Content: Generic info. "Use Aave" — already public knowledge  │
+│    Verdict: POOR QUALITY — 2 stars                               │
+│                                                                  │
+│ 🔥 SLASH EVENT: Charlie penalized -$2.00                         │
+│    Reason: "Generic publicly available information"              │
+│    Charlie's new stake: $3.00                                    │
+└──────────────────────────────────────────────────────────────────┘
+
+💰 The agent got its data. Charlie got slashed. The market self-corrects.
+```
+
+### �🚫 The Taylor Swift Defense — Reject Wasteful Queries
 
 ```
 📝 User Query: "Who is Taylor Swift?"
@@ -73,7 +121,7 @@ The agent doesn't ask permission. It has a wallet. It makes economic decisions. 
 💰 Session cost: $0.00 USDC — MISER MODE ACTIVATED
 ```
 
-### 💡 Seller Dashboard — Publish Your Knowledge
+### 💡 Seller Dashboard — Track Earnings & Stake
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -89,19 +137,26 @@ The agent doesn't ask permission. It has a wallet. It makes economic decisions. 
 │  [🚀 PUBLISH TO INFOMART]                                       │
 │                                                                 │
 ├─────────────────────────────────────────────────────────────────┤
-│  📈 YOUR EARNINGS                                               │
-│  Published: 1 product | Sales: 3 | Revenue: $0.15               │
+│  📈 YOUR EARNINGS          │  🔥 STAKED COLLATERAL              │
+│  Revenue: $0.15            │  Current Stake: $5.00              │
+│  Sales: 3                  │  Status: ✅ HEALTHY                │
+│                            │  [████████████████] 100%           │
+├─────────────────────────────────────────────────────────────────┤
+│  📜 RECENT STAKE EVENTS                                         │
+│  ✅ Rating 5/5 — No penalty ($0.00)                             │
+│  🔥 Rating 2/5 — SLASHED -$2.00 "Generic info"                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 📺 Market Ticker — The Closed Loop Economy
+### 📺 Market Ticker — The Closed Loop Economy (Now With Slashing!)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ 🟢 INFOMART LIVE | 📦 15 listed | 🛒 8 sales | 💰 $0.42 volume │
 ├─────────────────────────────────────────────────────────────────┤
 │ [NEW] 'Crypto Tax 2026' ($0.03) by Bob ••• [SALE] Agent paid   │
-│ Alice ($0.05) ••• [NEW] 'BTC Sentiment' ($0.02) by Charlie ••• │
+│ Alice ($0.05) ••• 🔥 [SLASH] Charlie penalized -$2.00 •••      │
+│ [NEW] 'BTC Sentiment' ($0.02) by Dave •••                      │
 └─────────────────────────────────────────────────────────────────┘
                          ◀─── scrolling marquee ───▶
 ```
@@ -123,8 +178,9 @@ The agent doesn't ask permission. It has a wallet. It makes economic decisions. 
 │  AGENT UI       │◄────────────────────│  │  SERVICE            │  │
 │  (Terminal)     │                      │  │                     │  │
 │  Port 5173      │     POST /chat       │  │  • Product Registry │  │
-│                 │─────────────────────►│  │  • SSE Events       │  │
-└─────────────────┘                      │  │  • x402 Paywall     │  │
+│                 │─────────────────────►│  │  • Stake Ledger     │  │
+└─────────────────┘                      │  │  • SSE Events       │  │
+        │                                │  │  • x402 Paywall     │  │
         │                                │  └─────────────────────┘  │
         │                                └─────────────┬─────────────┘
         │                                              │
@@ -134,10 +190,11 @@ The agent doesn't ask permission. It has a wallet. It makes economic decisions. 
 │  (Live Feed)    │   /market/stream     │                           │
 │                 │                      │  Tools:                   │
 │  [NEW] [SALE]   │                      │  • log_reasoning          │
-│  scrolling...   │                      │  • browse_marketplace     │
-└─────────────────┘                      │  • purchase_data          │
+│  [SLASH] 🔥     │                      │  • browse_marketplace     │
+│  scrolling...   │                      │  • purchase_data          │
+└─────────────────┘                      │  • rate_product 🆕        │
                                          │                           │
-                                         │  "Hunter for Human Alpha" │
+                                         │  "Hunter & Judge"         │
                                          └───────────────────────────┘
 ```
 
@@ -145,9 +202,10 @@ The agent doesn't ask permission. It has a wallet. It makes economic decisions. 
 
 | Tool | Purpose |
 |------|---------|
-| `log_reasoning` | Stream internal monologue (ANALYSIS, BUDGET, DECISION, REJECTION) |
+| `log_reasoning` | Stream internal monologue (ANALYSIS, BUDGET, DECISION, REJECTION, RATING) |
 | `browse_marketplace` | Fetch available products from `/api/market/products` |
 | `purchase_data` | Buy from marketplace OR legacy vendors via x402 payment |
+| `rate_product` | 🆕 Rate purchased data 1-5 stars, triggers slashing algorithm |
 
 ### The Human Alpha Preference
 
@@ -157,12 +215,19 @@ The agent is explicitly instructed:
 > or time-sensitive intelligence — PREFER marketplace products with type='human_alpha' over generic API data.
 > Human knowledge often has higher signal-to-noise ratio."
 
+### The Rating Protocol
+
+After every purchase, the agent **must** rate the data quality:
+
+> "IMMEDIATELY after calling `purchase_data`, you MUST evaluate the quality of what you received.
+> Be BRUTALLY HONEST. Low ratings slash the seller's stake. This keeps the marketplace clean."
+
 ### The Marketplace
 
-| Source | Type | What's Sold |
-|--------|------|-------------|
-| **InfoMart Marketplace** | human_alpha | Strategies, insider tips, niche expertise |
-| **Legacy Vendors** | api | Bloomberg news, weather, Wikipedia facts |
+| Source | Type | What's Sold | Stake |
+|--------|------|-------------|-------|
+| **InfoMart Marketplace** | human_alpha | Strategies, insider tips, niche expertise | $5.00 collateral |
+| **Legacy Vendors** | api | Bloomberg news, weather, Wikipedia facts | N/A |
 
 All purchases protected by [x402 protocol](https://x402.org) — payments embedded in HTTP requests.
 
@@ -218,20 +283,20 @@ Open `http://localhost:5173`:
 ```
 src/
 ├── types/
-│   └── marketplace.ts    # Product, Event, Stats types
+│   └── marketplace.ts    # Product, Event, Stats, Slash/Reward types
 ├── services/
-│   └── marketplaceService.ts  # In-memory product registry, SSE events
+│   └── marketplaceService.ts  # Product registry, stake ledger, slashing logic
 ├── routes/
-│   └── market.ts         # /api/market/* endpoints + x402 paywall
+│   └── market.ts         # /api/market/* endpoints + x402 paywall + rating
 ├── vendors.ts            # Legacy vendor definitions
-├── agent.ts              # InfoMart Agent — browse, evaluate, purchase
+├── agent.ts              # InfoMart Agent — browse, evaluate, purchase, RATE
 └── server.ts             # Express server, SSE streaming, x402 config
 
 client/src/
 ├── components/
-│   └── MarketTicker.tsx  # Live scrolling ticker (SSE-powered)
+│   └── MarketTicker.tsx  # Live scrolling ticker (sales + slashes)
 ├── pages/
-│   └── SellerDashboard.tsx  # Publish products, track earnings
+│   └── SellerDashboard.tsx  # Publish products, track earnings & STAKE
 └── App.tsx               # Agent Terminal, routing, budget display
 ```
 
@@ -249,8 +314,9 @@ client/src/
 | `/api/market/product/:id` | GET | Single product listing |
 | `/api/market/product/:id/buy` | GET | 🔒 Purchase (x402 paywall) |
 | `/api/market/product/:id/record-sale` | POST | Record sale with txHash |
+| `/api/market/product/:id/rate` | POST | 🆕 Rate product (triggers slashing) |
 | `/api/market/stats` | GET | Marketplace statistics |
-| `/api/market/stream` | GET | SSE stream (listings, sales) |
+| `/api/market/stream` | GET | SSE stream (listings, sales, slashes) |
 
 ### Agent
 
@@ -278,12 +344,19 @@ client/src/
 - React 18 + Vite 5
 - Tailwind CSS (dark terminal theme)
 
+**Reputation Layer** 🆕
+- $5.00 default stake per product
+- Tiered slashing algorithm (rating-based)
+- Real-time stake updates via SSE
+- Visual stake health indicators
+
 **Safeguards**
 - $0.50 budget cap per session
-- 30 iteration max (agent reasoning limit)
+- 25 iteration max (agent reasoning limit)
 - Taylor Swift Defense (reject trivial queries)
 - Human Alpha preference for unique insights
 - Full transaction audit trail with verifiable BaseScan links
+- **Staked Reputation** — sellers have skin in the game 🆕
 
 ---
 
@@ -295,21 +368,23 @@ client/src/
 | 2 | Seller Dashboard — Publish products, live earnings | ✅ |
 | 3 | Agent Brain Upgrade — browse_marketplace tool, Human Alpha persona | ✅ |
 | 4 | Market Ticker — Live scrolling feed of listings and sales | ✅ |
+| 5 | **Staked Reputation** — Seller collateral, agent ratings, slashing 🆕 | ✅ |
 
 ---
 
 ## Why This Matters
 
-**The Old World**: AI agents use free APIs or need human approval to pay for anything.
+**The Old World**: AI agents use free APIs or need human approval to pay for anything. Data marketplaces have no quality control.
 
-**The New World**: Any agent with a wallet can pay any human for any knowledge — instantly, programmatically, without intermediaries.
+**The New World**: Any agent with a wallet can pay any human for any knowledge — instantly, programmatically, without intermediaries. **And the agent can punish bad actors.**
 
 InfoMart is proof that:
 1. **Humans can monetize expertise** directly to AI (no platform cut)
 2. **Agents can make economic decisions** autonomously
 3. **The economy can be transparent** — every transaction visible
+4. **Quality can be enforced** — stake your reputation or get slashed 🆕
 
-The ticker isn't just eye candy. It's a window into an AI-powered economy where humans provide alpha and machines pay for it.
+The ticker isn't just eye candy. It's a window into an AI-powered economy where humans provide alpha, machines pay for it, **and bad actors get punished in real-time.**
 
 ---
 
@@ -323,3 +398,5 @@ The ticker isn't just eye candy. It's a window into an AI-powered economy where 
 ---
 
 **Built for AIBhoomi 2026. Built for the future of Human-AI commerce.**
+
+*Now with teeth.* 🦷

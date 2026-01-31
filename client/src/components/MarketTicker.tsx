@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { TrendingUp, Package, Zap } from 'lucide-react'
+import { TrendingUp, Package, Zap, AlertTriangle, Star } from 'lucide-react'
 
 // =============================================================================
 // TYPES
@@ -7,7 +7,7 @@ import { TrendingUp, Package, Zap } from 'lucide-react'
 
 interface TickerEvent {
   id: string
-  type: 'listing' | 'sale'
+  type: 'listing' | 'sale' | 'slash' | 'reward'
   timestamp: string
   data: {
     productTitle?: string
@@ -15,6 +15,11 @@ interface TickerEvent {
     price: number
     sellerName?: string
     buyerName?: string
+    // Slash/Reward specific
+    slashAmount?: number
+    rewardAmount?: number
+    rating?: number
+    reason?: string
   }
 }
 
@@ -22,6 +27,7 @@ interface MarketStats {
   totalProducts: number
   totalSales: number
   totalVolume: number
+  totalSlashes: number
 }
 
 // =============================================================================
@@ -58,6 +64,46 @@ function TickerItem({ event }: { event: TickerEvent }) {
     )
   }
 
+  if (event.type === 'slash') {
+    return (
+      <span className="inline-flex items-center gap-3 px-4 py-1 whitespace-nowrap">
+        <span className="flex items-center gap-1">
+          <AlertTriangle className="w-3 h-3 text-red-500" />
+          <span className="text-red-500 font-share-tech font-semibold text-xs">[SLASH]</span>
+        </span>
+        <span className="text-text-primary font-inter text-sm">
+          Seller {event.data.sellerName || 'Anonymous'} penalized
+        </span>
+        <span className="text-red-500 font-share-tech font-bold">
+          -${event.data.slashAmount?.toFixed(2) || '0.00'}
+        </span>
+        <span className="text-muted-text text-xs">
+          ({event.data.rating}★)
+        </span>
+      </span>
+    )
+  }
+
+  if (event.type === 'reward') {
+    return (
+      <span className="inline-flex items-center gap-3 px-4 py-1 whitespace-nowrap">
+        <span className="flex items-center gap-1">
+          <Star className="w-3 h-3 text-green-500" />
+          <span className="text-green-500 font-share-tech font-semibold text-xs">[REWARD]</span>
+        </span>
+        <span className="text-text-primary font-inter text-sm">
+          Seller {event.data.sellerName || 'Anonymous'} rewarded
+        </span>
+        <span className="text-green-500 font-share-tech font-bold">
+          +${event.data.rewardAmount?.toFixed(2) || '0.00'}
+        </span>
+        <span className="text-muted-text text-xs">
+          ({event.data.rating}★)
+        </span>
+      </span>
+    )
+  }
+
   return null
 }
 
@@ -67,7 +113,7 @@ function TickerItem({ event }: { event: TickerEvent }) {
 
 export default function MarketTicker() {
   const [events, setEvents] = useState<TickerEvent[]>([])
-  const [stats, setStats] = useState<MarketStats>({ totalProducts: 0, totalSales: 0, totalVolume: 0 })
+  const [stats, setStats] = useState<MarketStats>({ totalProducts: 0, totalSales: 0, totalVolume: 0, totalSlashes: 0 })
   const [connected, setConnected] = useState(false)
   const eventSourceRef = useRef<EventSource | null>(null)
 
@@ -141,6 +187,58 @@ export default function MarketTicker() {
         }
       })
 
+      // Handle slash events
+      es.addEventListener('slash', (e: MessageEvent) => {
+        try {
+          const data = JSON.parse(e.data)
+          const event: TickerEvent = {
+            id: `slash-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            type: 'slash',
+            timestamp: data.timestamp || new Date().toISOString(),
+            data: {
+              productTitle: data.productTitle,
+              productId: data.productId,
+              price: data.slashAmount || 0,
+              sellerName: data.sellerName || formatWallet(data.sellerWallet),
+              slashAmount: data.slashAmount,
+              rating: data.rating,
+              reason: data.reason,
+            },
+          }
+          setEvents(prev => [...prev.slice(-19), event])
+          // Update stats
+          setStats(prev => ({
+            ...prev,
+            totalSlashes: prev.totalSlashes + 1,
+          }))
+        } catch (err) {
+          console.error('[MarketTicker] Failed to parse slash event:', err)
+        }
+      })
+
+      // Handle reward events
+      es.addEventListener('reward', (e: MessageEvent) => {
+        try {
+          const data = JSON.parse(e.data)
+          const event: TickerEvent = {
+            id: `reward-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            type: 'reward',
+            timestamp: data.timestamp || new Date().toISOString(),
+            data: {
+              productTitle: data.productTitle,
+              productId: data.productId,
+              price: data.rewardAmount || 0,
+              sellerName: data.sellerName || formatWallet(data.sellerWallet),
+              rewardAmount: data.rewardAmount,
+              rating: data.rating,
+            },
+          }
+          setEvents(prev => [...prev.slice(-19), event])
+        } catch (err) {
+          console.error('[MarketTicker] Failed to parse reward event:', err)
+        }
+      })
+
       es.onerror = () => {
         setConnected(false)
         console.log('[MarketTicker] SSE connection lost, reconnecting in 3s...')
@@ -159,6 +257,7 @@ export default function MarketTicker() {
             totalProducts: data.stats.totalProducts || 0,
             totalSales: data.stats.totalSales || 0,
             totalVolume: parseFloat(data.stats.totalRevenue?.replace('$', '') || '0'),
+            totalSlashes: 0,
           })
         }
       })
