@@ -71,8 +71,7 @@ client/src/
 ### Setup
 
 ```bash
-git clone https://github.com/shreyas-sovani/marketplace.git
-cd marketplace
+git clone https://github.com/shreyas-sovani/Inference_protocol.git
 npm install
 cd client && npm install && cd ..
 cp .env.example .env
@@ -221,6 +220,37 @@ Experienced retail traders, professional analysts, research firms and niche expe
 |----------|--------|-------------|
 | `/api/chat` | POST | Trigger agent analysis |
 | `/api/stream` | GET | Agent reasoning SSE stream |
+
+---
+
+##  💡 AI Impact & Responsible Use
+
+### Evaluation & Guardrails (Hallucination / Bias Mitigations)
+
+The core AI component is an autonomous agent powered by **LangChain** + **Google Gemini** (reasoning model) that interprets natural-language queries, performs semantic matching against listed insights, evaluates relevance & ROI, and decides whether to recommend or purchase content.
+
+**Key mitigations in place:**
+- Retrieval-Augmented Generation (RAG)-like pattern: agent reasoning is strictly grounded in retrieved marketplace items (no open-world hallucination allowed).
+- Chain-of-thought prompting with explicit steps: Analysis → Browse → Budget/ROI → Decision → Rejection rules.
+- Hard rejection for low-value / generic queries (e.g. "Who is Elon Musk?" or broad non-trading questions).
+- Strict per-session budget cap ($0.10 USDC testnet default) prevents runaway spending.
+- Post-purchase human ratings + reputation scoring + slashing mechanism disincentivize low-quality or misleading insights.
+- No generative synthesis of financial predictions — agent only summarizes or forwards purchased human-created content.
+
+## 💡 Known Limitations & Risks
+
+- **Financial domain risk**: Insights are user-generated and not verified by the platform. Buyers (human or agent) must perform their own due diligence. The protocol is **not** investment advice.
+- **Early-stage reputation system**: Reputation scores and slashing are new and may initially be noisy until enough ratings accumulate.
+- **Model hallucinations**: While heavily mitigated via grounding + rejection rules, subtle misinterpretations of query intent or marketplace metadata remain possible.
+- **Marketplace quality**: Low-quality or spammy listings can appear until filtered by ratings and economic incentives.
+
+## 💖 Team
+
+| Name              | Role                        | Contact            |
+|-------------------|-----------------------------|--------------------------------|
+| Shreyas Sovani    | Lead Developer    | [Shreyas Sovani](https://x.com/shreyassovani) |
+| Swanandi Bhende   | Product / UX Design         | [Swanandi Bhende](https://x.com/swanandibhende) |
+
 
 ---
 
