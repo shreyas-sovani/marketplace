@@ -248,7 +248,7 @@ The core AI component is an autonomous agent powered by **LangChain** + **Google
 
 | Name              | Role                        | Contact            |
 |-------------------|-----------------------------|--------------------------------|
-| Shreyas Sovani    | Lead Developer    | [Shreyas Sovani](https://x.com/shreyassovani) |
+| Shreyas Sovani    | Lead Developer    | [Shreyas Sovani](https://x.com/0xshreyaas) |
 | Swanandi Bhende   | Product / UX Design         | [Swanandi Bhende](https://x.com/swanandibhende) |
 
 
